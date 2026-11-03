@@ -1,70 +1,69 @@
-﻿{
-    "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
-    "manifestVersion": "devPreview",
-    "version": "0.92",
-    "id": "98e180fd-7ce4-501a-af99-e33d5f313a7c",
-    "packageName": "com.cowork.plugin.noibu",
-    "developer": {
-        "name": "Noibu",
-        "websiteUrl": "https://www.noibu.com",
-        "privacyUrl": "https://www.noibu.com/privacy-policy",
-        "termsOfUseUrl": "https://www.noibu.com/terms-of-service"
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
+  "manifestVersion": "devPreview",
+  "version": "21.1.15",
+  "id": "2b1b1694-3a0f-4d10-b590-fd33a92eb90f",
+  "developer": {
+    "name": "Noibu",
+    "websiteUrl": "https://noibu.com",
+    "privacyUrl": "https://noibu.com/privacy-policy",
+    "termsOfUseUrl": "https://noibu.com/terms-of-service"
+  },
+  "name": {
+    "short": "Noibu Cowork",
+    "full": "Noibu for Microsoft 365 Copilot Cowork"
+  },
+  "description": {
+    "short": "Ecommerce conversion, checkout, error and experiment insights from Noibu",
+    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to analyze store health, checkout, products, traffic segments, technical errors and Core Web Vitals, accessibility, and A/B testing (finding, building and launching tests) using your own Noibu data. Ten workflows: Noibu Setup, Querying Noibu Data, Store Pulse, Checkout Analysis, Product Analysis, Segment Analysis, Technical Diagnosis, Accessibility Audit, Build Business Context and A/B Testing. Reports appear as an interactive board when the Noibu report widget is available, with actions to investigate findings, save a report to OneDrive, download a PDF, save a private Cowork app snapshot, schedule refreshed reports, open tickets, create A/B test drafts and build A/B tests through a pull request or Shopify preview theme. Every write, send, schedule or share needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#20142D",
+  "agentSkills": [
+    {
+      "folder": "./skills/noibu-setup"
     },
-    "name": {
-        "short": "Noibu",
-        "full": "Noibu Analytics for Copilot Cowork"
+    {
+      "folder": "./skills/querying-noibu-data"
     },
-    "description": {
-        "short": "Ask Noibu about your store's sessions, errors, and performance.",
-        "full": "Noibu brings ecommerce analytics into Microsoft 365 Copilot Cowork. Ask in natural language about sessions, conversion, revenue, page performance, priority errors, releases, and session replays for any domain in your Noibu account. Sign in with your Noibu credentials on first use."
+    {
+      "folder": "./skills/store-pulse"
     },
-    "icons": {
-        "color": "color.png",
-        "outline": "outline.png"
+    {
+      "folder": "./skills/checkout-analysis"
     },
-    "accentColor": "#0B5FFF",
-    "agentSkills": [
-        {
-            "folder": "./skills/ab-test-opportunity-finder"
-        },
-        {
-            "folder": "./skills/accessibility-audit"
-        },
-        {
-            "folder": "./skills/build-business-context"
-        },
-        {
-            "folder": "./skills/checkout-analysis"
-        },
-        {
-            "folder": "./skills/product-analysis"
-        },
-        {
-            "folder": "./skills/querying-noibu-data"
-        },
-        {
-            "folder": "./skills/segment-analysis"
-        },
-        {
-            "folder": "./skills/setup-noibu"
-        },
-        {
-            "folder": "./skills/store-pulse"
-        },
-        {
-            "folder": "./skills/tech-diagnosis"
+    {
+      "folder": "./skills/product-analysis"
+    },
+    {
+      "folder": "./skills/segment-analysis"
+    },
+    {
+      "folder": "./skills/tech-diagnosis"
+    },
+    {
+      "folder": "./skills/accessibility-audit"
+    },
+    {
+      "folder": "./skills/build-business-context"
+    },
+    {
+      "folder": "./skills/ab-testing"
+    }
+  ],
+  "agentConnectors": [
+    {
+      "id": "noibu",
+      "displayName": "Noibu",
+      "description": "Noibu ecommerce analytics: sessions, conversion, page visits, errors, performance, business context and A/B tests for the stores your Noibu account can access.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.noibu.com/mcp"
         }
-    ],
-    "agentConnectors": [
-        {
-            "toolSource": {
-                "remoteMcpServer": {
-                    "mcpServerUrl": "https://mcp.noibu.com/mcp"
-                }
-            },
-            "description": "Noibu ecommerce analytics: sessions, page performance, errors, releases, session replay.",
-            "id": "noibu",
-            "displayName": "Noibu MCP Server"
-        }
-    ]
+      }
+    }
+  ]
 }

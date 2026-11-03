@@ -1,116 +1,54 @@
 ---
 name: segment-analysis
-description: "Analyze segment and traffic performance using Noibu data. Use when you want to know which channels, devices, or countries convert best, how mobile compares to desktop, where your traffic is coming from, which segments are underperforming, or where to find your best and worst converting customer segments."
----
-<!-- overlay: replace — no dashboard-rendering tool on this host — triage board becomes a markdown report; offers become conversational — upstream @ df2f03fcd2c7 -->
-
-# Noibu Segment Conversion Analysis
-
-Surfaces which segments are winning or losing, and why — as a markdown report
-built from Noibu session data.
-
-**Call metadata:** on every `noibu_*` call this skill drives, pass `skill: "segment-analysis"`, `skillVersion: "cowork:fbf39d7"`, and a short `skillStep` (see the `querying-noibu-data` skill).
-
-## How it works
-
-- **Quick answer** (focused question) → run 1–2 queries, answer directly, offer to go deeper.
-- **Full analysis** (broad request, bare invocation, or "yes" to the offer) → the workflow below.
-
-## Setup — before any query
-
-**Work quietly.** The first thing the user sees is the report — no "let me…" commentary before it.
-
-- **Resolve the domain first.** Use what the user gave (name or UUID). If nothing, ask conversationally which one, listing their domains — don't ask about anything else. If exactly one domain, skip the question.
-- **Confirm every field name by role** before using it. Reference files name fields by role, never hard-coded column names.
-- **Default window:** last 30 days unless the user specifies otherwise.
-- **If the dataset is near-zero** (total sessions 0 or a handful), say plainly that the domain has no traffic in this window and offer to widen the range.
-
+description: Compare devices, countries, channels, and campaigns using Noibu, identify conversion regressions, and provide an interactive report with investigation, dashboard, export, and scheduling actions.
 ---
 
-## Quick answer
+# Segment conversion analysis
 
-For focused questions ("which channel converts best?", "how does mobile compare to desktop?", "which countries are underperforming?"):
+- Read [shared query guidance](../querying-noibu-data/SKILL.md). Open [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `segment-analysis`; resolve the store and saved context. Default to 30 days.
+- Focused questions need only relevant queries. For a full review, follow [queries](references/queries.md):
+  - Fetch device, country and UTM source/medium aggregates plus a direct whole-domain baseline **in one parallel batch**.
+  - Compare channels with peers of similar intent/objective; compare devices with their own history. Use equal halves with exact dates for within-window device ratios.
+  - Assess traffic quality and sparse purchases; zero conversion or geography alone does not identify bots.
+  - Select up to three supported signals and run campaign, landing-page or funnel follow-ups.
 
-1. Run only the 1–2 queries needed and answer directly.
-2. Ask conversationally whether they'd like the full analysis: "Want me to run a full segment analysis — survey device, country, and channel, then dig into anomalies? Reply yes or no."
+## Dashboard and opportunities
 
-Don't run the full workflow or render the report for a quick answer.
+Use the packaged [report display](references/card-quickstart.md).
 
----
+- Put one or two measured conclusions inside the report card; successful in-chat reports are CARD ONLY, without preamble or post-card recap.
+- Overview: site-wide/mobile/desktop conversion, purchasing/session denominators, exact window/timezone and a few nonduplicative country/channel highlights. No mandatory funnel.
+- Under Show more/Show less, use three `placement: "overview"` tables when supported: Countries, Best converting channels, Most visited channels. Include Sessions/CVR/Revenue per session with measured currency components kept separate.
+- State each ranking's volume filter, population and top-N bounds. A capped result cannot establish a global winner. Retain five-row previews/all rows; history/campaign/landing tables use `supporting`.
+- Use up to three visible `overviewNotes` for material attribution, reconciliation or currency caveats; retain detailed evidence too.
+- Each top opportunity has a factual tag, specific cohort, actual traffic unit and concise evidence; `fix` holds expandable investigation/verification.
+- Keep the saved-dashboard action (see the runtime guide) directly after dashboard content, then opportunities, then separate final save/download/schedule controls. Shared styling supplies light panels and orange measured declines.
 
-## Full analysis
+## Interpretation
 
-**Loading reference files:** Use the `Read` tool. All files live in a `references/` subdirectory next to this SKILL.md — derive the base path from wherever this file was loaded from.
+- A stable device gap is not a regression. A worsening ratio driven by faster desktop improvement or traffic mix does not prove mobile deteriorated.
+- Separate country opportunity, channel intent and campaign objective; exposure is not proven blocked users or lost orders.
+- Do not merge source/medium aliases or call all unattributed sessions Direct without evidence.
+- Missing UTM share needs a complete unattributed aggregate and whole-domain denominator, not overlapping cohort sums. Missing tags do not prove a tracking defect.
+- For absent paid-traffic UTM rows, use the shared guide's referrer-parameter recovery and label results a lower bound.
+- Preserve low-volume uncertainty, count discrepancies and currency boundaries; do not invent signals to fill cards.
 
-1. Read `references/queries.md` now, before running any queries.
-2. Run the workflow from queries.md.
-3. Render the report as markdown — see "Rendering the report" below.
+## Follow-ups
 
----
+- Investigate retains the selected evidence. Route genuine technical findings to tech-diagnosis and its [repository/CI handoff](../tech-diagnosis/references/github-handoff.md), not ordinary marketing findings.
+- Saved dashboards use [saved dashboard](../querying-noibu-data/references/saved-dashboard.md), including the mandatory refresh cadence/time/timezone/notification question (manual or decline is allowed).
+- **Schedule Insights** uses [shared connected delivery](../querying-noibu-data/references/scheduling-delivery.md), fresh rolling scope and the confirmed equal-half/other baselines. Daily is not offered here.
 
-## Follow-up questions after a report
+## In-chat report completion
 
-A user question naming a specific segment signal from a report already in this conversation ("why is Canada converting so low?", "dig into the campaign drag") — handle as a focused follow-up, not a re-run of the full analysis.
+Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
 
-- Reuse evidence already gathered; only re-query if genuinely new depth is needed.
-- Diagnose root cause first, then route the action:
-  - UX / campaign / localization / tracking gap → one concrete owner-routed action + the check that confirms resolution.
-  - Priority error or CWV → invoke the `tech-diagnosis` skill inline if it's available; otherwise handle the cause inline — don't mention or recommend installing another skill.
-- **Respond in plain chat text.** Format: root cause in 1–2 sentences · evidence table (≤8 rows) · recommended action.
+Scheduled Email always requires chat confirmation of the exact final recipient email list EVEN IF addresses were supplied; no schedule/send before that gate. Never infer the signed-in user from Email selected. See shared scheduling-delivery.md. Any private app save/build must ask refresh cadence, local time/IANA timezone and notification (manual/decline allowed), verify a same-app unattended DATA writer, and only then create/update a confirmed refresh schedule; no reminder substitute or unverified refresh-success claim.
 
----
+## Browser prerequisite, only for a requested browser step
 
-## Rendering the report
+Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
 
-**Guiding principle: insights first, data second.** The report must be scannable in 30 seconds. Every table that follows is supporting evidence, not the headline.
+## Local report completion contract (21.1.13)
 
-**Structure:**
-
-### Section 1 — Key findings & recommended actions
-
-Write this section after both phases are complete — it should synthesize everything, including deeper analysis discoveries. Lead with up to 3 numbered finding + action pairs, ordered by impact. Every finding must name a specific segment and a concrete number. Every action must be specific enough to hand off. No tables in this section.
-
-### Section 2 — Segment overview
-
-One table per dimension, each with a specific insight callout:
-
-- **Devices** — table: Device | Sessions | Conversion rate | Revenue/session.
-- **Countries** (top segments) — table: Country | Sessions | Conversion rate | Revenue/session.
-- **Channels** (UTM source/medium) — table: Channel | Sessions | Conversion rate | Revenue/session.
-
-### Section 3 — Evidence from deeper analysis
-
-This section exists to show why the actions in Section 1 are warranted — not to restate them. Each entry is the evidence trail for a finding already summarized above. Do not repeat the finding or the action here. Cap tables at 8 rows.
-
-### No signals this run
-
-If nothing stands out above the site-wide benchmark and the bot-filter gate (see `references/queries.md`, Step 1.5), say so plainly instead of padding with weak signals.
-
----
-
-## Exporting the report
-
-Triggered by the user asking to export, download, or save the report as a document.
-
-Export-only — do not call any Noibu tools and do not re-query. Reuse the data already in this conversation. Read `references/export-pdf.md` and follow the instructions there.
-
-## Recurring reports
-
-If the user asks to put this on a schedule: this skill doesn't create or manage recurring runs itself. Point them at Cowork's own automation instead — e.g. "You can set that up yourself in Cowork's Customize → Automated tasks, pointing it at this same prompt." Nothing here creates, schedules, or persists a recurring run on their behalf.
-
----
-
-## Data quality notes
-
-- **Currency anomalies**: Very high revenue per session for a single country
-  usually means local currency, not USD. Flag it rather than presenting it
-  at face value.
-- **Untagged traffic**: A large share of sessions with no channel attribution
-  is a tracking gap worth noting explicitly.
-- **Awareness campaigns at zero conversion**: Expected — but still worth
-  calling out so the user can confirm the campaign objective is non-conversion.
-- **Express checkout on mobile**: More completed purchases than payment page
-  views is normal — Apple Pay and Shop Pay bypass the payment step. Explain
-  it rather than treating it as a data error.
-
-The report as rendered in the conversation is the deliverable — conclude here.
+Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

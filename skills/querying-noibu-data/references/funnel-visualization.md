@@ -1,26 +1,19 @@
-<!-- overlay: replace — no chart-rendering tool on this host — funnel renders as a markdown table — upstream @ 671622c86f93 -->
+# Funnel presentation
 
-# Funnel visualization
+Fetch distinct session counts reaching each stage before rendering. For a depth histogram, stage N is the sum of sessions with depth ≥ N; do not use an exact depth bucket as the reach count. Preserve numeric current/prior raw counts (null where unknown). No screenshot is evidence.
 
-Read this reference when the user asks to chart, visualize, or "show" an ecommerce conversion funnel (e.g. "show me the funnel", "checkout funnel chart", "purchase journey chart", "render the funnel for last 7 days vs previous"). Fetch the per-step session counts from `noibu_search_sessions` (or `noibu_get_page_visits`) first, then present them as a markdown table.
+## Checkout only — cart population percentages (21.1.11)
 
-Analytical funnel prompts like "where do users drop off" or "abandonment by step" terminate at `noibu_get_page_visits` (see `references/page-visits.md`) — do not detour through this reference.
+The checkout funnel is percentage-led, NOT counts-only and NOT previous-step percentages. Use the four ordered roles: `added-to-cart`, `checkout-started`, `payment-submitted`, `order-completed`. The canonical labels are exactly Added to cart, Started checkout, Payment submitted, Completed order (case/whitespace insensitive); supply `role` for a localized label. The cart role must be FIRST, roles unique and in semantic order; a recognized label cannot contradict its typed role. Do not infer a cart denominator from an arbitrary label such as Sessions or Cart visitors. Unknown roles keep counts but no inferred rate.
 
-## How to present
+- Added to cart HEADLINE is its actual COUNT; denominator context states that it represents 100% when positive and measured. Never replace the count with a bare 100% label.
+- Later-stage headline and chart value = 100 × that stage's distinct session count / Added to cart count from the SAME period. Prior bars use the PRIOR cart count, not current cart or a shared maximum count. For example synthetic 8,000 → 4,000 → 1,600 → 1,200 gives count 8,000 then 50.0%, 20.0%, 15.0%. These are fixture calculations, not business evidence.
+- Signed pp delta = current cart-based percentage − prior cart-based percentage, only when BOTH rates are measurable. Different period cart counts can still yield 50% versus 50% and +0.0 pp. Do not attach a stale count-relative change to a percentage headline. `build_presentation.py` overrides incoming display/rate/delta metadata using verified raw counts, without mutating the original evidence input.
+- Checkout completion is separate: 100 × completed / started checkout; the same example yields 30.0%, NOT the funnel's 15.0% cart-to-order rate.
+- Missing/null/zero cart baseline cannot support any cart-based rate. Unknown stages remain Not measured with no bar or invented delta. A measured zero numerator WITH a valid positive base is 0.0%. Show explicit coverage and retain all raw counts. Express checkout may make payment lower than completion; never reorder, clamp or rewrite counts/rates to manufacture monotonicity. Above-100% measured ratios remain visible with cohort/instrumentation coverage warning and an expanded linear scale.
+- HTML, full Adaptive Card and compact/fallback all use percentage-based geometry. The grouped chart's numeric axis is percentage points with `yAxisTitle`, `yMin: 0`, and `yMax` at least 100 (expand above 100 when measured). Do not invent a grouped-chart `valueFormat` formatter or leave a raw-count axis below a percent heading.
+- **Show exact counts is mandatory in full AND compact**, expanding a table of every stage's actual current/prior session counts, including null as Not measured. Preserve count/prior numeric fields and missing state; percentage display never replaces them. Compact can simplify optional typography/chrome and avoid duplicated visible counts, never remove the count table, comparisons, supported method/abandonment tables, findings or caveats to fit 24 KB. Choose full→compact offline BEFORE the response's one render attempt.
 
-1. Fetch the per-step session counts (`noibu_search_sessions` or `noibu_get_page_visits`).
-2. For each step, compute:
-   - **Conversion %** — this step's sessions ÷ step 1's sessions.
-   - **Drop-off %** — 1 − (this step's sessions ÷ previous step's sessions). Step 1 has no drop-off.
-3. Render a markdown table:
+## Other workflows — unchanged
 
-   | Step | Sessions | Conversion % | Drop-off % |
-   |---|---|---|---|
-   | Add to cart | 6,574 | 100% | — |
-   | Checkout started | 2,420 | 36.8% | 63.2% |
-   | Payment submitted | 1,391 | 21.2% | 42.5% |
-   | Checkout completed | 1,283 | 19.5% | 7.8% |
-
-If the user asked for a period-over-period comparison (e.g. "last 7 days vs previous"), add a **Δ** column: the percentage-point change in that step's Conversion % vs. the prior period.
-
-Format large numbers with thousands separators; round percentages to one decimal place.
+Store Pulse uses total sessions as its percentage baseline; product reports use their explicitly named viewer cohort. Their existing count-scaled geometry, labels, annotations and exact-count disclosure are unchanged by the checkout correction. Keep stage, distinct sessions, declared baseline share, optional explicitly labelled previous-stage rate, prior count/rate and change available. Missing stages are not zero; rising stages remain rising. Full reports use native presentation; focused textual answers can use a table with the same declared denominators. A report snapshot never proves a saved, refreshed or scheduled dashboard.

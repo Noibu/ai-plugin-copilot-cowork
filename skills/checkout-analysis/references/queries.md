@@ -1,8 +1,6 @@
-<!-- generated: passthrough -->
-
 # Checkout query specs
 
-The query definitions for every path. Quick answer runs one or two of these; Full analysis runs the whole battery (Step 1 → 4); an Investigate click reuses a Step 4 breakdown and goes deeper. Principles 1 and 2, the Setup notes, and the Session-tool capabilities live in SKILL.md and apply throughout.
+These query plans preserve the analytical workflow. Follow SKILL.md and the shared guide for host output, sampling, missing-data disclosure, and current schemas. A focused answer uses only the relevant plans; a follow-up reuses prior evidence.
 
 ## Signal model — what earns a priority card
 
@@ -21,20 +19,20 @@ The **prior comparable window** is the equal-length window immediately before th
 
 ## Step 1 — Broad overview (current + prior windows)
 
-- First tell the user what you're doing, e.g. "Starting with a broad look across your checkout, comparing the last 30 days to the prior 30."
+- Put the exact analysis/comparison scope inside the final report card; do not add a report preamble or recap. Prerequisite questions/errors remain allowed.
 - Fire the **current-window** battery (Q1–Q7, plus Q1b when its fields are available) and, in parallel, the **prior-window** counterparts for the change-detection metrics (Q1, Q1b, Q2, Q6, Q7). Q3/Q4 (payment/delivery, descriptive) and Q5 (errors, recency-based) need no prior copy.
-- **No minimum session thresholds at this stage.** Principle 1: skip any empty/null slice silently.
+- **No minimum session thresholds at this stage.** Omit empty/null charts, but retain material missing-field/population coverage in the card; never silently imply a missing mix was checked and empty.
 
 **Q1 — Full funnel by depth** (current + prior). Session tool, group by funnel depth, measure session count, order by sessions desc.
 
 - One row per depth: 0/null = no action, 1 = ATC, 2 = checkout started, 3 = payment submitted, 4 = completed. Compute drop-off in post-processing.
-- If depth group-by is unavailable: one all-sessions query measuring total sessions, per-stage event counts, and the predefined conversion rate — those intermediate counts are event proxies, so lean on total → completed.
+- If depth group-by is unavailable: one all-sessions query measuring total sessions, per-stage event counts, and the predefined conversion rate — those intermediate counts are event proxies, NOT verified distinct cart-reaching sessions. Keep them separately labelled; they cannot become the checkout cart denominator. Without a valid measured cart population, checkout funnel rates are Not measured with explicit coverage and raw counts retained. A separately labelled total → completed diagnostic can use verified session populations but must not replace the cart-based checkout funnel.
 - If intermediate buckets are near-zero while completions are healthy → Principle 2.
 - **Express checkout inflates depth-4 vs depth-3.** Apple Pay, Shop Pay, etc. bypass the payment-info page, so depth-4 > depth-3 is normal — explain it, don't treat it as an error.
 
 **Q1b — Checkout sub-step abandonment** (current + prior). Run this unconditionally, same as Q1 — the fields below (contact / address / shipping / payment submission counts, cart value, visual-error flag, exit URL) are standard session-table fields on every account, not an account-specific extension, so don't gate this query on confirming they "exist" first. What varies by platform/integration is whether they're *populated* — apply Principle 1 to the **results**, not to whether to run the query.
 
-Session tool, filter to funnel depth ≥ 2 (checkout-entered sessions only — cart-only sessions are out of scope here), row-level (one row per session, not grouped), selecting: the checkout sub-step submission-count fields (contact / address / shipping / payment), `MAX_CART_VALUE` (alias `cart_value`), the visual-error flag, and the exit-URL field.
+Use `noibu_session_lookup` for row-level examples, inspecting its live select/filter schema. Filter to checkout-entered, non-completed sessions and select the available sub-step counts, cart value, visual-error indicator, and exit URL. A bounded sample supports examples, not population counts or cart-value totals. Use supported aggregate expressions for whole-population buckets only when their exact schema is verified.
 
 - Exclude completed sessions — this query only classifies *abandoned* checkout sessions.
 - Classify each remaining session into exactly one bucket by the furthest step reached, first match wins:
@@ -42,9 +40,9 @@ Session tool, filter to funnel depth ≥ 2 (checkout-entered sessions only — c
   2. **Experienced technical issues** — the session's visual-error flag is set.
   3. **Dropped at payment step** — reached shipping/address (≥ 1) but zero payment submissions.
   4. **Dropped after adding contact info** — contact submitted ≥ 1, nothing further.
-  5. **Left checkout without any action** — checkout started, zero sub-steps submitted.
-  6. **Left checkout to keep browsing** — zero progress, and the exit page is a product/collection page rather than checkout.
-- Per bucket, sum session count and `cart_value` (sum of `MAX_CART_VALUE`).
+  5. **Left checkout to keep browsing** — zero progress, and the exit page is a product/collection page rather than checkout.
+  6. **Left checkout without any action** — checkout started, zero sub-steps submitted, and not in the preceding bucket.
+- Sampled buckets show sample counts and observed maximum cart values with sample size/coverage, never claimed population loss. Exact aggregated bucket totals can be shown only when complete coverage is established. Behavior does not prove motive.
 - **After running the query**, apply Principle 1 to what came back: if every bucket is zero/null, this data genuinely isn't populated for this account — omit the table entirely, no placeholder. If only some buckets have real counts (e.g. sub-step counts are populated but the visual-error flag never fires), show the populated buckets and drop the zero ones — don't require every bucket before showing any.
 - Feeds the Overview's "Top source of abandonment" table (buckets ranked by session count, capped at 5) and, per bucket, the regression check in Step 3.
 
@@ -54,11 +52,13 @@ Session tool, filter to funnel depth ≥ 2 (checkout-entered sessions only — c
 - **Use the completion-time discount value, not checkout-start.** Checkout-start discount fields significantly undercount usage.
 - **Discount survivorship bias.** Only checkout-reaching sessions can have a discount, so this discount rate is among checkout-entering sessions only.
 
-**Q3 — Payment method mix** (current only). *Only if a payment-method dimension exists (see Session tool note).* Filter to completed checkouts, group by payment method names (array join, limit 20), measure session count + median completed order value, order by sessions desc. If unavailable, skip (Principle 1).
+**Q3 — Payment method mix; Q4 — Delivery method mix** (current window, descriptive). Discover current query/select/aggregation schemas for payment and shipping/delivery dimensions rather than assuming they are absent or guessing field names. Available and populated are distinct: when exposed, query completed population and inspect the actual values; if unsupported/unpopulated record the exact reason/coverage in the card, not invented bars. Q3/Q4 are independent and should run in the initial parallel battery when supported.
 
-- **Completed-orders only (applies to Q4 too).** Payment and delivery fields populate only on completed sessions — never imply a method was rejected because of low volume; it may just not have been chosen by completers.
-
-**Q4 — Delivery method mix** (current only). *Only if a delivery/shipping dimension exists.* Filter to completed checkouts, group by delivery method names (array join, limit 20), measure session count + median completed order value + median shipping cost, order by sessions desc. If unavailable, skip (Principle 1).
+- Prefer the actual COMPLETED-ORDER grain, using distinct completed order IDs or a verified exposed order-count measure, grouped by method. Filter completed orders in the requested window BEFORE grouping. Never label COUNT(session) as orders. If no actual order grain exists, use distinct COMPLETED PURCHASING SESSIONS as an explicitly lower-fidelity proxy and record order-grain unavailability.
+- For method arrays, deduplicate a method within each order/session. Verify whether more than one method is possible; preserve overlap and do not use array-join row sums as denominators or coverage. Retain actual distinct completed-population denominator and field-populated member count for each mix separately; null/missing is not zero or Other.
+- Fetch enough aggregate methods/pages to support the preview (up to six per mix); do not underfetch a two-row screenshot. Keep all returned rows in evidence/export. Counts scale both full and compact bar visuals. These describe choices by completers, NOT rejection/failure rates among attempters.
+- Monetary medians/order values and shipping cost need completed-order evidence, explicit currency, coverage and denominators; never pool currencies or multiply a session proxy into order totals.
+- Map verified results through [report mapping](../../querying-noibu-data/references/report-mapping.md) into `checkout.mixes.payment` / `checkout.mixes.delivery`. Fields: actual label/count rows, population completed-orders OR completed-purchasing-sessions, coveredCount/completedCount, currencyScope and overlap. Missing slices use `checkout.missing`. Existing abandonment tables remain placement overview; the renderer keeps abandonment PLUS BOTH available mixes in full/compact, rather than hiding the third table behind a generic cap.
 
 **Q5 — Active fixable checkout errors.** Priority errors tool, priority-type issues on URLs containing "checkout". Then **qualify** each candidate — surface only the genuinely fixable ones (this mirrors tech-diagnosis's "fixable" bucket). Fetch stack trace + error-type detail for the top candidates by occurrence, and keep an error only if **all** hold:
 
@@ -80,7 +80,11 @@ Compute current rates **and the change vs the prior window**, for metrics whose 
 
 **Current rates (from Q1):**
 
-- ATC rate = depth-1+ ÷ total · Checkout start = depth-2+ ÷ total · Checkout → payment = depth-3+ ÷ depth-2+ · Payment → completion = depth-4 ÷ depth-3+ · Overall completion = depth-4 ÷ depth-2+ (or the predefined conversion rate).
+- **Displayed checkout funnel:** Added to cart is the actual distinct-session COUNT and positive 100% baseline. Started checkout = depth-2+ / depth-1+; Payment submitted = depth-3+ / depth-1+; Completed order = depth-4 / depth-1+, each ×100. ALL displayed stages use this SAME added-to-cart population, never the previous stage or all sessions. Use the canonical ordered labels/typed roles in [funnel contract](../../querying-noibu-data/references/funnel-visualization.md). Prior chart bars/rates normalize to their OWN prior depth-1+ cart count; signed pp change = current rate − prior rate. Never use formatted display strings as evidence or show a count change beside a rate. Retain all current/prior raw stage counts in report.json and Show exact counts in full AND compact. Missing/null/zero cart baseline or unknown stage means Not measured, not 0%; preserve the raw counts and coverage.
+- **Separate checkout completion metric:** completed / started checkout (depth-4 / depth-2+), not the funnel's completed / cart percentage. Keep genuine express-checkout nonmonotonicity and >100% observations with coverage; do not clamp or replace measured counts.
+- The following step-to-step diagnostics may support investigation but must be named as such; they DO NOT replace the cart-based funnel headline/chart:
+
+- Optional diagnostics: ATC rate = depth-1+ ÷ total; checkout-start share of all sessions = depth-2+ ÷ total; checkout → payment = depth-3+ ÷ depth-2+; payment → completion = depth-4 ÷ depth-3+. Each needs its explicit diagnostic denominator and measured positive base. Checkout completion specifically means depth-4 ÷ depth-2+; a predefined whole-site conversion rate is NOT a substitute for it.
 - If intermediate events are uninstrumented (Principle 2), use cart → order (depth-4 ÷ depth-1+). depth-4 > depth-3 is expected (express checkout — see the Q1 note).
 
 **Period-over-period deltas** (current − prior), for each populated metric: every funnel step rate, overall completion, each device's CVR (Q6), each market's CVR (Q7), the discount rate and discounted-vs-full conversion (Q2). A metric is a **candidate signal** only if its delta is a regression past the threshold above.
@@ -116,5 +120,5 @@ Device and country baselines are already in Step 1; these go deeper on a flagged
 - **Device funnel breakdown** — filter to depth ≥ 1 (or ≥ 2 when checkout-start is reliable), group by device, measure session + completion (+ intermediate where populated). Find the step where the regression concentrates.
 - **Country cross-tab** — for a market whose CVR regressed, break the funnel down to see whether it's a shipping/payment block vs a UX change.
 - **Payment method completion** — when payment → completion regressed and payment data is populated: depth ≥ 3, group by payment method, completion per method.
-- **Cart-page exit journeys** — when cart → checkout regressed: user journeys tool anchored to `/cart`, loose mode, forward paths only, max depth 5. Forward-nav back to product = purchase uncertainty; exits to external URLs = distraction/price comparison.
+- **Cart-page exit journeys** — when cart → checkout regressed: page visits using URL/PREV_URL and exit evidence for `/cart`; category patterns can use noibu_list_page_group_journeys only when configured page groups are the intended scope. Forward-nav back to product = purchase uncertainty; exits to external URLs = distraction/price comparison.
 - **Error detail** — Q5 already qualified the fixable errors; deeper root-cause and the fix route through the tech-diagnosis handoff (see SKILL.md Investigate click).

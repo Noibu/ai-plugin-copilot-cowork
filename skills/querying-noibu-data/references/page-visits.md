@@ -1,5 +1,3 @@
-<!-- overlay: replace — no scrollmap-rendering tool on this host — clickmap keeps its console link, scrollmap falls back to aggregate stats — upstream @ aa887f827ac8 -->
-
 # Page visits analytics
 
 Read this reference when the user asks page-level questions: per-page traffic, time on page, web vitals (LCP/CLS/INP/FCP/TTFB/FID), landing/exit pages, visual errors, scroll depth, click/scroll behaviour, or cohort behaviour for a specific URL.
@@ -38,11 +36,16 @@ When the user asks "how is my LCP" / "what's my INP" / "which pages are slow", l
 
 Web vitals and `VISUAL_ERROR_COUNT` live here, not in error tools. "Slow pages", "broken feeling", "UX quality" questions route to this tool — do NOT reach for error tools.
 
-## Clickmaps: callable — scrollmaps: fall back to aggregate stats
+## Clickmaps & scrollmaps → `noibu_visualize_page_visits`
 
-When the user wants to **see** click behaviour ("show me the clickmap"), `noibu_visualize_page_visits` (`visualization.clickMap`) is the right call — it returns ranked per-selector click, conversion, and revenue numbers, plus a `consoleUrl`. Render the numbers as a markdown table and state the `consoleUrl` plainly; note it opens the general heat-maps section rather than the exact url/device/date-range queried, and don't claim a heatmap image is visible — you can't confirm this host rendered one.
+When the user wants to **see** click or scroll behaviour ("show me the clickmap", "scrollmap overlay"), call `noibu_visualize_page_visits`. Renders heatmap overlays on a page snapshot inside an MCP App iframe. Visual only — no numeric counts in the payload. Pair with `noibu_get_page_visits` if numbers help too.
 
-Scrollmaps are **not** callable this way — `noibu_visualize_page_visits` has no reliable scrollmap equivalent here. Fall back to `noibu_get_page_visits` aggregate stats and present them as a markdown table:
+Set `visualization` to exactly one:
 
-- Click behaviour (if not using the clickmap call above): `CLICKED_SELECTOR_COUNT` (total clicks), `CLICKED_TEXT` (top clicked text/elements) — segment by URL, ranked
-- Scroll behaviour: `MAX_SCROLL_DEPTH` (e.g. average or `QUANTILE_75` scroll depth by URL)
+- `{ clickMap: { metric?: "CLICKS" | "CHECKOUT_CONVERSION" | "REVENUE_PER_SESSION" } }` — click heatmap. `metric` preselects the UI button (default `CLICKS`):
+  - `CLICKS` — general "what users click"
+  - `CHECKOUT_CONVERSION` — elements correlated with conversion
+  - `REVENUE_PER_SESSION` — elements correlated with revenue
+- `{ scrollMap: {} }` — scroll-depth heatmap
+
+Prefer `noibu_visualize_page_visits` for real heatmap overlays when its MCP UI renders in the host (it renders only if the Noibu server serves it as an MCP Apps `ui://` resource with `text/html;profile=mcp-app`; verify in the tenant). A generic chart cannot substitute for a page-context heatmap. If rendering fails, return available numeric evidence and permitted server-returned links, and state the display limitation.

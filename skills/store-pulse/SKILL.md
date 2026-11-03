@@ -1,94 +1,38 @@
 ---
 name: store-pulse
-description: An instant, at-a-glance read on your store's health — run on demand. Use to check on how the overall store is doing.
+description: Show a Noibu store-health snapshot with KPI cards, a purchase funnel, and actions to save a private dashboard, export, or schedule recurring reports; optionally include products and traffic channels.
 ---
-<!-- overlay: replace — no saved-dashboard or scheduling surface on this host — stateless per-run markdown snapshot only — upstream @ eb6518bc30fd -->
 
 # Store Pulse
 
-A stateless health check. Every run resolves the domain, pulls fresh Core KPIs + Purchase Funnel data (plus any optional blocks requested), and prints a markdown report directly in the chat response. Nothing persists between runs — no saved state, no config file. Re-run any time for a fresh read.
+- Read [shared query guidance](../querying-noibu-data/SKILL.md). Open [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `store-pulse`; resolve the store and saved context.
+- Fetch fresh data for each invocation. Default to rolling last 24 hours versus preceding 24 hours, using one anchor; honor requested windows.
+- Follow [snapshot queries](references/snapshot-queries.md). Send **all six window queries in one parallel batch**: core metrics, completed revenue and orders, and funnel depth, each for the current and prior window, plus `noibu_get_business_context` when not yet loaded. Compute after they return; don't query one at a time:
+  - Fetch sessions, bounce/conversion, completed-order revenue and completed-order count for both windows; keep currencies separate.
+  - Derive engagement = 1 − bounce, AOV = completed-order revenue ÷ completed orders, and RPS = completed-order revenue ÷ sessions. Undefined denominators remain unknown.
+  - Build cumulative funnel depths from distinct sessions, not event sums; account for express checkout/missing intermediate events.
+- Query products/channels/paid traffic only when requested, using [optional blocks](references/optional-blocks.md).
 
-**Call metadata:** on every `noibu_*` call this skill drives, pass `skill: "store-pulse"`, `skillVersion: "cowork:fbf39d7"`, and a short `skillStep` (see the `querying-noibu-data` skill).
+## Report and actions
 
-## Flow
+- Put one or two measured conclusions inside the card, using the packaged [report display](references/card-quickstart.md).
+- Show light unfilled Sessions/Engagement/Conversion/AOV/RPS groups and a connected five-stage funnel with rates against total sessions, comparison context and exact counts.
+- Rate deltas use pp; volume/value deltas use relative %, undefined when prior is zero. Explicit measured downward changes use orange; captions remain separate.
+- Place the saved-dashboard action (see the runtime guide) below all dashboard content, before supported investigation opportunities; keep save/download/scheduling in the final section.
+- Saved dashboards use [saved dashboard](../querying-noibu-data/references/saved-dashboard.md): reuse the existing private app, preserve domain/window/optional blocks, verify totals and the saved snapshot by rereading it, and always ask refresh cadence/local time/IANA timezone/notification, with explicit manual/decline allowed. Do not require a spreadsheet or visitor connection for saved-data mode.
+- **Schedule report** uses [shared connected delivery](../querying-noibu-data/references/scheduling-delivery.md). Store Pulse alone adds **Daily** to Weekly/Every 2 weeks/Monthly; weekly remains initially selected.
+- Daily means every calendar day, including weekends, at confirmed local time/IANA timezone; no weekday/first-run/monthday fields. Recurrence does not change source windows: fetch fresh last 24 hours versus preceding 24 hours, or the confirmed alternative, on every run.
 
-### 1. Resolve the domain
+## In-chat report completion
 
-- Always call `noibu_list_domains` first (unless the user already gave you a UUID — use it directly).
-- **User named a domain** → case-insensitive match (accept `www.` variants). If matched, use that UUID + name. If not, tell them the named domain isn't in their Noibu account, list what is, and stop. Never silently substitute a different domain.
-- **User didn't name a domain** → one result, use it. Multiple results → ask in plain text, e.g. "Which store should I check — [name 1], [name 2], or [name 3]?" and wait for their reply. Don't guess.
+Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
 
-### 2. Pick the window
+Scheduled Email always requires chat confirmation of the exact final recipient email list EVEN IF addresses were supplied; no schedule/send before that gate. Never infer the signed-in user from Email selected. See shared scheduling-delivery.md. Any private app save/build must ask refresh cadence, local time/IANA timezone and notification (manual/decline allowed), verify a same-app unattended DATA writer, and only then create/update a confirmed refresh schedule; no reminder substitute or unverified refresh-success claim.
 
-Default to the **last 24h vs. the prior 24h**. If the user asks for a different window ("this week", "last 30 days"), use that instead — same query shape, different `dateTimeRange`. State the window used in the report header.
+## Browser prerequisite, only for a requested browser step
 
-### 3. Choose blocks
+Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
 
-`core-kpis` and `purchase-funnel` are always included. Ask once, in plain conversational text (no special widget):
+## Local report completion contract (21.1.13)
 
-> "I'll pull Core KPIs and the Purchase Funnel by default. Want me to also include Top products, Channel performance, or Paid ad performance?"
-
-Read `references/blocks/<id>.md` for each block picked (default and optional) before querying — those files define the exact metrics, MCP query shapes, methodology tooltips, empty-state handling, and polarity. Don't rewrite or second-guess them; reuse the query shapes and table columns verbatim.
-
-### 4. Fetch the data
-
-Run the MCP queries from each included block's reference file for both the current and prior windows. Compute deltas vs. the prior period of equal length.
-
-### 5. Report
-
-Print a clean markdown report directly in the chat response — headers, tables, bullet points, nothing else:
-
-```markdown
-# Store Pulse — [domain] ([period label])
-
-[1-2 sentence editorial summary — lead with the most notable thing, mix wins and concerns, use specific numbers]
-
-## Core KPIs
-
-| Metric | Value | vs prior |
-|---|---|---|
-| Sessions | ... | ... |
-| Engagement | ... | ... |
-| Conversion | ... | ... |
-| AOV | ... | ... |
-| RPS | ... | ... |
-
-## Purchase funnel
-
-| Step | % of sessions | Sessions | Δ pp |
-|---|---|---|---|
-| Enter store | 100% | ... | ... |
-| View product | ... | ... | ... |
-| Add to cart | ... | ... | ... |
-| Start checkout | ... | ... | ... |
-| Checkout complete | ... | ... | ... |
-
-[+ one section per optional block picked, using that block's table shape from its reference file — Top products, Channel performance, Paid ad performance]
-```
-
-Use each block's own empty-state and polarity rules (e.g., "No traffic in this window") rather than blank cells or guessed numbers.
-
-See `references/inline-snapshot.md` for the full response-shape contract — the exact order of the editorial summary, this report, the recurring-cadence line, and the investigate-thread follow-up below.
-
-### 6. Suggest — don't set up — a recurring check
-
-One line, near the end, after the report:
-
-> "Want this on a recurring cadence? You can set that up yourself in Cowork's Customize → Automated tasks, with a prompt like: 'Run my store health check for [domain] and summarize any notable changes.'"
-
-This is something the user sets up themselves through Cowork's own automated-tasks feature — nothing here creates, schedules, or persists a recurring run on their behalf.
-
-### 7. Offer a next thread to pull on
-
-After the recurring-cadence line, offer a short plain-text follow-up drawn from the summary — see `references/inline-snapshot.md`'s "Where to next" for the exact options and routing.
-
-## File map
-
-```
-store-pulse/
-├── SKILL.md
-├── references/blocks/{core-kpis,purchase-funnel,top-products,channel-performance,paid-performance}.md
-└── references/inline-snapshot.md
-```
-
-Read `references/blocks/<id>.md` for block specs (metrics, MCP query shapes, methodology tooltips, empty states, polarity). Read `references/inline-snapshot.md` for the full response-shape contract.
+Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

@@ -1,174 +1,49 @@
 ---
 name: checkout-analysis
-description: "Analyze checkout performance and health using Noibu data. Use when you want to know where shoppers drop off in the checkout funnel, what payment or delivery methods customers are using, why completion rates are low, what priority errors are hurting checkout, or how cart and order values benchmark."
----
-<!-- overlay: replace — no dashboard-rendering tool on this host — triage board becomes a markdown report; the Investigate button becomes a conversational follow-up — upstream @ 6165ba92392f -->
-
-# Noibu Checkout Performance & Health Analysis
-
-Surfaces where shoppers drop off in checkout and what to do about it, as a markdown
-report built from Noibu session, value, and error data.
-
-**Call metadata:** on every `noibu_*` call this skill drives, pass `skill: "checkout-analysis"`, `skillVersion: "cowork:fbf39d7"`, and a short `skillStep` (see the `querying-noibu-data` skill).
-
-## How it works
-
-Run Setup, then pick one of two behaviors from the user's prompt:
-
-- **Quick answer** (one focused question) → run 1–2 queries, answer directly, offer to go deeper.
-- **Full analysis** (broad request, bare invocation, or "yes" to the offer) → the four-step workflow below.
-
-Full analysis flow: **(1)** broad overview (Q1–Q7, plus Q1b when available, current + prior window) → **(2)** cross-reference + period-over-period → **(3)** pick the top 3 regressions → **(4)** run targeted follow-ups → render the report. Signals are flagged on **change vs the prior window**, not absolute level — see `references/queries.md` "Signal model".
-
-## Setup — before any query
-
-**Work quietly.** Don't narrate plumbing — resolving the domain, loading reference files, reading the report format, and deciding which tools, queries, or fields to use all happen silently, with no "let me…" commentary or explanation of *how* the analysis will be assembled. The first thing the user sees is the Step 1 overview line ("Starting with a broad look…"); after that, narrate only real analytical progress (what the data shows), never file reads, tool setup, field-name lookups, or other implementation/processing detail about how the answer was produced.
-
-- **Resolve the domain first; keep the company id it returns.** If the user gave a domain (name or UUID), use it. If not, ask conversationally which one, listing the account's domains — don't interrogate for anything else; take the default window and proceed. If the account has exactly one domain, skip the question and use it. Domain resolution returns a company id alongside the domain UUID; some tools (priority errors, data-connection checks) need that company id too — carry both.
-- **Load the Noibu context reference** (the `querying-noibu-data` skill/reference). It maps the role-based names used here ("session query tool", "funnel depth field", etc.) to the real Noibu tools/columns and documents query constraints. If it isn't available, discover tools and field names from the live Noibu API / tool schema instead — don't stop or guess.
-- **Confirm every field name by role before using it** (from the context reference, else the live schema). Steps below name fields by role, never by hard-coded column, so when the API changes only the lookup moves.
-- **Default analysis window:** the one in the context reference; if none, last 30 days.
-
-### Session tool — what it can group and filter by
-
-- **Group by:** device, country, browser, OS, UTM source/medium, landing URL, bounced, discount-applied, and **funnel depth** (how far the session got).
-- **Filter on:** device, country, bounced, checkout-completed, landing URL, UTM source.
-- **Funnel depth — confirm the exact field name; the prefix matters.** It *is* groupable (working name ~`CONVERSION_FUNNEL_DEPTH`), but near-variants are rejected. If a group-by is rejected, look up the exact name and retry; only fall back to per-stage count measures if it truly isn't available.
-- **Payment and delivery method are NOT groupable.** Attempt those slices only if the reference/schema exposes such a field; if not, skip them (see Principle 1).
-- **Checkout sub-step submission counts (contact / address / shipping / payment) and cart value are per-session fields, not group-by dimensions.** They feed Q1b's abandonment-reason classification (row-level, one row per session), not the grouped session queries above. These are standard fields on every account — run Q1b unconditionally; only skip its output (whole table, or individual buckets) if the results actually come back empty (Principle 1 applied to the data, not to whether the fields are named in a reference doc).
-
-## Two principles that govern everything
-
-**Principle 1 — analyze what's present, never flag what's missing.** Which fields are populated varies by platform, integration, and account. An empty/null result is normal — that signal just isn't available for this domain, not broken.
-
-- Silently skip any empty/null slice and build from the data you *do* have. Omit its table entirely — no zero-rows, no "no data" placeholder.
-- Never create a finding, action, or caveat about missing data, tracking, capture, or coverage. That's out of scope.
-- There's always a useful story in the present data (funnel progression, device/country splits, conversion, errors, populated value/method fields). Lead with it confidently, as if it's the full picture.
-
-**Principle 2 — trust cart → completion when intermediate events are uninstrumented.** If checkout-started and/or payment-submitted are near-zero while completions are healthy, those events aren't instrumented here. Don't treat the apparent "drops" as real — use cart → completion as the headline conversion metric and lean on segment splits (device, country, discount) for the drop story.
-
-**Exception to Principle 1 — the whole domain is empty.** If the *entire* dataset is near-zero (total sessions 0 or a handful), there's no story to tell. Say plainly the domain has essentially no traffic in this window and offer to widen the range or pick another domain. This is a "no data in the window" statement (fine to surface), not a tracking-coverage complaint (still out of scope).
-
+description: Analyze Noibu checkout performance, funnel drop-off, payment and delivery mix, abandonment, and technical issues with an interactive investigation board, dashboard, export, and scheduling actions.
 ---
 
-## Quick answer
+# Checkout performance
 
-A specific, focused question ("where do people drop off?", "what payment methods are used?", "errors on my checkout pages?"):
+- Read [shared query guidance](../querying-noibu-data/SKILL.md). Open [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `checkout-analysis`; resolve the store and saved business context.
+- Default to the last 30 days versus the immediately preceding equal window; honor requested dates.
+- Focused questions use only relevant [queries](references/queries.md). For a full review:
+  - Fetch Q1–Q7, Q1b when row-level fields exist, and prior counterparts **in one parallel batch** (all independent); only follow-ups wait for results.
+  - Use distinct sessions reaching at least each stage. Express checkout may skip intermediate events.
+  - Compare each segment with its own prior window. Candidate regressions are ≥3 pp absolute or ≥10% relative with sufficient traffic; rank up to three supported findings.
+  - Run targeted follow-ups. Route merchant technical causes to tech-diagnosis; give UX/operations findings a concrete next check and verification plan.
 
-1. Load `references/queries.md` and run only the 1–2 query specs needed (e.g. funnel → Q1, why people abandon → Q1b, payment methods → Q3, errors → Q5).
-2. Answer in a few sentences + a small table if useful.
-3. Ask conversationally whether they'd like the full analysis; if yes, run Full analysis.
+## Report
 
-Don't run the full workflow or render the report for a quick answer.
+Use the packaged [report display](references/card-quickstart.md); focused answers may remain prose.
 
-## Follow-up questions after a report
+- Put one or two measured conclusions inside the report card; successful in-chat reports are CARD ONLY, without preamble or post-card recap.
+- Overview: compact population/cart reach, percentage-led cart → checkout → payment → completion funnel: Added to cart shows its raw count and is the 100% baseline; later stages show their share of that SAME cart population (not previous stage), completion/device/value highlights, supported abandonment rows and populated payment/delivery bars.
+- Show exact windows, timezone, denominators, currency and express-checkout/coverage limits. Each period uses its OWN measured positive cart baseline for bars and rates; derive signed pp deltas from those rates, not counts. Show exact counts must expand actual current/prior session counts for EVERY stage in full AND compact. Missing/zero bases or unmeasured stages are Not measured, never invented zero rates. Keep checkout completion separate: completed / started checkout. See [funnel contract](../querying-noibu-data/references/funnel-visualization.md). Avoid duplicating KPIs as highlights.
+- Put abandonment tables at `placement: "overview"`; supporting data is expandable. Label bounded samples and never extrapolate sample cart values to all abandoned sessions.
+- Classify abandonment as observed behavior, not proven motives. Check continued product/category browsing before generic no-action. Payment/delivery mix measured only on purchases cannot establish gateway failure rates.
+- Each numbered opportunity needs its cohort, current/prior denominators, signed pp/relative delta and `fix` containing **Next check** plus verification. Do not pad findings or treat tiny order movements as major opportunities.
+- Missing slices stay omitted. With healthy completions but missing intermediate events, headline cart-to-completion rather than invented drops. An empty window warrants another date/store choice.
+- Estimates need a formula/baseline and are not guaranteed recovery. Lower discount use alone does not prove coupon failure.
 
-A user question naming a specific signal from a report already in this conversation ("why is mobile checkout completion down?", "dig into the payment method drop") — handle as a focused follow-up, not a re-run of the full analysis. The follow-up specs are in `references/queries.md` (Step 4).
+## Follow-ups
 
-- **Don't re-run the breakdown that already surfaced the signal.** The Step 4 follow-up for this signal already ran to rank and headline it — reuse that evidence; only query again if the needed data wasn't pulled.
-- **Go one level deeper** for root cause: e.g. error detail on the affected page, or live page inspection — genuinely new work beyond the breakdown. A single follow-up may surface more than one cause, and of mixed type (e.g. a UX/form issue *plus* two priority errors, or a slow page).
-- **Route the what-next by cause type — decide this *after* diagnosing:**
-  - **UX / funnel / market / discount / ops causes** → write the what-next inline: one concrete, owner-routed step + the check that confirms resolution.
-  - **Priority error or performance/CWV causes** → if **tech-diagnosis** is available, hand each one off to it (it owns root-cause-to-fix, platform guidance, and the ticket/share flow). Suggest one handoff per issue (carrying its own `humanId` or page), so multiple causes become multiple options the user can pick from:
-    - Fixable error → suggest asking tech-diagnosis to fix #[humanId] on [domain]
-    - Vendor/third-party error → suggest asking tech-diagnosis to share #[humanId] with the vendor on [domain]
-    - Performance → suggest asking tech-diagnosis to look at [LCP|INP|CLS] on [page-url] for [domain]
-    - **If tech-diagnosis is NOT available, don't suggest it.** Handle the cause inline: name the issue (`humanId` / page), give a one-line likely root cause and a concrete next step. Don't mention or recommend installing another skill.
-- **Offer to run the next step yourself when it's Noibu-answerable — this applies across every cause type above, not just performance ones.** Before handing a what-next off entirely to a human team, check whether it's something the Noibu tools can actually answer right now: page-visit Core Web Vitals (LCP/INP/CLS) for the affected URL, session replay or session detail for the sessions in this bucket, click data for the page, or a deeper breakdown of this same segment. When it is, end the answer with a one-line offer naming the specific action (e.g. "Want me to pull LCP/INP for the checkout page on mobile?" or "Want me to pull a few session replays from this bucket?") instead of only describing it as a task for someone else's team to go check manually. Don't offer this for what-nexts that are genuinely external (e.g. "have the payment processor check gateway logs," "ask the theme team to review the code") — only for what the Noibu toolset itself can pull. This offer is separate from (and can sit alongside) a tech-diagnosis suggestion — it's for the cases where the answer can be fetched directly.
-- **Answer in chat with:** the *why* (the breakdown already gathered, ≤8 rows, plus any deeper root-cause finding), per cause either the inline what-next or the tech-diagnosis suggestion, and — where it applies — the one-line offer to pull further Noibu data directly. Keep it tight; don't re-render the whole report.
+- Preserve the tested light dashboard, the saved-dashboard action (see the runtime guide) beneath dashboard content, investigation cards, and separate final save/download/scheduling controls.
+- Investigate reuses the selected evidence; technical findings use the [repository/CI handoff](../tech-diagnosis/references/github-handoff.md), not ordinary UX/operations analysis.
+- Saved dashboards follow [saved dashboard](../querying-noibu-data/references/saved-dashboard.md), including the mandatory refresh cadence/time/timezone/notification question (manual or decline is allowed).
+- Scheduling follows [connected delivery](../querying-noibu-data/references/scheduling-delivery.md), with fresh rolling comparisons; exports reuse evidence unless refresh is requested.
+- Issue/status changes require an explicit request, exact issue and supported status. Analysis/rendering authorizes no writes.
 
-## Full analysis
+## In-chat report completion
 
-A broad request, a bare invocation, or "yes" to the quick-answer offer. Run the whole workflow, then render the report as markdown:
+Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
 
-1. **Broad overview** — fire Q1–Q7, plus Q1b when its fields are available, for the current window plus the prior-window counterparts for the change-detection metrics (`queries.md`, Step 1).
-2. **Cross-reference + period-over-period** — compute current rates and their delta vs the prior window (Step 2).
-3. **Pick the top 3 regressions** to dig into, using the routing table (Step 3). The only non-regression finding is a qualified active error (Q5).
-4. **Follow-up queries** — run only the follow-ups those signals call for (Step 4).
-5. **Render the report** — see "Rendering the report" below.
+Scheduled Email always requires chat confirmation of the exact final recipient email list EVEN IF addresses were supplied; no schedule/send before that gate. Never infer the signed-in user from Email selected. See shared scheduling-delivery.md. Any private app save/build must ask refresh cadence, local time/IANA timezone and notification (manual/decline allowed), verify a same-app unattended DATA writer, and only then create/update a confirmed refresh schedule; no reminder substitute or unverified refresh-success claim.
 
-## Rendering the report
+## Browser prerequisite, only for a requested browser step
 
-**Guiding principle: insights first, data second.** The report must be scannable in 30 seconds. Every table is supporting evidence for a finding already named above.
+Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
 
-### Section 1 — Key findings & recommended actions *(always first)*
+## Local report completion contract (21.1.13)
 
-Write after both phases are complete. Number each pair, ranked by sessions affected (the incremental sessions lost to each regression — see the sessions-affected formulas in `references/queries.md`, Step 4).
-
-> **1. Finding:** [specific step, device, market, or page] + [the move vs the prior window, or the qualified error] + [why it matters].
-> **Suggested Action:** [One specific, testable thing to do.]
-
-Rules:
-- Every change-based finding must be a regression vs the prior window — never the absolute level or a gap vs another segment or the site average.
-- **Markets are relative.** A chronically-low or 0% market that didn't change is not a finding.
-- **No discount-value finding** unless the discount rate or discounted conversion regressed.
-- The only non-regression finding is a qualified active error (Q5).
-- If nothing regressed and no error qualifies, say so plainly instead of padding with weak signals — see "No regressions this run" below.
-- Cap at 3. If more signals exist: "N more signals in the data below."
-
-### Section 2 — Overview
-
-- **Context line** — `[total sessions] · [ATC%] added to cart`.
-- **Checkout funnel** — a markdown table:
-
-  | Stage | Sessions | % of Cart | Drop to Next Step | Δ vs prior |
-  |---|---|---|---|---|
-  | Added to cart | … | 100% | … | — |
-  | Started checkout | … | …% | …% | …pp |
-  | Payment submitted | … | …% | …% | …pp |
-  | Completed order | … | …% | …% | …pp |
-
-  Callout the single largest *reliable* drop and its rate. Express checkout caveat if depth-4 > depth-3. If intermediate steps are uninstrumented (Principle 2), show only the instrumented steps rather than a misleading drop.
-- **Funnel health** — Checkout completion X% (Δ N pp vs prior) · Mobile Y% / Desktop Z% conversion · Checkout errors N.
-- **Order profile** — Median order $X · Discounted N% · Items/order N. Principle 1: drop any unpopulated metric, and drop the whole line if none are populated.
-- **Payment methods** (completed orders only) — table: Payment Method | Orders | Median Order Value. Survivorship caveat: abandoned sessions' payment method is not captured.
-- **Delivery methods** (completed orders only) — table: Delivery Method | Orders | Median Order Value | Median Shipping Cost. Exclude rows where median order value = $0 (in-store pickup / B2B / retail channels). Flag non-English method names with very high order values as likely local-currency anomalies.
-
-### Section 3 — Checkout page errors
-
-List each qualified error from Q5: humanId, title, error type, sessions affected. If none: "No active priority errors detected on checkout pages."
-
-### Section 4 — Evidence from deeper analysis *(one entry per Step 4 follow-up)*
-
-For each Step 4 query, a tight two-line entry:
-- **What the data showed:** specific numbers, one or two sentences max.
-- **Supports:** reference the numbered finding from Section 1 (e.g., "→ supports Finding 2").
-
-No raw data dumps. Cap tables at 8 rows.
-
-### No regressions this run
-
-When no regression clears the threshold and no error qualifies: "No checkout regressions vs the prior [window] and no active fixable errors — checkout is holding steady. The Overview above shows the current state." If there's no prior window to compare (sparse history), say that instead: "No prior [window] to compare against, so no change-based signals this run — the Overview shows the current state."
-
-## Exporting the report
-
-Triggered by the user asking to export, download, or save the report as a document.
-
-Export-only — **do not re-run the analysis or any queries.** Reuse the results already in this conversation. Read `references/export-pdf.md` and follow the instructions there.
-
-## Recurring reports
-
-If the user asks to put this on a schedule: this skill doesn't create or manage recurring runs itself. Point them at Cowork's own automation instead — e.g. "You can set that up yourself in Cowork's Customize → Automated tasks, pointing it at this same prompt." Nothing here creates, schedules, or persists a recurring run on their behalf.
-
-## Ignoring an issue
-
-Triggered by the user asking to ignore or close a specific issue by its humanId (e.g. "ignore issue #445").
-
-Call `noibu_update_issue` to set that issue's status to Ignored/Closed (confirm the exact status value from the tool schema), then confirm in one line (e.g. "Ignored #445 — it won't surface on future runs"). If `noibu_update_issue` isn't available, say so briefly rather than failing.
-
-## Data quality notes
-
-- **Payment and delivery data reflects completed orders only.** Payment method
-  and delivery method fields are only populated on sessions where checkout was
-  completed. Never imply a payment method was rejected because of low volume —
-  it may simply not have been selected by completers.
-- **Express checkout inflates depth-4 vs depth-3.** Apple Pay, Shop Pay, and
-  similar flows bypass the payment information page. Depth-4 exceeding depth-3
-  is normal — always explain this rather than treating it as a data error.
-- **Discount survivorship bias.** Only sessions that reach checkout can have a
-  discount applied. The discount rate from Q2 is among checkout-entering sessions
-  only.
-- **Use the discount value recorded at checkout completion, not at checkout start.**
-  Many shoppers apply discount codes after initiating checkout. The checkout-start
-  discount fields significantly undercount discount usage — always use the
-  completion-time discount value field.
+Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

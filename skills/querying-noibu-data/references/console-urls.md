@@ -1,8 +1,6 @@
-<!-- overlay: replace — render honesty — cannot claim an inline replay or heatmap rendered; states the console link plainly instead — upstream @ a8e6f58893f0 -->
-
 # Console URLs
 
-Read this reference when the user pastes a `console.noibu.com` link, or asks anything that requires parsing a console URL to extract a domain ID, issue ID, session path, or filter set.
+Read this reference when parsing pasted console links or including Noibu destinations in reports/action confirmations. Preserve links in saved Pages, downloads and scheduled reports when relevant to the reported evidence.
 
 The Noibu console lives at `https://console.noibu.com`. When the user pastes a console URL, parse it to extract the resource and IDs, then route to the relevant tool.
 
@@ -27,6 +25,11 @@ The Noibu console lives at `https://console.noibu.com`. When the user pastes a c
 ## Console link policy
 
 - **Issue links** — always use `issueUrl` from `noibu_list_priority_errors`, `noibu_search_errors`, or `noibu_get_error`. Never construct manually. If `issueUrl` is absent, do not link — surface the data without one.
-- **Session replay** — always use `replayUrl` from `noibu_show_session_replay`, and always state it plainly in your reply — never assume the inline player rendered. Never construct manually. If `replayUrl` is absent, do not link.
-- **Click heatmaps** — always use `consoleUrl` from `noibu_visualize_page_visits`, and always state it plainly — never assume the inline heatmap rendered. It opens the general heat-maps section, not the exact url/device/date-range queried; say so.
-- **Other console pages** (site health, performance, etc.) — do not construct, suggest, or mention any console.noibu.com link in any form. Use the path patterns in the table above only to parse URLs the user has pasted, never to generate new ones.
+- **Session replay** — always use `jazzUrl` from `noibu_show_session_replay`. Never construct manually. If `jazzUrl` is absent, do not link.
+- **A/B drafts and existing tests** — after successful creation/lookup, include “Open draft in Noibu” or “View test in Noibu.” Prefer a canonical URL returned for that exact test. Otherwise use the documented `https://console.noibu.com/<domain UUID>/ab-tests/<numeric test id>` route with the resolved domain UUID and actual returned test id. Never use the key, candidate rank, domain numId or an invented id. If only a key was returned, read the roster and match that exact key/domain to get its numeric id. Never repeat creation to obtain a link. If unresolved, return confirmed key/status and explain that the direct link is unavailable.
+- **Performance metrics** — prefer a returned exact link; otherwise use `https://console.noibu.com/<domain UUID>/performance/<metric>` for a verified domain and LCP/INP/CLS/FCP/TTFB. Label it “View INP in Noibu,” for example. This is a metric overview, not a page- or time-filtered deep link. Do not invent query parameters, element ids or claim preserved filters.
+- **Other destinations** — include relevant canonical URLs returned by Noibu or verified same-resource URLs from the user's context. Do not invent undocumented site-health/context/page/scan/report routes. A storefront URL is not a Noibu console link.
+
+The [link helper](../scripts/console_links.py) validates HTTPS console destinations against the selected domain and builds only the documented A/B/performance routes above: `python <shared-skill>/scripts/console_links.py --domain-id <resolved UUID> --kind ab-test --resource <actual numeric test id>`. It makes no request and cannot verify existence/account access; preserve provenance from the actual result. Issue and replay links retain their returned-URL-only rules above; replay jazzUrl values on another supported host do not use this console-only helper.
+
+Links are navigation, not actions. Validate HTTPS, expected host, matching domain/resource and absence of credentials; do not expose token/secret-bearing URLs. Do not claim a link was opened or verified unless it was. A timeout is not confirmed creation: reconcile existing objects before returning a draft confirmation/link.

@@ -1,5 +1,3 @@
-<!-- generated: passthrough -->
-
 # Product Analysis — Query Workflow
 
 Four-step workflow for full analysis. Field names are role-based — already confirmed during setup.
@@ -7,6 +5,8 @@ Four-step workflow for full analysis. Field names are role-based — already con
 ---
 
 ## Step 1 — Broad overview (fire all four in one turn)
+
+For the full dashboard, also retrieve a complete whole-store session/purchase baseline and a distinct product-viewer cohort grouped by maximum funnel depth, using the exposed session schema. Calculate viewer → cart-or-deeper → purchase counts from that same cohort. Order/cap/paginate as required; never sum overlapping title rows to construct this population. A viewer's purchase may contain another product, so label that attribution accurately. If this aggregate is unavailable, omit the global product funnel or explicitly name the narrower measured cohort; a top product's funnel must not masquerade as the overall product funnel. Retrieve a currency-specific median completed order/cart value only when supported, with the actual unit; do not guess it from product prices.
 
 | Query | Tool | Group by | Measures | Limit | Order |
 |---|---|---|---|---|---|
@@ -26,7 +26,7 @@ Four-step workflow for full analysis. Field names are role-based — already con
 - **ATC opportunity** = use the `ATC_LIFT_OPPORTUNITY` ranking directly. Cross-check the top URLs against products-by-views to confirm they are high-traffic products.
 - **Collection CVR benchmark** = compare collections against others in the same price tier, not the site-wide average. Two game-focused collections are valid benchmarks for each other; a premium hardware collection is not a valid benchmark for a accessories collection. Only flag low CVR when a same-tier benchmark exists.
 - **Viewed-only %** = sessions with no funnel progression ÷ total view sessions. Flag products where 80%+ viewed-only, but check site-wide average first — high viewed-only is normal for low-intent browsing.
-- **Site-wide CVR benchmark** = total purchases ÷ total sessions. Use only as context — never to flag high-ticket products, collections, or types as underperforming. Price data is not in Noibu session data; infer price tier from product/collection names.
+- **Site-wide CVR benchmark** = total purchases ÷ total sessions. Use only as context — never to flag high-ticket products, collections, or types as underperforming. Price data is not in Noibu session data; require actual prices or confirmed context before asserting a price-tier benchmark.
 
 ---
 
@@ -55,7 +55,7 @@ Run only the follow-ups the signals call for. Apply traffic thresholds now:
 - Use page visits tool. Filter URLs CONTAINS the product's SKU code or slug fragment (limit 15).
 - Measures: page views, ATC_LIFT_OPPORTUNITY, add-to-cart rate, median duration, median max scroll depth ratio, median clicked selector count, total visual error count. Order by ATC_LIFT_OPPORTUNITY ↓.
 - Use URL CONTAINS (not exact URL) — product pages appear under `/products/`, `/collections/[name]/products/`, `/es/products/`, etc.
-- Scroll depth: <0.20 = users not reaching ATC button; 0.20–0.40 with low clicks = content/pricing concern; high errors on one URL variant = possible JS error blocking ATC.
+- Low scroll and low clicks support a friction hypothesis, but control placement needs live inspection. High errors on one URL variant warrant diagnosis; they do not prove a blocked add-to-cart action.
 - Compare ATC rate across URL variants — a rate that's low on one variant but normal on others points to a URL-specific issue (broken localised page, collection-scoped page with missing ATC).
 
 **Funnel depth breakdown** (strong ATC, weak purchase)
@@ -66,10 +66,10 @@ Run only the follow-ups the signals call for. Apply traffic thresholds now:
 
 **Country breakdown** (collection CVR well below benchmark)
 - Session search tool. Filter to sessions where collection title was viewed. Group by country code (limit 20). Measure sessions, CVR, revenue/session. Order ↓.
-- Near-zero CVR across multiple LATAM/non-English markets = ops/localization gap, not a merchandising problem.
+- Near-zero CVR in a market warrants checking confirmed shipping availability and campaign intent before attributing it to localization, operations, bots, or merchandising.
 
 **Product mix within a collection** (collection underperforms, country breakdown is clean)
 - Session search tool. Filter to collection title viewed. Group by viewed product titles (array join, limit 25). Measure sessions, CVR. Order ↓.
 
 **Journey paths** (high views, high bounce)
-- User journey tool. Anchor on product slug fragment, loose mode. Both directions, max depth 6.
+- For exact URLs use noibu_get_page_visits and PREV_URL/exit evidence. For configured page-group pattern shapes use noibu_list_page_group_journeys with its live anchor/filter schema and URL grounding.

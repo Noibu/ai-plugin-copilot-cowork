@@ -1,5 +1,3 @@
-<!-- generated: passthrough -->
-
 # Errors / issues
 
 Read this reference only when the user has **explicitly** asked about errors, bugs, JavaScript crashes, HTTP failures, broken pages, or revenue-loss projections — or after analytics has pointed at an error hypothesis and the user has confirmed they want to investigate.

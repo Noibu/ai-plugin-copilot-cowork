@@ -1,5 +1,3 @@
-<!-- generated: passthrough -->
-
 # Sessions analytics
 
 Read this reference when the user asks session-level questions: conversion rate, revenue, AOV, traffic sources, bounce rate, products viewed/purchased, search behaviour, discount usage, time-series trends.

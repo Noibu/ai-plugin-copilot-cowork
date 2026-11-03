@@ -1,5 +1,3 @@
-<!-- overlay: replace — render honesty — cannot claim a replay is playing or visible; states the console link plainly instead — upstream @ 80f76ef194b4 -->
-
 # Journeys & session replay
 
 Read this reference when the user asks about the shape of multi-step journey patterns across many sessions, or when they explicitly want to watch / see / view a session replay.
@@ -16,7 +14,7 @@ If the user is asking for an aggregate (count, rate, percentage, ranking by URL)
 
 ### Funnel-shaped *visualization* requests are different
 
-When the user explicitly asks to **see / chart / visualize / draw** the ecommerce conversion funnel (e.g. "show me the checkout funnel", "render the purchase funnel as a chart", "funnel chart for last 7 days vs previous"), do NOT stop at `noibu_get_page_visits`. Use it (or `noibu_search_sessions`) to fetch the per-step session counts, then hand the result to `references/funnel-visualization.md` — it presents the per-step counts as a markdown table. Analytical funnel prompts ("where do users drop off", "abandonment by step") still terminate at `noibu_get_page_visits`.
+When the user asks to chart a conversion funnel, retrieve distinct stage-session counts and use the bundled funnel-visualization reference to present a table or the Noibu report board. No specific widget tool is required. Analytical funnel questions use the matching session/page dataset.
 
 ## noibu_list_page_group_journeys (narrow)
 
@@ -60,7 +58,7 @@ Compare `totalMatchingSessions` to the sum of `sessionCount` across returned pat
 
 ## noibu_show_session_replay
 
-The tool call returns full page-visit metadata for the session (URLs, durations, key events per visit) — narrate the session using that data. Returns a `replayUrl` for the full session — state it plainly in your reply whenever present, and never claim the replay is playing or visible; you can't confirm this host rendered it. Never construct or mention a Noibu console link otherwise.
+Returns a Noibu MCP replay UI for one page visit, plus metadata. The host renders it only when the server declares an MCP Apps `ui://` resource (`text/html;profile=mcp-app`); verify in the tenant. If the UI cannot render, use a permitted server-returned `jazzUrl` or explain the display limitation; do not claim a video played. Never construct a replay link.
 
 USE ONLY when the user **explicitly** asks to watch / see / view a session replay or video. Examples of when to call it:
 
@@ -80,4 +78,4 @@ Specifically:
 - Only specify `pageVisitIndex` when the user has expressed interest in a specific page visit (e.g., "show me page visit 3").
 
 **Multiple replays:**
-- When showing multiple replays from the same session, call the tool once per page visit and write the summary immediately after each call before calling the tool for the next. This produces: tool call → summary → tool call → summary, rather than batching all summaries at the end.
+- When showing multiple replays from the same session, call the tool once per page visit and write the summary immediately after each replay before calling the tool for the next. This produces: [iframe] → summary → [iframe] → summary, rather than batching all summaries at the end.

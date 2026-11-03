@@ -1,8 +1,12 @@
-<!-- overlay: replace — share flow, not a share widget — upstream @ 3e22d11c8315 -->
-
 # Performance reference
 
+## Required paired acquisition before presentation
+
+Default: current 30 days against the immediately preceding equal 30 days for the SAME page/group/device, p75 and units. Start both requests in parallel, await both, query whole-window quantiles (never average daily p75), and retain actual metric current/prior/delta, exact windows and coverage IN the card. Attempt actual prior query before claiming unavailable; include reason. Only an explicit user-requested snapshot may omit the prior attempt. Follow [local comparison acquisition](comparison-acquisition.md), not a snapshot-only example. Error recency remains a separate seven-day survey, with current/prior seven-day history only when actual schema/response supports it.
+
 ## CWV thresholds
+
+Normalize response units before comparisons: Noibu's tested LCP/FCP/TTFB values are milliseconds (some serialize as numeric strings); divide by 1000 only for labels or thresholds expressed in seconds. INP remains milliseconds and CLS is dimensionless. Parse numeric strings without treating null/empty as zero. Preserve any explicit unit returned by the current schema.
 
 | Metric | Good | Needs improvement | Poor |
 |---|---|---|---|
@@ -14,21 +18,29 @@
 
 ---
 
-## What Noibu MCP provides vs what needs Chrome
+## Performance presentation
+
+Use the shared report board (`noibu_show_report`) with findings category performance and a performance object for measured p75 INP/LCP/CLS. Match the requested metric-header card, plain-language title/evidence, large value, green/amber/red labelled threshold bar with measured marker, actual traffic/page/group/device/window and Get fix ↗. Include the exact relevant Noibu destination using shared console link guidance. Metric overview links are not filtered page deep links.
+
+Normalize INP/LCP to ms, CLS to score; include percentile p75, and traffic count with its measured unit. Unknown values remain null and get no marker/verdict. Never invent Active or affected-user counts to match the screenshot. State shared-template causes as hypotheses unless verified. Examples in previews are synthetic, not findings. Retain proposed fix/verification inside the report card and existing repository/CI handoff for source inspection.
+
+Sources for the three CWV bands: [Google's threshold definitions](https://web.dev/articles/defining-core-web-vitals-thresholds).
+
+## What Noibu MCP provides vs what needs browser developer tools
 
 **Noibu MCP (`noibu_get_page_visits`):**
 - p75 CWV scores per page/URL (LCP, CLS, INP, FCP, TTFB)
 - `CLICKED_SELECTORS_WITH_COUNTS` — CSS selectors + click counts per page (useful for INP: cross-reference most-clicked elements on a high-INP page to narrow down candidates)
 - Visual error count per page
 
-**Requires Chrome DevTools:**
+**Requires browser developer tools (not available through Microsoft 365 Copilot hosts):**
 - The specific LCP element (tag, source, attributes)
 - CLS shift sources (which elements are moving and by how much)
 - The specific INP slow element selector and phase breakdown
 
-The Noibu performance console shows element-level detail for INP (via the `id=` parameter in the console URL) but this is not exposed through the MCP tools — it requires navigating to the console in Chrome.
+The Noibu performance console shows element-level detail for INP (via the `id=` parameter in the console URL) but this is not exposed through the MCP tools — the user can open that console page themselves.
 
-When Chrome isn't available: use `CLICKED_SELECTORS_WITH_COUNTS` as supporting context for INP, and fall back to pattern-based recommendations for LCP and CLS element identification.
+Without developer tools (the normal case in Microsoft 365 Copilot): use `CLICKED_SELECTORS_WITH_COUNTS` as supporting context for INP, and fall back to pattern-based recommendations for LCP and CLS element identification.
 
 ---
 
@@ -36,7 +48,7 @@ When Chrome isn't available: use `CLICKED_SELECTORS_WITH_COUNTS` as supporting c
 
 ### Device emulation
 
-Match emulation to where the issue is worst in Noibu data. Mobile emulation is **required** for mobile CWV findings — without it, CLS and LCP issues produce silent false negatives. Use a mid-range Android device with Fast 3G throttling. Always hard reload with cache disabled when measuring.
+Match emulation to where the issue is worst in Noibu data. Mobile emulation, when actually supported and authorized, is needed to reproduce mobile-specific CWV behavior — without it, CLS and LCP issues produce silent false negatives. Use a mid-range Android device with Fast 3G throttling. Always hard reload with cache disabled when measuring.
 
 ### LCP
 
@@ -77,11 +89,11 @@ If Noibu shows a poor score but page inspection looks clean (no lazy hero, no mi
 
 ## Technical details fields
 
-Rendered only when the operator explicitly asks or "Technical details" is one of the items selected in the share flow. Render exactly these fields in order, omitting any with no data. No placeholder text, no commentary between fields.
+Rendered only when the operator explicitly asks or the user requests technical details. Render exactly these fields in order, omitting any with no data. No placeholder text, no commentary between fields.
 
 - **Score** — one combined line: `[Metric] p75 [value] — [band]`
 - **Sub-metric breakdown** — when available
-- **Affected element** — CSS selector from Chrome inspection
+- **Affected element** — CSS selector from developer-tools inspection, when the user supplies it
 - **Detected anti-pattern** — specific pattern found during page inspection
 - **Browser impact** — when applicable
 - **OS impact** — when applicable

@@ -1,5 +1,3 @@
-<!-- generated: passthrough -->
-
 # AB tests
 
 Read this reference when the user asks about AB tests or experiments — what tests exist, whether one is running, how a test is doing, which variation is winning, whether it's safe to ship, or why a variation won.

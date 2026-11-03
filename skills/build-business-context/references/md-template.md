@@ -1,10 +1,8 @@
-<!-- overlay: replace — Claude-branding string — template refers to the business-context file, not CLAUDE.md/Claude — upstream @ 91f7c01fbb12 -->
-
 # Business Context MD — Section Skeleton
 
 This is the structure to populate, not a rigid form. Reorder, drop, or add sections to
-fit the business. The one constant: lead with whatever most changes how future analysis
-reasons about this store, and close with a standing-reminders checklist.
+fit the business. The one constant: lead with whatever most changes how Copilot reasons
+about this store, and close with a standing-reminders checklist.
 
 Replace every `[bracketed]` prompt with real content. Anything you can't confirm stays
 as `[CONFIRM: what you need]`.
@@ -18,7 +16,7 @@ parsing the prose — keep it verbatim in form.
 ```markdown
 <!-- noibu-business-context: uuid=<domain-uuid> domain=<domain-name> generated=<YYYY-MM-DD> -->
 
-# [Company] — Business Context
+# [Company] — Business context
 
 [One paragraph: what this file is and why to read it before answering anything about
 the business. Name the single most important section to read first.]
@@ -62,9 +60,9 @@ gotchas to capture if they apply:]
   tier-price comparisons, multi-session B2B buying).
 - B2B vs. B2C signal-detection hierarchy (logged-in account, AOV bands, product mix,
   etc.) and an instruction to produce segmented views, not a single site-wide number.
-- Any worked example of a past wrong conclusion, so future analysis doesn't repeat it.
+- Any worked example of a past wrong conclusion, so Copilot doesn't repeat it.
 
-[For each rule, explain the WHY so future analysis can generalize.]
+[For each rule, explain the WHY so Copilot can generalize.]
 
 ---
 
@@ -102,7 +100,7 @@ as hypotheses to validate, not confirmed facts.]
 - **Checkout:** [native or customized — note risk level].
 - **Payments:** [processor], [vaulting provider].
 - **Key apps:** [reviews, search, loyalty, subscriptions, analytics, CDP].
-- **Code access:** [is the code repo connected here — e.g. a GitHub connector?].
+- **Code access:** [is the repo connected to Microsoft 365 Copilot? GitHub or Azure DevOps connector?].
 
 ### Change-risk rule
 
