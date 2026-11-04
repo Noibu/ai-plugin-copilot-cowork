@@ -72,7 +72,7 @@ The selected label (or a typed reply) is the person's next message. Match it, or
 - Goal: a label or typed reply naming a catalogue metric is that goal; "everything", "all", "not sure" is "All goals". A typed reply describing a change ("test a sticky add to cart button") is the "Create a specific test" route with the change already described.
 - Pages: "product", "collection", "homepage", or a URL / "specific page".
 - Card 4b, split checkout and blast radius test picks: `scripts/ab_flow.py match-test` — the full title (case-insensitive), then a unique label, then the rank ("test 2", "#2", "the first one"). A reply that matches zero or several tests (two runs with the same title, a partial word) is re-asked with one `AskUserQuestion` listing only those candidates; never take the first match. A described change is "Create a specific test"; "something new" or another goal is "Look for new opportunities".
-- No answer, or one that matches nothing: don't pick. One short line listing the labels, then wait.
+- No answer, skipped, or one that matches nothing: don't pick. Cowork won't show the question again, so send one short line listing the labels and "say **continue** to see this question again", then wait. On *continue* (or "options", "what now"), ask the same question again.
 
 ## 8. Option overflow
 

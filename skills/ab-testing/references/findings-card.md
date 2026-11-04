@@ -14,7 +14,7 @@ Each test's report file is its full record (previews where they exist, evidence,
 | Per-test card | `Create A/B test N` (description: "Create this test as a draft in Noibu; nothing goes live") · `Back to the list` |
 | Implement card | `Automate the implementation (Recommended)` (description: "Write the variation code; you choose code only, a PR or an end-to-end test") · `Done for now` |
 
-If `AskUserQuestion` is unavailable or fails, end with one line: "Reply with one: <labels>". A choice or a typed reply is the person's own request.
+If `AskUserQuestion` is unavailable or fails, end with one line: "Reply with one: <labels>". If it is skipped or left unanswered, use the one-line recovery from the [UX guidelines](ux-guidelines.md) section 3 ("Say **next steps** anytime…") and ask it again when the person says *next steps*. A choice or a typed reply is the person's own request.
 
 
 ## How they are built
@@ -45,7 +45,7 @@ A reply arrives as the person's next message. It is their decision, made on a ca
 3. Check every metric code in `createInput` against the tool's current schema enums (`successMetric.metric`, `secondaryMetrics[].metric`, max items). A code the schema no longer accepts is a reason to stop and say which, never to substitute.
 4. Call `noibu_create_ab_test` with the test's `createInput` exactly as the file has it, plus `domainId`, `rationale` ("User replied Create A/B test N on the findings card for \"<title>\""), `skill: "ab-testing"` and `skillStep: "create-test"`. This creates a DRAFT only; it never starts, updates or deletes a test. The person's reply is the authorization; any native approval prompt still applies and a denial creates nothing.
 5. Take the numeric id and key from the result (when the result lacks the id, look up the exact title or key in `noibu_list_ab_tests`; never use the rank, never create a second test to get a link). On a timeout, reconcile with the roster before retrying or claiming anything.
-6. `build_page.py page.json implement <rank> <id> <key> created|existing`, then render `implement-report-<rank>.json`. Output nothing after the card: it carries the id, the flag key, the reminder and the console link.
+6. `build_page.py page.json implement <rank> <id> <key> created|existing`, then render `implement-report-<rank>.json`, then its next-step question. Nothing else: the card carries the id, the flag key, the reminder and the console link.
 
 `scripts/ab_flow.py plan-create` returns the same decision (create / adopt existing draft / stop) deterministically from the file, the roster and the enums. This is the one way the finder half's chat ever creates a test: a reply is a request, and the rule that the run itself never creates one still holds.
 

@@ -10,7 +10,7 @@ Every Noibu skill follows these rules for what the user sees. Where a skill's ow
 
 1. **Summary:** 2–3 sentences of prose. Lead with the most important movement, use real numbers with their window, mix wins and concerns. Don't list every KPI.
 2. **Card:** exactly one `render_ui` call, built by this skill's card runner from a `noibu.presentation/1` report (see `references/card-quickstart.md`). Never hand-write card JSON.
-3. **Next step:** one `AskUserQuestion` (section 3). It is the last thing in the turn. Write nothing after it.
+3. **Next step:** one `AskUserQuestion` (section 3). It is the last thing in the turn. Write nothing after it, unless it is skipped (section 3).
 
 Never batch steps 2 and 3 together. The question's options come from the findings in the card. No preamble ("Let me look…"), no recap after the card.
 
@@ -55,11 +55,13 @@ Standard options:
 
 If `AskUserQuestion` is unavailable or fails, end with one line: "Reply with one: <label> · <label> · …". This is the only place "Reply with" is allowed.
 
+**If the question is skipped, dismissed or left unanswered** (the user skips it, closes it, or replies with something that matches no option), Cowork does not show it again. Reply with one line and stop: "Say **next steps** anytime to see these options again, or type one: <label> · <label> · …". When the user later says "next steps", "options", "what now" or similar, ask the same question again for the most recent card: same report, same options. A typed label (e.g. "Investigate 2") always works, with or without the question showing.
+
 A chosen option or typed reply applies to the report shown in that card: same workflow, domain, window and evidence. If it's unclear which report or finding is meant, ask.
 
 ## 4. Choices during a flow
 
-Every pick-one moment (store, goal, destination, recipients) is one `AskUserQuestion` with the same rules as section 3, one decision per question.
+Every pick-one moment (store, goal, destination, recipients) is one `AskUserQuestion` with the same rules as section 3, one decision per question. A skipped or unanswered one gets the same one-line recovery: the options as text and "say **continue** to see this question again".
 
 **Setting up a schedule** (the only time a schedule asks anything):
 
@@ -98,6 +100,6 @@ Every pick-one moment (store, goal, destination, recipients) is one `AskUserQues
 - Dashboards or Cowork apps as an output or an offer.
 - More than one card in a response.
 - A card button that isn't a verified Noibu console link.
-- Prose after the next-step question.
+- Prose after the next-step question, except the one-line recovery when it is skipped.
 - Raw HTML or card JSON pasted into chat.
 - Describing a button, link or file that doesn't exist.

@@ -143,7 +143,7 @@ One call, nothing else: `noibu_get_domain` (fallback `noibu_list_domains`); keep
 
 1. **Collect the tests this chat already has** (only on the way to card 4b): one `candidates.json` per finder run in this chat's working folders. A pasted link gets one line saying that report's tests aren't available here and a fresh run will produce a new set; no fetch.
    - **Pass the goal through.** When the finder runs and the request already says what to improve ("lift add to cart rate"), state that goal in the finder's terms so it skips its goal question. When the request names no goal, let the finder ask.
-   - **After the finder, the findings card is the next step.** The finder ends with its findings card and nothing after it, then waits. Do not ask card 4b after it. Answer whichever reply comes (see "When a reply wakes this chat").
+   - **After the finder, the findings card is the next step.** The finder ends with its findings card and its next-step question, then waits. Do not ask card 4b after it. Answer whichever reply comes (see "When a reply wakes this chat").
 2. **Load `candidates.json`** for each run. Accept it only if `schema` is `noibu.ab-candidates/3` (or a legacy `/2`) and `domainId` matches; `scripts/validate_candidates.py` decides. No age check. If a run's `goal` differs from the request's goal, leave its tests off 4b unless that empties it (then show them with their goal named). A missing or failing file: say so in one line only if 4b ends up empty.
 3. **De-duplicate before card 4b**, starting from the file:
    - `killed`: never re-offer those ideas.

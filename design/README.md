@@ -46,7 +46,7 @@ The goal is the same experience people get from the Noibu plugin in Claude, rebu
 ```
 1. Summary   2–3 sentences of prose. Lead with the most important movement, use real numbers, mix wins and concerns.
 2. Card      One render_ui call: the report card (section 4).
-3. Next step One AskUserQuestion: "Where next?" (section 5). Nothing is written after it.
+3. Next step One AskUserQuestion: "Where next?" (section 5). Nothing is written after it, unless it is skipped (section 5).
 ```
 
 - These three steps are **sequential, never batched**. The question's options come from the findings in the card, so render the card first, then ask.
@@ -102,6 +102,7 @@ People shouldn't have to click anything once a schedule exists. Questions happen
 - If Noibu isn't connected: one line asking the user to finish the Connect prompt, then stop. No partial numbers.
 - If the user says a button or link didn't open: reply with the same destination as a plain URL in one sentence. Don't re-render the card.
 - If the clickable question didn't appear (the user asks what to do next, or the tool errored): send the "Reply with one: …" fallback line (section 5).
+- If the question was skipped or left unanswered: the one-line recovery from section 5 ("Say **next steps** anytime…"), and ask it again when the user says *next steps*.
 
 ---
 
@@ -237,7 +238,7 @@ The question covers everything that happens **inside Cowork**; the card's link b
 - 2–5 options. Labels ≤5 words, verb-first; each with a one-line description that says what will happen.
 - Most useful option first; add `(Recommended)` only when one is clearly best.
 - No catch-all "Other" option: the user can always type, and typed replies are matched like clicks.
-- Nothing is written after the question. The question ends the turn.
+- Nothing is written after the question. The question ends the turn, unless it is skipped (below).
 - More than 5 possibilities: show the top ones and name the rest in the question text ("…or type *Investigate 4*").
 
 **Standard option sets**
@@ -251,6 +252,12 @@ The question covers everything that happens **inside Cowork**; the card's link b
 | Answer card | Only if a natural drill-down exists (e.g. `Break down by device`) |
 
 **Fallback:** if AskUserQuestion is unavailable or fails, end with one line: `Reply with one: Investigate 1 · Investigate 2 · Download as PDF`. This is the only place "Reply with" text is allowed.
+
+**Skipped or unanswered questions:** once the user skips or closes the question, or replies with something that matches no option, Cowork does not show it again, so the flow would stall. Recover in one line, then stop:
+
+> Say **next steps** anytime to see these options again, or type one: Investigate 1 · Download as PDF · Schedule this report.
+
+When the user later says "next steps", "options", "what now" or similar, ask the same question again for the most recent card (same report, same options). A typed label always works, with or without the question showing. Choice questions inside a flow (goal, destination, schedule setup) recover the same way, with "say **continue** to see this question again".
 
 **Reading the answer:** map the chosen label (or typed paraphrase) to the action for **the report shown in that card**: same workflow, domain, window and evidence. If it's ambiguous which report or finding is meant, ask; never act on a different report.
 
@@ -342,7 +349,7 @@ Keep this table current: it's what the rules rest on. Whoever first sees an ⚠�
 
 - [ ] `SKILL.md` follows `design/skill-template/SKILL.md` and its Output section points to `references/ux-guidelines.md`.
 - [ ] `references/ux-guidelines.md` is a synced copy (`python design/sync.py --check` passes).
-- [ ] Report turns: summary → one card → next-step question. No preamble, no recap, nothing after the question.
+- [ ] Report turns: summary → one card → next-step question. No preamble, no recap, nothing after the question except the skipped-question line (section 5).
 - [ ] The skill writes `noibu.presentation/1` data; it never hand-writes card JSON.
 - [ ] Every number in the card has a window and a denominator; unmeasured values are null.
 - [ ] Findings are ≤3, ranked by sessions affected, each with one evidence sentence and a Next check.

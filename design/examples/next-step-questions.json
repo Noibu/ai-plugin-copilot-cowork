@@ -96,5 +96,6 @@
    }
   ]
  },
- "fallback-text": "Reply with one: Investigate 1 · Investigate 2 · Download as PDF · Schedule this report"
+ "fallback-text": "Reply with one: Investigate 1 · Investigate 2 · Download as PDF · Schedule this report",
+ "skipped-recovery": "Say **next steps** anytime to see these options again, or type one: Investigate 1 · Investigate 2 · Download as PDF · Schedule this report"
 }
