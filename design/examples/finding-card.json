@@ -1,0 +1,215 @@
+{
+ "type": "AdaptiveCard",
+ "version": "1.6",
+ "fallbackText": "Payment submission fell on mobile: 22.5% vs 25.0%.",
+ "body": [
+  {
+   "type": "Container",
+   "style": "default",
+   "showBorder": true,
+   "roundedCorners": true,
+   "spacing": "None",
+   "items": [
+    {
+     "type": "Container",
+     "style": "emphasis",
+     "bleed": true,
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "FINDING · Device gap",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "~1,900 sessions",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Container",
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Payment submission fell on mobile",
+         "weight": "Bolder",
+         "size": "Medium"
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "example.com · Oct 3 – Nov 2 (UTC)",
+         "size": "Small",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "None"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "EVIDENCE",
+         "size": "Small",
+         "weight": "Bolder",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Medium"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "• Mobile: 22.5% of cart sessions submitted payment vs 25.0% previously."
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "• Desktop held flat at 31.0%."
+        }
+       ],
+       "spacing": "None"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "• 412 mobile sessions hit a TypeError in payment.js on the payment step."
+        }
+       ],
+       "spacing": "None"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "LIKELY CAUSE · HYPOTHESIS",
+         "size": "Small",
+         "weight": "Bolder",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Medium"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "The payment form script fails on iOS Safari before the card field renders."
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "NEXT CHECK",
+         "size": "Small",
+         "weight": "Bolder",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Medium"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Reproduce on iOS Safari 17; confirm the error stops the card field loading."
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "VERIFY",
+         "size": "Small",
+         "weight": "Bolder",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Medium"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "After the fix, mobile payment submission should return to ~25% within 7 days."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "actions": [
+  {
+   "type": "Action.OpenUrl",
+   "title": "Open issue in Noibu",
+   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues/11111111-2222-4333-8444-555555555555"
+  },
+  {
+   "type": "Action.OpenUrl",
+   "title": "View sessions in Noibu",
+   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+  }
+ ]
+}

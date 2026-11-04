@@ -1,0 +1,100 @@
+{
+ "_note": "AskUserQuestion payloads that follow each card. Labels ≤5 words, header ≤12 chars, 2–5 options, nothing written after the question.",
+ "after-report": {
+  "questions": [
+   {
+    "header": "Next step",
+    "question": "What next for example.com's checkout?",
+    "multiSelect": false,
+    "options": [
+     {
+      "label": "Investigate #1",
+      "description": "Payment submission fell on mobile: find the cause and the fix"
+     },
+     {
+      "label": "Investigate #2",
+      "description": "More shoppers leave at delivery options"
+     },
+     {
+      "label": "Download as PDF",
+      "description": "Save this report to your Cowork output folder"
+     },
+     {
+      "label": "Schedule this report",
+      "description": "Get a fresh version weekly, by email or Teams"
+     }
+    ]
+   }
+  ]
+ },
+ "after-report-no-findings": {
+  "questions": [
+   {
+    "header": "Next step",
+    "question": "Nothing moved enough to flag. What next for example.com?",
+    "multiSelect": false,
+    "options": [
+     {
+      "label": "Compare by device",
+      "description": "Split the funnel into mobile and desktop"
+     },
+     {
+      "label": "Change the date range",
+      "description": "Look at a different window"
+     },
+     {
+      "label": "Schedule this report",
+      "description": "Get a fresh version weekly, by email or Teams"
+     }
+    ]
+   }
+  ]
+ },
+ "after-finding": {
+  "questions": [
+   {
+    "header": "Next step",
+    "question": "How do you want to handle the mobile payment drop?",
+    "multiSelect": false,
+    "options": [
+     {
+      "label": "Get the fix",
+      "description": "Read the code involved and propose a change"
+     },
+     {
+      "label": "Open a ticket",
+      "description": "Create it in Linear, Jira or GitHub Issues; I'll ask which"
+     },
+     {
+      "label": "Draft a pull request",
+      "description": "Open a draft PR in your connected repository for review"
+     },
+     {
+      "label": "Back to the report",
+      "description": "Pick another priority from the checkout report"
+     }
+    ]
+   }
+  ]
+ },
+ "after-result": {
+  "questions": [
+   {
+    "header": "Next step",
+    "question": "The draft is in Noibu. Build the variation now?",
+    "multiSelect": false,
+    "options": [
+     {
+      "label": "Automate the implementation",
+      "description": "Write the variation code; you choose code only, a PR or an end-to-end test"
+     },
+     {
+      "label": "Done for now",
+      "description": "Keep the draft and come back to it later"
+     }
+    ]
+   }
+  ]
+ },
+ "fallback-text": "Reply with one: Investigate 1 · Investigate 2 · Download as PDF · Schedule this report"
+}

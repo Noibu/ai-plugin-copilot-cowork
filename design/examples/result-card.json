@@ -1,0 +1,123 @@
+{
+ "type": "AdaptiveCard",
+ "version": "1.6",
+ "fallbackText": "A/B test draft created: Sticky add to cart on mobile product pages.",
+ "body": [
+  {
+   "type": "Container",
+   "style": "default",
+   "showBorder": true,
+   "roundedCorners": true,
+   "spacing": "None",
+   "items": [
+    {
+     "type": "Container",
+     "style": "emphasis",
+     "bleed": true,
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "CREATED IN NOIBU",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "example.com",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Container",
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Sticky add to cart on mobile product pages",
+         "weight": "Bolder",
+         "size": "Medium"
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "FactSet",
+       "facts": [
+        {
+         "title": "Status",
+         "value": "Draft (not started)"
+        },
+        {
+         "title": "Test ID",
+         "value": "4821"
+        },
+        {
+         "title": "Flag key",
+         "value": "sticky-atc-mobile"
+        },
+        {
+         "title": "Goal",
+         "value": "Add to cart rate"
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "The variation code must be live before the test starts.",
+         "size": "Small",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Small"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "actions": [
+  {
+   "type": "Action.OpenUrl",
+   "title": "Open draft in Noibu",
+   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/ab-tests/4821"
+  }
+ ]
+}

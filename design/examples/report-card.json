@@ -1,0 +1,1082 @@
+{
+ "type": "AdaptiveCard",
+ "version": "1.6",
+ "fallbackText": "Checkout completion fell 5.3 pp to 41.0%; payment submission on mobile is the biggest drop.",
+ "body": [
+  {
+   "type": "Container",
+   "style": "default",
+   "showBorder": true,
+   "roundedCorners": true,
+   "spacing": "None",
+   "items": [
+    {
+     "type": "Container",
+     "style": "emphasis",
+     "bleed": true,
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "OVERVIEW",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "example.com · Oct 3 – Nov 2 (UTC)",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Container",
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "53,212 sessions · 7.5% added to cart",
+         "size": "Small",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Checkout completion",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "41.0%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↓ 5.3 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Warning"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Conversion",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "1.54%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↓ 0.12 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Warning"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "AOV · USD",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "$86.40",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↑ 2.1%",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Good"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        }
+       ],
+       "spacing": "Medium"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "PURCHASE FUNNEL",
+         "size": "Small",
+         "weight": "Bolder",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Large"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "% of sessions that added to cart; each period uses its own cart base.",
+         "size": "Small",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "None"
+      },
+      {
+       "type": "Chart.VerticalBar.Grouped",
+       "title": "% of sessions that added to cart",
+       "yAxisTitle": "% of sessions that added to cart",
+       "yMin": 0,
+       "yMax": 100,
+       "data": [
+        {
+         "legend": "Oct 3 – Nov 2",
+         "color": "sequential7",
+         "values": [
+          {
+           "x": "Added to cart",
+           "y": 100
+          },
+          {
+           "x": "Started checkout",
+           "y": 50.0
+          },
+          {
+           "x": "Payment submitted",
+           "y": 22.5
+          },
+          {
+           "x": "Completed order",
+           "y": 20.5
+          }
+         ]
+        },
+        {
+         "legend": "Previous 30 days",
+         "color": "sequential3",
+         "values": [
+          {
+           "x": "Added to cart",
+           "y": 100
+          },
+          {
+           "x": "Started checkout",
+           "y": 50.0
+          },
+          {
+           "x": "Payment submitted",
+           "y": 25.0
+          },
+          {
+           "x": "Completed order",
+           "y": 23.2
+          }
+         ]
+        }
+       ],
+       "fallback": {
+        "type": "RichTextBlock",
+        "inlines": [
+         {
+          "type": "TextRun",
+          "text": "Funnel: 4,000 added to cart → 50.0% started checkout → 22.5% submitted payment → 20.5% completed (previous: 50.0%, 25.0%, 23.2%).",
+          "size": "Small",
+          "isSubtle": true
+         }
+        ]
+       }
+      },
+      {
+       "type": "Accordion",
+       "spacing": "Small",
+       "pages": [
+        {
+         "type": "AccordionPage",
+         "headerTitle": "Show exact counts",
+         "headerSize": "Small",
+         "items": [
+          {
+           "type": "ColumnSet",
+           "columns": [
+            {
+             "type": "Column",
+             "width": 2,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "STAGE",
+                 "size": "Small",
+                 "weight": "Bolder",
+                 "isSubtle": true
+                }
+               ],
+               "horizontalAlignment": "Left"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "CURRENT",
+                 "size": "Small",
+                 "weight": "Bolder",
+                 "isSubtle": true
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "PREVIOUS",
+                 "size": "Small",
+                 "weight": "Bolder",
+                 "isSubtle": true
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            }
+           ],
+           "spacing": "Medium"
+          },
+          {
+           "type": "ColumnSet",
+           "columns": [
+            {
+             "type": "Column",
+             "width": 2,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "Added to cart"
+                }
+               ],
+               "horizontalAlignment": "Left"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "4,000"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "3,800"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            }
+           ],
+           "separator": true,
+           "spacing": "Small"
+          },
+          {
+           "type": "ColumnSet",
+           "columns": [
+            {
+             "type": "Column",
+             "width": 2,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "Started checkout"
+                }
+               ],
+               "horizontalAlignment": "Left"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "2,000"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "1,900"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            }
+           ],
+           "separator": true,
+           "spacing": "Small"
+          },
+          {
+           "type": "ColumnSet",
+           "columns": [
+            {
+             "type": "Column",
+             "width": 2,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "Payment submitted"
+                }
+               ],
+               "horizontalAlignment": "Left"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "900"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "950"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            }
+           ],
+           "separator": true,
+           "spacing": "Small"
+          },
+          {
+           "type": "ColumnSet",
+           "columns": [
+            {
+             "type": "Column",
+             "width": 2,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "Completed order"
+                }
+               ],
+               "horizontalAlignment": "Left"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "820"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            },
+            {
+             "type": "Column",
+             "width": 1,
+             "items": [
+              {
+               "type": "RichTextBlock",
+               "inlines": [
+                {
+                 "type": "TextRun",
+                 "text": "880"
+                }
+               ],
+               "horizontalAlignment": "Right"
+              }
+             ]
+            }
+           ],
+           "separator": true,
+           "spacing": "Small"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "PAYMENT METHODS",
+         "size": "Small",
+         "weight": "Bolder",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Large"
+      },
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Card",
+             "size": "Small"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "ProgressBar",
+           "value": 100
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 1,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "512",
+             "size": "Small"
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ]
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "PayPal",
+             "size": "Small"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "ProgressBar",
+           "value": 41
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 1,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "210",
+             "size": "Small"
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ]
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Shop Pay",
+             "size": "Small"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "ProgressBar",
+           "value": 19
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 1,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "98",
+             "size": "Small"
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ]
+        }
+       ],
+       "spacing": "Small"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "Container",
+   "style": "default",
+   "showBorder": true,
+   "roundedCorners": true,
+   "spacing": "Medium",
+   "items": [
+    {
+     "type": "Container",
+     "style": "emphasis",
+     "bleed": true,
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "PRIORITY 1 · Device gap",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "~1,900 sessions",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Container",
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Payment submission fell on mobile",
+         "weight": "Bolder"
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "22.5% of mobile cart sessions submitted payment vs 25.0% in the previous 30 days."
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "Accordion",
+       "spacing": "Small",
+       "pages": [
+        {
+         "type": "AccordionPage",
+         "headerTitle": "Next check",
+         "headerSize": "Small",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Compare payment-step errors by device for Oct 3 – Nov 2, then re-check the mobile rate a week after any fix."
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Open in Noibu ↗",
+         "size": "Small",
+         "color": "Accent",
+         "selectAction": {
+          "type": "Action.OpenUrl",
+          "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues"
+         }
+        }
+       ],
+       "spacing": "Small"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "Container",
+   "style": "default",
+   "showBorder": true,
+   "roundedCorners": true,
+   "spacing": "Medium",
+   "items": [
+    {
+     "type": "Container",
+     "style": "emphasis",
+     "bleed": true,
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "PRIORITY 2 · Shipping step",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "~640 sessions",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Container",
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "More shoppers leave at delivery options",
+         "weight": "Bolder"
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "31% of checkout starts left on the delivery step vs 26% previously."
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "Accordion",
+       "spacing": "Small",
+       "pages": [
+        {
+         "type": "AccordionPage",
+         "headerTitle": "Next check",
+         "headerSize": "Small",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Watch five replays that exit on delivery options; check whether a rate failed to load."
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Open in Noibu ↗",
+         "size": "Small",
+         "color": "Accent",
+         "selectAction": {
+          "type": "Action.OpenUrl",
+          "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+         }
+        }
+       ],
+       "spacing": "Small"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "Accordion",
+   "spacing": "Small",
+   "pages": [
+    {
+     "type": "AccordionPage",
+     "headerTitle": "Evidence & coverage",
+     "headerSize": "Small",
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "• Distinct sessions per stage; express checkout can skip stages."
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "• Payment methods count completed orders only."
+        }
+       ]
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "• Completion = completed orders ÷ started checkouts."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "RichTextBlock",
+   "inlines": [
+    {
+     "type": "TextRun",
+     "text": "Generated Nov 2, 9:00 pm (UTC) · Last 30 days vs the previous 30 days",
+     "size": "Small",
+     "isSubtle": true
+    }
+   ],
+   "spacing": "Medium"
+  }
+ ],
+ "actions": [
+  {
+   "type": "Action.OpenUrl",
+   "title": "View issues in Noibu",
+   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues"
+  },
+  {
+   "type": "Action.OpenUrl",
+   "title": "View sessions in Noibu",
+   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+  }
+ ]
+}
