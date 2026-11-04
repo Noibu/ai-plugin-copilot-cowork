@@ -198,18 +198,58 @@
      ]
     }
    ]
-  }
- ],
- "actions": [
-  {
-   "type": "Action.OpenUrl",
-   "title": "Open issue in Noibu",
-   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues/11111111-2222-4333-8444-555555555555"
   },
   {
-   "type": "Action.OpenUrl",
-   "title": "View sessions in Noibu",
-   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+   "type": "ColumnSet",
+   "columns": [
+    {
+     "type": "Column",
+     "width": "auto",
+     "style": "emphasis",
+     "selectAction": {
+      "type": "Action.OpenUrl",
+      "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues/11111111-2222-4333-8444-555555555555"
+     },
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Open issue in Noibu ↗",
+         "size": "Small",
+         "weight": "Bolder",
+         "color": "Accent"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Column",
+     "width": "auto",
+     "style": "emphasis",
+     "selectAction": {
+      "type": "Action.OpenUrl",
+      "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+     },
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "View sessions in Noibu ↗",
+         "size": "Small",
+         "weight": "Bolder",
+         "color": "Accent"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "spacing": "Medium"
   }
  ]
 }

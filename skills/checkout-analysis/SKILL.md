@@ -1,6 +1,6 @@
 ---
 name: checkout-analysis
-description: Analyze Noibu checkout performance, funnel drop-off, payment and delivery mix, abandonment, and technical issues with an interactive investigation board, dashboard, export, and scheduling actions.
+description: Analyze Noibu checkout performance, funnel drop-off, payment and delivery mix, abandonment, and technical issues with a report card and investigation, export and scheduling follow-ups.
 ---
 
 # Checkout performance
@@ -17,7 +17,7 @@ description: Analyze Noibu checkout performance, funnel drop-off, payment and de
 
 Use the packaged [report display](references/card-quickstart.md); focused answers may remain prose.
 
-- Put one or two measured conclusions inside the report card; successful in-chat reports are CARD ONLY, without preamble or post-card recap.
+- Lead with one or two measured conclusions as the prose summary before the card; the card doesn't repeat them.
 - Overview: compact population/cart reach, percentage-led cart → checkout → payment → completion funnel: Added to cart shows its raw count and is the 100% baseline; later stages show their share of that SAME cart population (not previous stage), completion/device/value highlights, supported abandonment rows and populated payment/delivery bars.
 - Show exact windows, timezone, denominators, currency and express-checkout/coverage limits. Each period uses its OWN measured positive cart baseline for bars and rates; derive signed pp deltas from those rates, not counts. Show exact counts must expand actual current/prior session counts for EVERY stage in full AND compact. Missing/zero bases or unmeasured stages are Not measured, never invented zero rates. Keep checkout completion separate: completed / started checkout. See [funnel contract](../querying-noibu-data/references/funnel-visualization.md). Avoid duplicating KPIs as highlights.
 - Put abandonment tables at `placement: "overview"`; supporting data is expandable. Label bounded samples and never extrapolate sample cart values to all abandoned sessions.
@@ -28,22 +28,20 @@ Use the packaged [report display](references/card-quickstart.md); focused answer
 
 ## Follow-ups
 
-- Preserve the tested light dashboard, the saved-dashboard action (see the runtime guide) beneath dashboard content, investigation cards, and separate final save/download/scheduling controls.
+- Keep the tested light layout: overview, numbered investigation cards, Evidence & coverage. Next steps (Investigate, Download as PDF, Schedule this report) come from the question after the card.
 - Investigate reuses the selected evidence; technical findings use the [repository/CI handoff](../tech-diagnosis/references/github-handoff.md), not ordinary UX/operations analysis.
-- Saved dashboards follow [saved dashboard](../querying-noibu-data/references/saved-dashboard.md), including the mandatory refresh cadence/time/timezone/notification question (manual or decline is allowed).
 - Scheduling follows [connected delivery](../querying-noibu-data/references/scheduling-delivery.md), with fresh rolling comparisons; exports reuse evidence unless refresh is requested.
 - Issue/status changes require an explicit request, exact issue and supported status. Analysis/rendering authorizes no writes.
 
-## In-chat report completion
+## Output
 
-Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question. The card carries Noibu link buttons only; investigate, download and schedule are offered by the question. No dashboards. In a scheduled run, ask nothing.
 
-Scheduled Email always requires chat confirmation of the exact final recipient email list EVEN IF addresses were supplied; no schedule/send before that gate. Never infer the signed-in user from Email selected. See shared scheduling-delivery.md. Any private app save/build must ask refresh cadence, local time/IANA timezone and notification (manual/decline allowed), verify a same-app unattended DATA writer, and only then create/update a confirmed refresh schedule; no reminder substitute or unverified refresh-success claim.
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response.
+- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
+- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
+- Scheduled runs: preset "Weekly · Mon 9 am · Summary"; last 7 days vs the previous 7.
 
 ## Browser prerequisite, only for a requested browser step
 
 Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
-
-## Local report completion contract (21.1.13)
-
-Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

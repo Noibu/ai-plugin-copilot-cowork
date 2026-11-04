@@ -1,10 +1,21 @@
 # The chat cards: the findings card, the per-test report card and the implement card
 
-Each test's report file is its full record (previews where they exist, evidence, setup, dev notes). The person reading the chat should not have a report pushed at them the moment the finder finishes, and should not need to open one to act either. Three Adaptive Cards cover that, all rendered by this skill's local runner (`references/card-quickstart.md`): **one `render_ui` per response**, the card is the message, nothing before or after it.
+Each test's report file is its full record (previews where they exist, evidence, setup, dev notes). The person reading the chat should not have a report pushed at them the moment the finder finishes, and should not need to open one to act either. Three Adaptive Cards cover that, all rendered by this skill's local runner (`references/card-quickstart.md`): **one `render_ui` per response**, followed by one next-step question (below). Cowork cards can't send button clicks, so the question carries the actions.
 
-- **The findings card** is the first and only thing in the chat once the finder is done: an "A/B test opportunities" header (domain · window, the goal, and — only when no browser read the site — a one-line "Live site not checked" notice), then one block per test under "Test N": a "What to change" label over the test's title and one sentence on the change, a "Why this test" label over the test's `why`, and **Reply with: Preview test N · Create A/B test N**. Nothing else from a report is repeated: the full evidence, targeting, metric, volume and overlap are on the per-test card and the report file.
-- **The per-test report card** appears after a "Preview test N" reply: the test's title and surface, what to change, why, before and after (whether screenshots exist and why not), up to three evidence lines with their numbers, the setup exactly as Noibu will receive it, fix first, overlap, then folded "Dev notes" (with console follow-ups), "Outside your goal" and "Run notes", the report file's name, and **Reply with: Create A/B test N**.
-- **The implement card** appears only after a "Create A/B test N" reply produced (or found) a draft: "Created in Noibu · Test N" (or "Already in Noibu"), the title, "Draft <id>" as a link to the test in the Noibu console, the flag key, the reminder that the variation code must be live before it starts, and **Reply with: Automate the implementation N**. Creating and building are two steps in order, so the build is offered once the draft exists rather than as a third hint on the findings card.
+- **The findings card** ends the finder run, after one or two sentences naming the top test and its key number: an "A/B test opportunities" header (domain · window, the goal, and — only when no browser read the site — a one-line "Live site not checked" notice), then one block per test under "Test N": a "What to change" label over the test's title and one sentence on the change, a "Why this test" label over the test's `why`. Nothing else from a report is repeated: the full evidence, targeting, metric, volume and overlap are on the per-test card and the report file.
+- **The per-test report card** appears after a "Preview test N" reply: the test's title and surface, what to change, why, before and after (whether screenshots exist and why not), up to three evidence lines with their numbers, the setup exactly as Noibu will receive it, fix first, overlap, then folded "Dev notes" (with console follow-ups), "Outside your goal" and "Run notes", and the report file's name.
+- **The implement card** appears only after a "Create A/B test N" reply produced (or found) a draft: "Created in Noibu · Test N" (or "Already in Noibu"), the title, "Draft <id>" as a link to the test in the Noibu console, the flag key, the reminder that the variation code must be live before it starts, and an **Open draft in Noibu** link button. Creating and building are two steps in order, so the build is offered once the draft exists rather than on the findings card.
+
+**Next-step questions** (one `AskUserQuestion` right after each card, header "A/B test"; nothing after it; [UX guidelines](ux-guidelines.md) section 3):
+
+| After | Options |
+| --- | --- |
+| Findings card | `Preview test N` for each test, up to four (description: the test title), then `Create A/B test 1` (description: "Create the top test as a draft in Noibu"). Name any others in the question text ("…or type *Create A/B test 2*") |
+| Per-test card | `Create A/B test N` (description: "Create this test as a draft in Noibu; nothing goes live") · `Back to the list` |
+| Implement card | `Automate the implementation (Recommended)` (description: "Write the variation code; you choose code only, a PR or an end-to-end test") · `Done for now` |
+
+If `AskUserQuestion` is unavailable or fails, end with one line: "Reply with one: <labels>". A choice or a typed reply is the person's own request.
+
 
 ## How they are built
 
@@ -16,9 +27,9 @@ Render each with RunScript and the local runner (`references/card-quickstart.md`
 
 The runner validates the candidates (`validate_candidates.py`), builds the card, preselects the compact variant only when the full card would exceed 24 KB, makes the single `render_ui` call and returns `status`, `response_policy` and `abReplyMap` (rank → title → createInputHash). Keep `abReplyMap` from the findings card: it binds a later "Create A/B test N" to exactly what was shown.
 
-- `status: rendered`, `response_policy: CARD_ONLY`: stop. No text.
-- `status: unknown`: delivery is uncertain, not failed: no replay, no second render; one short neutral sentence at most.
-- Explicit failure (`allow_text_fallback: true`): say in one line what failed. For the findings card only, then give each test as one line ("Test N: <title> — <what>") with "Reply with: Preview test N · Create A/B test N", because without the card the person has no other way to act. Never a recap beyond that.
+- `status: rendered`, `response_policy: CARD_THEN_NEXT_STEP`: the card's next-step question, then nothing.
+- `status: unknown`: delivery is uncertain, not failed: no replay, no second render; one short neutral sentence at most, then the next-step question.
+- Explicit failure (`allow_text_fallback: true`): say in one line what failed. For the findings card only, then give each test as one line ("Test N: <title> — <what>") then the next-step question, because without the card the person has no other way to act. Never a recap beyond that.
 
 Do not render a card from memory after a context compaction; rebuild it from `page.json` / `candidates.json` first.
 
@@ -26,7 +37,7 @@ Do not render a card from memory after a context compaction; rebuild it from `pa
 
 A reply arrives as the person's next message. It is their decision, made on a card they read, so act on it directly, without re-asking, re-ranking or re-validating the analysis.
 
-**Preview test N** (or "Learn why and preview variation N", "open test N"). Find the test by rank (or title). In one response: render `test-report-<N>.json` with the runner (the response's one `render_ui`), and publish `<domain-short>-test-<N>.html` to the user's output files (`references/output-format.md`, "Delivering a report file"). Then end the turn with no text: the card is the answer. Only when the render or the publish failed, say in one line what failed. Another "Preview" reply for the same test renders the card again and does not republish an unchanged file.
+**Preview test N** (or "Learn why and preview variation N", "open test N"). Find the test by rank (or title). In one response: render `test-report-<N>.json` with the runner (the response's one `render_ui`), and publish `<domain-short>-test-<N>.html` to the user's output files (`references/output-format.md`, "Delivering a report file"). Then the per-test card's next-step question, and nothing after it. Only when the render or the publish failed, say in one line what failed. Another "Preview" reply for the same test renders the card again and does not republish an unchanged file.
 
 **Create A/B test N** (or "create test N in Noibu"). Then, in order:
 1. Find the test in this run's `candidates.json` by `title` (exact, then case-insensitive), falling back to rank; validate the file (`validate_candidates.py`) and compare the test's createInput hash with the `abReplyMap` entry the findings card returned. A mismatch means the file changed since the card was shown: rebuild and show the card again; create nothing.

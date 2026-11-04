@@ -142,8 +142,8 @@ Order, top to bottom. Omit any section that has no data; never pad.
 | 5 | Overview table(s) | Up to 2 tables, 5-row preview each; the rest behind **Show more** |
 | 6 | Priorities | Up to 3 numbered findings, ranked by sessions affected (section 4.2 compact form) |
 | 7 | Evidence & coverage | Collapsed accordion: caveats, definitions, exact counts. Never removed |
-| 8 | Footer | Small, subtle: `Generated Nov 2, 9:00 pm (UTC) · Last 30 days vs previous 30 days` |
-| 9 | Link buttons | Up to 2 Noibu buttons (section 4.5), shown by the host at the bottom of the card |
+| 8 | Link buttons | Up to 2 Noibu buttons (section 4.5) |
+| 9 | Footer | Small, subtle: `Generated Nov 2, 2026, 9:00 pm UTC · Last 30 days vs the preceding 30 days` |
 
 What is **not** on the card: the summary paragraph (it's in the prose), Submit-style buttons, buttons for Cowork actions (investigate, download, schedule), "Reply with:" hints, a "Download & schedule" section or a "Save as private Cowork app" row. Cowork actions live in the question.
 
@@ -159,7 +159,7 @@ Checkout completion fell on mobile                   ← title: metric + move
 Open in Noibu ↗                                       ← inline text link, only with a verified console link
 ```
 
-Findings inside a report use an inline text link, because Cowork doesn't allow button rows inside a card section (no `ActionSet`); buttons can only sit at the bottom of the whole card.
+Findings inside a report use an inline text link to keep the card compact; the two link buttons are reserved for the report-level destinations.
 
 **Detail (its own Finding card, after "Investigate N"):** header strip (`FINDING · tag`, impact chip), title, evidence (up to 3 lines with numbers), likely cause (labelled as hypothesis if not proven), fix or next check, verification step. Buttons: `Open issue in Noibu` · `View sessions in Noibu`.
 
@@ -184,7 +184,7 @@ After a successful write: header strip (`CREATED IN NOIBU` / `TICKET CREATED` / 
 | **Mix bars** | Label · quiet ProgressBar (share of the largest row) · value right-aligned. Payment and delivery side by side |
 | **Core Web Vitals** | Large value + `p75 · band` in severity colour, `Chart.Gauge` with good/needs-improvement/poor segments, threshold legend (INP 200/500 ms, LCP 2,500/4,000 ms, CLS 0.1/0.25) |
 | **Accordion** | `Accordion` → `AccordionPage` with `headerTitle`. Used for Show more, Next check, Evidence & coverage, Show exact counts. Starts collapsed |
-| **Link button** | Top-level `actions` entry of type `Action.OpenUrl`. At most 2 per card. Title verb-first, ≤4 words, names the destination (`Open issue in Noibu`, `View sessions in Noibu`, `Open draft in Noibu`). URL is an HTTPS `console.noibu.com` page that follows `console-urls.md` (returned `issueUrl`/`jazzUrl`, or a documented route built by `console_links.py`). No verified URL → no button. Never a non-Noibu URL, never a Cowork action. The builder renders the first 2 report-level `noibuLinks` as these buttons |
+| **Link button** | A row at the foot of the card: one `emphasis` Column per link, each with `selectAction` → `Action.OpenUrl` and a Bolder, Accent label ending in ↗. Built in the card body (not top-level `actions`) because Cowork's `render_ui` receives only the body. At most 2 per card. Title verb-first, ≤4 words, names the destination (`Open issue in Noibu`, `View sessions in Noibu`, `Open draft in Noibu`). URL is an HTTPS `console.noibu.com` page that follows `console-urls.md` (returned `issueUrl`/`jazzUrl`, or a documented route built by `console_links.py`). No verified URL → no button. Never a non-Noibu URL, never a Cowork action. The builder renders the first 2 report-level `noibuLinks` as these buttons |
 | **Inline link** | `Action.OpenUrl` as a `selectAction` on a TextRun reading `Open in Noibu ↗`, `Accent` colour. For per-finding links inside a report card. Same URL rules as the link button |
 | **Empty state** | One **No priorities** block with one sentence (e.g. "No checkout step moved more than 3 pp versus the previous 30 days.") |
 
@@ -203,7 +203,7 @@ After a successful write: header strip (`CREATED IN NOIBU` / `TICKET CREATED` / 
 | Cards per response | 1 | `render_ui` accepts one call per response |
 | Card size | 24,000 bytes (compact JSON) | Teams-based hosts swap larger cards for a "too large" placeholder; the builder switches to compact *before* rendering |
 | Schema | Adaptive Card **1.6** | `render_ui` rejects other versions |
-| Actions | `Action.OpenUrl` only: ≤2 top-level link buttons, plus inline `selectAction` links | `render_ui` allows only OpenUrl/ShowCard; no `ActionSet`, `Action.Submit`, `Action.Execute`, `Action.ToggleVisibility`, no inputs. ShowCard is untested, so we don't use it |
+| Actions | `Action.OpenUrl` only, as `selectAction`: ≤2 link buttons in the body, plus inline links | `render_ui` allows only OpenUrl/ShowCard; no `ActionSet`, `Action.Submit`, `Action.Execute`, `Action.ToggleVisibility`, no inputs. ShowCard is untested, so we don't use it |
 | KPI tiles | ≤5 | Scannable in one row on desktop |
 | Priorities on a report | ≤3 (tech diagnosis: ≤2 per section) | 15-second triage |
 | Table preview | 5 rows (≤50 behind Show more) | Beyond that, export to Excel |
@@ -215,10 +215,10 @@ After a successful write: header strip (`CREATED IN NOIBU` / `TICKET CREATED` / 
 
 | File | Shows | Size (compact) |
 | --- | --- | --- |
-| `report-card.json` | Checkout report: Overview, 3 KPIs, funnel chart, exact counts, payment mix, 2 priorities with inline links, Evidence & coverage, footer, 2 link buttons | ~11.8 KB |
-| `finding-card.json` | Drill-down after "Investigate #1": evidence, hypothesis, next check, verify, 2 link buttons | ~2.8 KB |
-| `answer-card.json` | Focused question: conversion by device, 1 link button | ~2.6 KB |
-| `result-card.json` | After creating an A/B test draft, `Open draft in Noibu` button | ~1.5 KB |
+| `report-card.json` | Checkout report: Overview, 3 KPIs, funnel chart, exact counts, payment mix, 2 priorities with inline links, Evidence & coverage, footer, 2 link buttons | ~12.2 KB |
+| `finding-card.json` | Drill-down after "Investigate #1": evidence, hypothesis, next check, verify, 2 link buttons | ~3.2 KB |
+| `answer-card.json` | Focused question: conversion by device, 1 link button | ~2.8 KB |
+| `result-card.json` | After creating an A/B test draft, `Open draft in Noibu` button | ~1.7 KB |
 | `next-step-questions.json` | The AskUserQuestion payload that follows each card, plus the text fallback | — |
 | `scheduled-run.md` | A schedule end to end: the one setup question, the stored prompt, and what a run delivers to Teams and email | — |
 
@@ -325,7 +325,7 @@ Keep this table current: it's what the rules rest on. Whoever first sees an ⚠�
 | Adaptive Card display via `render_ui` (v1.6) | ✅ Works | Markdown fallback (2.6) | Tenant test, Oct 28, 2026 (`adaptive-card-board.md`) |
 | Accordion, Table, ColumnSet, Chart.*, ProgressBar, Badge | ✅ In the `render_ui` allow-list; Accordion and charts used by the current builder | Element `fallback` text | `cowork_card_check.py` |
 | Submit-style card buttons reaching the conversation | ❌ Don't work | Not used | Tenant test, Oct 28, 2026 |
-| Link buttons (top-level `Action.OpenUrl`) opening the console | ⚠️ Allowed by schema; not yet clicked in a tenant | Plain URL in one sentence (2.6) | `render_ui` allow-list |
+| Link buttons (`selectAction` → `Action.OpenUrl`) opening the console | ⚠️ Allowed by schema; not yet clicked in a tenant | Plain URL in one sentence (2.6) | `render_ui` allow-list |
 | Inline links (`selectAction` on TextRun) | ⚠️ Rendered by the current builder; click not confirmed | Plain URL in one sentence (2.6) | `build_presentation.py` |
 | `Action.ShowCard` | ⚠️ Untested | Not used | — |
 | AskUserQuestion clickable choices | ✅ Used by the A/B skill | "Reply with one: …" line (5) | `ab-testing/references/choice-cards.md` |

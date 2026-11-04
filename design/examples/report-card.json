@@ -1055,28 +1055,68 @@
    ]
   },
   {
+   "type": "ColumnSet",
+   "columns": [
+    {
+     "type": "Column",
+     "width": "auto",
+     "style": "emphasis",
+     "selectAction": {
+      "type": "Action.OpenUrl",
+      "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues"
+     },
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "View issues in Noibu ↗",
+         "size": "Small",
+         "weight": "Bolder",
+         "color": "Accent"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Column",
+     "width": "auto",
+     "style": "emphasis",
+     "selectAction": {
+      "type": "Action.OpenUrl",
+      "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+     },
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "View sessions in Noibu ↗",
+         "size": "Small",
+         "weight": "Bolder",
+         "color": "Accent"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "spacing": "Medium"
+  },
+  {
    "type": "RichTextBlock",
    "inlines": [
     {
      "type": "TextRun",
-     "text": "Generated Nov 2, 9:00 pm (UTC) · Last 30 days vs the previous 30 days",
+     "text": "Generated Nov 2, 2026, 9:00 pm UTC · Last 30 days vs the preceding 30 days",
      "size": "Small",
      "isSubtle": true
     }
    ],
    "spacing": "Medium"
-  }
- ],
- "actions": [
-  {
-   "type": "Action.OpenUrl",
-   "title": "View issues in Noibu",
-   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/issues"
-  },
-  {
-   "type": "Action.OpenUrl",
-   "title": "View sessions in Noibu",
-   "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
   }
  ]
 }
