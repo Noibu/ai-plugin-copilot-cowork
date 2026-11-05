@@ -1611,29 +1611,82 @@ def _ab_card(data, candidates, compact=False):
     body = []
     live = view.get('liveSiteCheck') or {'none': 'not-performed', None: 'not-performed'}.get(items[0]['report'].get('browser'), 'performed')
     if view['kind'] == 'findings':
+        # SKILL-SPECIFIC (ab-testing): one findings card, one full block per test in the design's
+        # priority layout (design/README.md 4.2): header strip with the metric chip, title, the
+        # change, why, a facts row, fix-first when present, and a folded "Evidence & setup".
+        # render_ui allows one card per response, so this is the "card per test" the finder shows.
         require(n <= 6, 'The findings card shows at most six tests; rank and trim the list first')
-        head = [_rich(_run(domain + ' · ' + window, size='Small', isSubtle=True), spacing='None')]
+        run_window = candidates.get('window') or {}
         goal = items[0]['report'].get('goal')
-        if goal:
-            head.append(_rich(_run('Goal: ' + goal, size='Small'), spacing='Small'))
+        context = [('Goal: ' + goal) if goal else None]
+        if run_window.get('sessions'):
+            context.append(f"{run_window['sessions']:,} sessions in {run_window.get('days') or 30} days")
+        if isinstance(run_window.get('mobileShare'), (int, float)) and not isinstance(run_window.get('mobileShare'), bool):
+            context.append(f"{round(run_window['mobileShare'] * 100)}% on mobile")
+        head = [_rich(_run(' · '.join(x for x in context if x)[:LINE_CHARS], size='Small'), spacing='None')]
         if live == 'not-performed':
             head.append({'type': 'Container', 'style': 'warning', 'spacing': 'Small', 'items': [_rich(_run('Live site not checked: these ideas rest on Noibu data alone; structural claims are inferred.', size='Small'))]})
-        body.append(_card('A/B test opportunities', head, spacing='None'))
+        elif live == 'partial':
+            head.append(_rich(_run('Live site partly checked: only some of these pages were read in the browser.', size='Small', isSubtle=True), spacing='Small'))
+        body.append(_card('A/B test opportunities', head, meta=domain + ' · ' + window, spacing='None'))
         for item in items:
             report = item['report']
-            content = [_eyebrow('What to change'), _rich(_run(item['title'], size='Medium', weight='Bolder'), spacing='None')]
-            what, more = _split(item['what'], AB_WHAT_CHARS)
-            content.append(_rich(_run(what, isSubtle=True), spacing='Small'))
+            setup = report.get('setup') or {}
+            key = item['rank']
+            metric_label = re.sub(r'\s*\(.*\)\s*$', '', _prose(setup.get('successMetric') or '')).strip() or item['metric'].replace('_', ' ').capitalize()
+            devices = [d for d in item.get('devices', []) if d in {'mobile', 'other'}]
+            device = 'Mobile' if devices == ['mobile'] else 'Desktop & tablet' if devices == ['other'] else None
+            label = f'Test {key}' + (' · ' + device if device else '')
+            # Impact chip (design 4.2): the weekly volume the success metric sees in this targeting,
+            # from metricVolume ("About 6,500 add-to-cart shoppers a week ..."); else the metric name.
+            volume = re.search(r'(?:about|around|roughly|~)?\s*([0-9][0-9,.]*[kKmM]?)\s+([a-z][a-z -]*?)\s+(?:a|per|each)\s+week', _prose(report.get('metricVolume') or ''), re.I)
+            chip = f'~{volume.group(1)} {volume.group(2).strip()} a week' if volume else metric_label
+            if len(chip) > CHIP_CHARS and volume:
+                chip = f'~{volume.group(1)} {volume.group(2).split()[-1]} a week'
+            if len(chip) > CHIP_CHARS:
+                chip = chip[:CHIP_CHARS - 1].rstrip() + '…'
+            content = [_rich(_run(item['title'], size='Medium', weight='Bolder'), spacing='None')]
+            what, more_what = _split(item['what'], AB_WHAT_CHARS)
+            content.append(_rich(_run(what), spacing='Small'))
             if report.get('why'):
-                content += _ab_text('Why this test', report['why'], AB_WHY_CHARS, f'noibu-ab-why-{item["rank"]}', compact)
-            if more:
-                content += [_toggle('Full change', f'noibu-ab-what-{item["rank"]}'), _folded(f'noibu-ab-what-{item["rank"]}', [_rich(_run(more, size='Small', isSubtle=True))])]
-            if compact:
-                body.append({'type': 'Container', 'separator': True, 'spacing': 'Medium', 'items': [_eyebrow(f'Test {item["rank"]}')] + content})
+                why, more_why = _split(report['why'], AB_WHY_CHARS)
+                content.append(_rich(_run('Why: ', size='Small', weight='Bolder'), _run(why, size='Small'), spacing='Small'))
             else:
-                body.append(_card(f'Test {item["rank"]}', content))
+                more_why = None
+            targeting = _prose(setup.get('targeting') or 'Everyone')
+            if targeting.lower().startswith('everyone'):
+                targeting = 'Everyone'
+            traffic = _split(report.get('metricVolume') or '', LINE_CHARS)[0]
+            traffic = re.sub(r'\s*Noibu shows the days to a verdict at setup\.?$', '', traffic).strip()
+            surface = _prose(report.get('surface') or '')
+            facts = [('Metric', _prose(setup.get('successMetric') or metric_label)), ('Where', surface[:LINE_CHARS]), ('Targeting', targeting), ('Traffic', traffic)]
+            if compact:
+                facts = [f for f in facts if f[0] in {'Metric', 'Traffic'}]
+            facts = [{'title': t, 'value': v} for t, v in facts if v]
+            if facts:
+                content.append({'type': 'FactSet', 'spacing': 'Small', 'facts': facts})
+            if report.get('fixFirst'):
+                content.append({'type': 'Container', 'style': 'warning', 'spacing': 'Small', 'items': [_rich(_run('Fix first ', size='Small', weight='Bolder'), _run(_prose(report['fixFirst']), size='Small'))]})
+            if item.get('validation') == 'unvalidated':
+                content.append(_rich(_run('This page was not read in the browser; the site claims are inferred.', size='Small', isSubtle=True), spacing='Small'))
+            elif item.get('validation') == 'partial':
+                content.append(_rich(_run('Only the homepage was read in the browser; this page was not.', size='Small', isSubtle=True), spacing='Small'))
+            folded = []
+            if more_what:
+                folded.append(_rich(_run(more_what, size='Small', isSubtle=True)))
+            if more_why:
+                folded.append(_rich(_run(more_why, size='Small', isSubtle=True), spacing='Small'))
+            for e in item['evidence'][:3]:
+                line = _prose(e['claim']) + (' (' + _ab_numbers(e['numbers']) + ')' if e.get('numbers') else '') + (' · correlational' if e.get('correlational') else '')
+                folded.append(_rich(_run('• ' + line, size='Small'), spacing='None' if folded else None))
+            for name, value in (('Variations', setup.get('variations')), ('Hypothesis', setup.get('hypothesis', item['hypothesis'])), ('Secondary metrics', setup.get('secondaryMetrics')), ('Overlap', report.get('overlap'))):
+                if value:
+                    folded.append(_rich(_run(name + ' ', size='Small', weight='Bolder'), _run(_prose(value), size='Small'), spacing='Small'))
+            if folded and not compact:
+                content += [_toggle('Evidence & setup', f'noibu-ab-detail-{key}'), _folded(f'noibu-ab-detail-{key}', folded)]
+            body.append(_card(label, content, right=chip))
         made = timestamp(data['generatedAt'])
-        footer = f'Generated {_MONTHS[made.month - 1]} {made.day}, {made.year} · nothing is created in Noibu until you choose a test'
+        footer = f'Generated {_MONTHS[made.month - 1]} {made.day}, {made.year} · nothing is created in Noibu until you choose a test · full details on each test after "Preview test N"'
     elif view['kind'] == 'test':
         require(view['rank'] in by_rank, 'No candidate with that rank')
         item = by_rank[view['rank']]

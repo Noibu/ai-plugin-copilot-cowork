@@ -1,6 +1,6 @@
 # Output format: the "Recommended test" reports and the chat cards
 
-The deliverable is ONE standalone report file per recommended test plus the in-chat cards, all built from a single `page.json` you write. Do NOT write the recommendations, or any test from them, into the conversation as prose. The chat gets only the findings card (quiet-mode rule 6), and later the per-test card a "Preview test N" reply asks for.
+The deliverable is ONE standalone report file per recommended test plus the in-chat cards, all built from a single `page.json` you write. Do NOT write the reports' content into the conversation. The chat gets the findings lead (one sentence per test), the findings card (or its Markdown fallback when the card is not confirmed rendered; quiet-mode rule 6), and later the per-test card a "Preview test N" reply asks for.
 
 A report's job: let a busy merchant read what the test is, see why the data supports it, look at the variation next to the current site where a capture exists, and see exactly how it will be set up in Noibu. Every report opens with the run's intro (title, goal, data and capture lines, the previews note) and then carries its one test in this order: what to change → why → before and after (or the description and why there is no image) → the setup as Noibu will receive it → dev notes → how to create it (reply "Create A/B test N" in the Cowork chat). The run-level "Outside your goal" list and the footer caveats close every report. A report has no button and no script: creating and building happen in the chat (`references/findings-card.md`).
 
@@ -9,7 +9,7 @@ A report's job: let a busy merchant read what the test is, see why the data supp
 1. Write `page.json` in the run's working folder (fields below), next to the `walkthrough.json` the site read wrote.
 2. `python <skill-dir>/scripts/build_page.py page.json <domain-short>` writes, next to `page.json`: one report per test (`<domain-short>-test-1.html`, ...), `candidates.json` (the handoff, derived from `page.json` + `walkthrough.json` and validated by `validate_candidates.py`; never hand-written), `findings-report.json` and `test-report-<rank>.json` (the card inputs). A validation error is a reason to fix `page.json`, never to edit the outputs.
 3. Do not publish yet. A report reaches the person's files only when they reply "Preview test N" (or, in an unattended run where no one can reply, at the end of the run, every report in rank order).
-4. At the end of the finder run, one or two sentences naming the top test, then the findings card from the local runner, then its next-step question (`references/findings-card.md`).
+4. At the end of the finder run, the findings lead (one sentence per test, `references/findings-card.md`), then the findings card from the local runner (or its Markdown fallback when the card is not confirmed rendered), then its next-step question (`references/findings-card.md`).
 
 The build script owns the HTML, the styling and the honesty rules (images embedded only from real files, no script, no remote fonts), so every run produces the same reports; never hand-write a report or edit the generated HTML. If something needs to change for every run, change the script.
 
