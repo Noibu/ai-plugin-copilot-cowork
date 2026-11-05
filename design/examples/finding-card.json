@@ -5,9 +5,6 @@
  "body": [
   {
    "type": "Container",
-   "style": "default",
-   "showBorder": true,
-   "roundedCorners": true,
    "spacing": "None",
    "items": [
     {
@@ -27,7 +24,7 @@
            "inlines": [
             {
              "type": "TextRun",
-             "text": "FINDING · Device gap",
+             "text": "PRIORITY 1 · Device gap",
              "size": "Small",
              "weight": "Bolder",
              "isSubtle": true

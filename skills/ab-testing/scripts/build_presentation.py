@@ -1,5 +1,6 @@
 """Build safe Noibu boards for Microsoft 365 Copilot Cowork (widget fragment) or standalone snapshots; no network or writes."""
 import argparse
+import copy
 import hashlib
 import html
 import importlib.util
@@ -155,7 +156,8 @@ def _checkout_rates(data):
         note += ' Missing prior stage counts: no comparison for those stages.'
     if any((s[k] or 0) > 100 for s in stages for k in ('rate', 'priorRate')):
         note += ' Rates above 100% retained: verify cohort/instrumentation coverage; not clamped.'
-    data['funnelBasis'] = {'kind': 'added-to-cart-sessions', 'current': bases['count'], 'prior': bases['prior'], 'currentCoverage': coverage('count'), 'priorCoverage': coverage('prior'), 'stageOrder': resolved, 'note': note}
+    short = f"% of {bases['count']:,} sessions that added to cart" if coverage('count') == 'measured' else 'Cart base ' + coverage('count') + '; rates Not measured'
+    data['funnelBasis'] = {'kind': 'added-to-cart-sessions', 'current': bases['count'], 'prior': bases['prior'], 'currentCoverage': coverage('count'), 'priorCoverage': coverage('prior'), 'stageOrder': resolved, 'note': note, 'shortNote': short}
     # Checkout completion is a DIFFERENT denominator: completed / started checkout.
     by_role = {r: s for r, s in zip(resolved, stages) if r is not None}
     started, completed = by_role.get('checkout-started'), by_role.get('order-completed')
@@ -319,7 +321,8 @@ def validate(data):
             require(len(table['columns']) == 2 and all(row[1] is None or type(row[1]) in {int, float} and math.isfinite(row[1]) and row[1] >= 0 for row in table['rows']), 'Bars require label and nonnegative numeric value columns')
     seen = set()
     for finding in data.get('findings', []):
-        require(isinstance(finding, dict) and set(finding) <= {'id', 'title', 'evidence', 'impact', 'fix', 'issueId', 'category', 'tag', 'performance', 'noibuLinks', 'ownership', 'disposition', 'priorityJustification', 'errorRecency'}, 'Invalid finding fields')
+        require(isinstance(finding, dict) and set(finding) <= {'id', 'title', 'evidence', 'impact', 'fix', 'issueId', 'category', 'tag', 'performance', 'noibuLinks', 'ownership', 'disposition', 'priorityJustification', 'errorRecency', 'shortTitle'}, 'Invalid finding fields')
+        require('shortTitle' not in finding or text(finding['shortTitle'], 40) and len(finding['shortTitle'].split()) <= 5, 'shortTitle must be 5 words or fewer')
         require(finding.get('ownership') in {None, 'merchant-code', 'merchant-content', 'vendor', 'unknown'}, 'Invalid finding ownership')
         require(all(key not in finding or text(finding[key]) for key in ['impact', 'fix', 'tag']), 'Invalid finding annotation')
         require(text(finding.get('id'), 100) and finding['id'] not in seen, 'Invalid/duplicate finding identity')
@@ -1044,7 +1047,9 @@ def _card(label, body, meta=None, right=None, spacing='Medium'):
     head_cols = [{'type': 'Column', 'width': 3, 'verticalContentAlignment': 'Center', 'items': [_eyebrow(label)]}]
     if meta or right:
         head_cols.append({'type': 'Column', 'width': 2, 'verticalContentAlignment': 'Center', 'items': [right or _rich(_run(meta, size='Small', isSubtle=True), align='Right')]})
-    return {'type': 'Container', 'style': 'default', 'showBorder': True, 'roundedCorners': True, 'spacing': spacing, 'items': [
+    # No border or rounded panel: Cowork already frames the card, and a second frame wastes width
+    # on every side (design/README.md 4.5 "Section", Cowork screenshot 2026-11-05).
+    return {'type': 'Container', 'spacing': spacing, 'items': [
         {'type': 'Container', 'style': 'emphasis', 'bleed': True, 'items': [{'type': 'ColumnSet', 'columns': head_cols}]},
         {'type': 'Container', 'items': body}]}
 
@@ -1208,17 +1213,18 @@ def _funnel(data, details, compact=False):
 
 def _checkout_card_funnel(data, details, compact=False):
     stages = data['funnel']
-    out = [_eyebrow('Purchase funnel', spacing='Medium'), _rich(_run(data['funnelBasis']['note'], size='Small', isSubtle=True), spacing='Small')]
+    # One short base line; the full denominator definition is folded (design/README.md 4.5 "Funnel").
+    out = [_eyebrow('Purchase funnel', spacing='Medium')]
+    details.append(('Funnel definition', data['funnelBasis']['note']))
     if data.get('funnelContext'):
         details.append(('Source funnel notes — annotations only; calculated denominator above controls', data['funnelContext']))
     if not data['funnelBasis']['completionInMetrics']:
         out += _stat_strip([data['funnelBasis']['checkoutCompletion']], tiles=False, details=details)
+    # Each stage tile carries its own measured pp change (derived above from own-period cart bases),
+    # so the per-stage current/prior text rows are not repeated under the tiles.
     steps = [{**s, 'value': s.get('display', 'Not measured')} for s in stages]
-    # Signed percentage-point differences are derived above, not count changes.
-    # Keep the existing generic delta design untouched outside checkout.
-    for stage in steps:
-        stage.pop('change', None)
     out += _stat_strip(steps, tiles=False)
+    out.append(_rich(_run(data['funnelBasis']['shortNote'], size='Small', isSubtle=True), spacing='Small'))
     maximum = max([100] + [s[k] for s in stages for k in ('rate', 'priorRate') if s[k] is not None])
     series = []
     for key, name, color in (('rate', 'Current % of own cart base', 'sequential7'), ('priorRate', 'Prior % of own cart base', 'sequential3')):
@@ -1234,10 +1240,13 @@ def _checkout_card_funnel(data, details, compact=False):
     if compact or not series:
         out.append(fallback)
     else:
-        out += [_rich(_run(s['label'] + ' · Current ' + (f"{s['rate']:.1f}%" if s['rate'] is not None else 'Not measured') + ' · Prior ' + (f"{s['priorRate']:.1f}%" if s['priorRate'] is not None else 'Not measured') + ' · ' + s.get('change', 'Own cart base'), size='Small')) for s in stages]
         out.append({'type': 'Chart.VerticalBar.Grouped', 'title': '% of sessions that added to cart', 'yAxisTitle': '% of sessions that added to cart', 'yMin': 0, 'yMax': maximum, 'data': series, 'fallback': fallback})
+    def cell(count, rate):
+        if count is None:
+            return 'Not measured'
+        return format(count, ',') + (f' · {rate:.1f}%' if rate is not None else '')
     head = ['Stage', 'Current sessions', 'Prior sessions']
-    rows = [[s['label'], s['count'], s.get('prior')] for s in stages]
+    rows = [[s['label'], cell(s['count'], s['rate']), cell(s.get('prior'), s['priorRate'])] for s in stages]
     out += [_toggle('Show exact counts', 'noibu-funnel-counts'), {**_card_table(head, rows, numeric=(1, 2), names=False), 'id': 'noibu-funnel-counts', 'isVisible': False}]
     return out
 
@@ -1282,6 +1291,57 @@ def _link_buttons(links):
 
 def _inline_link(link, spacing='Small'):
     return _rich(_run(link['label'] + ' ↗', size='Small', color='Accent', selectAction={'type': 'Action.OpenUrl', 'url': link['url']}), spacing=spacing)
+
+
+_TRAILING = {'on', 'in', 'at', 'for', 'of', 'the', 'a', 'an', 'and', 'to', 'with', 'by', 'from', 'vs', 'after', 'before', 'than', 'as', 'per', 'into', 'more', 'less', 'fewer', 'under', 'over', 'too', 'is', 'are', 'was', 'were', '·', '-', '–'}
+
+
+def _short_name(finding):
+    """Next-step question label: the finding's shortTitle, else its title cut to 5 words."""
+    if finding.get('shortTitle'):
+        return finding['shortTitle'].strip()
+    words = re.sub(r'[.:;,]+$', '', _prose(finding['title'])).split()[:5]
+    while len(words) > 1 and words[-1].lower().strip('.,:;') in _TRAILING:
+        words.pop()
+    return ' '.join(words).rstrip('.,:;')
+
+
+def _card_plan(data):
+    """(plan, extras, monitoring): the priorities shown on the card in order (with their section
+    heading for technical diagnosis), the ranked priorities not shown, and monitor-only items."""
+    wf = data['workflow']
+    findings = data.get('findings', [])
+    monitoring = [f for f in findings if not _tech_priority(f)] if wf == 'tech-diagnosis' else []
+    if wf == 'tech-diagnosis':
+        findings = [f for f in findings if _tech_priority(f)]
+        plan = []
+        for category, title in [('merchant', 'Merchant issues'), ('performance', 'Performance'), ('vendor', 'Vendor issues'), (None, 'Other findings')]:
+            group = [f for f in findings if f.get('category') == category][:2]
+            plan += [(title if k == 0 else None, f) for k, f in enumerate(group)]
+    else:
+        plan = [(None, f) for f in findings[:3]]
+    shown = {id(f) for _, f in plan}
+    return plan, [f for f in findings if id(f) not in shown], monitoring
+
+
+def priority_options(data):
+    """The next-step question's options, in card order then the extras (design/README.md section 5):
+    [{priority, findingId, label, description, onCard}]. Built from the validated report, so the
+    question always matches the card."""
+    data = validate(copy.deepcopy(data))
+    plan, extras, _ = _card_plan(data)
+    out, seen = [], set()
+    for n, f in enumerate([f for _, f in plan] + extras, 1):
+        impact = _prose(f.get('impact')) or ''
+        label = _short_name(f)
+        if label.casefold() in seen:
+            # Two cut-down titles collided: keep them apart (prefer a shortTitle in the report).
+            label = ' '.join(label.split()[:4]) + f' #{n}'
+        seen.add(label.casefold())
+        out.append({'priority': n, 'findingId': f['id'], 'label': label,
+                    'description': f'Priority {n}' + (' · ' + impact if impact and len(impact) <= CHIP_CHARS else ''),
+                    'onCard': n <= len(plan)})
+    return out
 
 
 def _details_block(details, target):
@@ -1399,22 +1459,15 @@ def render_adaptive_card(data, candidates=None, compact=False):
     # 2. Priority cards: design cap of 3, ranked as supplied. Technical diagnosis keeps the tested
     # baseline's merchant / performance / vendor sections, at most two cards each. Each card shows
     # the title and one evidence line; full evidence and the next check sit behind one toggle.
-    findings = data.get('findings', [])
-    monitoring = [f for f in findings if not _tech_priority(f)] if wf == 'tech-diagnosis' else []
-    if wf == 'tech-diagnosis':
-        findings = [f for f in findings if _tech_priority(f)]
-        plan = []
-        for category, title in [('merchant', 'Merchant issues'), ('performance', 'Performance'), ('vendor', 'Vendor issues'), (None, 'Other findings')]:
-            group = [f for f in findings if f.get('category') == category][:2]
-            plan += [(title if k == 0 else None, f) for k, f in enumerate(group)]
-    else:
-        plan = [(None, f) for f in findings[:3]]
+    plan, extras, monitoring = _card_plan(data)
+    findings = [f for _, f in plan] + extras
     for n, (section, item) in enumerate(plan, 1):
         if section:
             body.append(_eyebrow(section, spacing='Large'))
         label = f'Priority {n}' + (' · ' + item['tag'] if item.get('tag') and item['tag'].lower() != f'priority {n}' else '')
         if item.get('performance'):
-            label = item['performance']['metric'] + (' · ' + item['performance']['status'] if item['performance'].get('status') else '')
+            # Keep "Priority N" so the card matches the next-step question's "Priority N" descriptions.
+            label = f'Priority {n} · ' + item['performance']['metric'] + (' · ' + item['performance']['status'] if item['performance'].get('status') else '')
         impact = _prose(item.get('impact')) or None
         chip = impact if impact and len(impact) <= CHIP_CHARS else None
         evidence, full = _split(item['evidence'], 160)
@@ -1448,9 +1501,13 @@ def render_adaptive_card(data, candidates=None, compact=False):
             body.append({'type': 'Container', 'separator': True, 'spacing': 'Medium', 'items': [_eyebrow(label)] + content})
         else:
             body.append(_card(label, content, right=chip))
-    if len(findings) > len(plan):
-        extra = len(findings) - len(plan)
-        body.append(_rich(_run(f'{extra} more ranked finding{"s are" if extra > 1 else " is"} in the full report.', size='Small', isSubtle=True), spacing='Small'))
+    if extras:
+        # Name the priorities not shown, so they can be asked for (design/README.md 4.1).
+        first = len(plan) + 1
+        labels = [o['label'] for o in priority_options(data)][len(plan):]
+        names = ', '.join(labels[:4]) + (f' and {len(labels) - 4} more' if len(labels) > 4 else '')
+        ask = f'"priority {first}"' + (f' to "priority {len(plan) + len(extras)}"' if len(extras) > 1 else '')
+        body.append(_rich(_run(f'{len(extras)} more: {names}. Ask for {ask}.', size='Small', isSubtle=True), spacing='Small'))
     if not findings and wf in ANALYTICS | {'tech-diagnosis'}:
         body.append(_card('No priorities', [_rich(_run('No supported ranked priorities in this report; see comparison scope and coverage.', isSubtle=True))]))
 

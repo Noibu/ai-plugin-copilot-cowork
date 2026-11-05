@@ -14,8 +14,8 @@ Follow [card-quickstart.md](card-quickstart.md): write `report.json`, then run `
 
 Calm, flat, monochrome data; colour only for meaning. In Adaptive Cards terms:
 
-- **Everything is a card:** a bordered `Container` whose first child is an `emphasis` header strip with an UPPERCASE small bold subtle label on the left (Overview, Priority 1 · tag, Download & schedule) and small subtle meta or an impact chip on the right (`domain · window`, "~4,200 sessions affected"). The body sits below.
-- **Board order:** the Overview card, then priority cards (at most 3, ranked as supplied; technical diagnosis keeps Merchant / Performance / Vendor sections with up to 2 each), then Evidence & coverage, up to two Noibu link buttons and the footer. No action bar. The summary sentence is chat prose before the card (audits keep theirs inside the card); never repeat it in the card or recap after it.
+- **Everything is a card:** a `Container` (no border or rounded corners, which Cowork draws as heavy outlines) whose first child is an `emphasis` header strip with an UPPERCASE small bold subtle label on the left (Overview, Priority 1 · tag) and small subtle meta or an impact chip on the right (`domain · window`, "~4,200 sessions affected"). The body sits below.
+- **Board order:** the Overview card, then priority cards (at most 3, ranked as supplied; technical diagnosis keeps Merchant / Performance / Vendor sections with up to 2 each), then one line naming any further priorities ("1 more: … Ask for \"priority 4\"."), then Evidence & coverage, up to two Noibu link buttons and the footer. No action bar. The summary sentence is chat prose before the card (audits keep theirs inside the card); never repeat it in the card or recap after it.
 - **Monochrome data, semantic colour:** values and bars use default ink. Colour appears only on deltas and severity: declines `Warning` (orange) with **↓**, rises `Good` with **↑**, flat **—**. Never use + or −, and never colour magnitude or rank. Severity: Poor = `Attention`, Needs improvement = `Warning`, Good = `Good`.
 - **Everything is a card (header strip):** label and right-hand text sit in weighted columns (3 and 2), never `auto`. A right-hand chip is at most 32 characters; longer impact text goes in the body as one small bold line. Long meta (domain · window) goes in the body as the first line.
 - **KPI tiles:** `emphasis` **columns** (so tiles stretch to equal height) in rows of up to three (five for Store Pulse). Each shows only an uppercase label, a bold value and an arrow delta (pp for rates, % for counts), with **no detail text**. Labels in a row share one height and are bottom-aligned, so values line up. With four or more tiles, use the short metric names (AOV, RPS, Conversion, Engagement), and a currency code moves into the label ("AOV · CAD") so the value stays on one line. Show one currency per tile; every currency, denominator and definition goes in **Details & definitions**. Segment site-wide/mobile/desktop use the same layout without the tile background.
@@ -33,19 +33,19 @@ Calm, flat, monochrome data; colour only for meaning. In Adaptive Cards terms:
 
 ## Handle a next-step choice
 
-The user picks an option from the next-step question after a card, or types something similar. Map it to the board's action for **the report in that card**: the same workflow, reportId, domain, window and evidence. Then follow [action handling](presentation-actions.md).
+The user picks a priority from the next-step question after a card, or types a request. Map it to the board's action for **the report in that card**: the same workflow, reportId, domain, window and evidence. Then follow [action handling](presentation-actions.md).
 
-| Choice or typed reply | Action |
+| Choice or typed request | Action |
 | --- | --- |
-| Investigate #*n* / Get the fix | `investigate` / `get-fix` for the *n*-th finding shown in the card, in order |
+| A priority (its name, "priority *n*" or "investigate *n*") / Get the fix | `investigate` / `get-fix` for that finding (`priorityOptions` maps *n* to its finding) |
 | Open a ticket | `create-ticket` for that finding: ask "Where should the ticket go?" first |
 | Vendor message | `share-vendor` for that finding |
 | Create A/B test *n* / Preview test *n* / Automate the implementation | `ab-testing` skill (`references/findings-card.md`) |
-| Download as PDF / Save to OneDrive | `export-report` / `save-report` |
-| Schedule this report | `schedule`: the setup question below |
+| "Download this" / "Save to OneDrive" (typed only, never offered) | `export-report` / `save-report` |
+| "Schedule this" (typed only, never offered) | `schedule`: the setup question below |
 
 - If *n* doesn't match a finding or candidate in that card, or more than one recent card could be meant, ask which one. Never act on a different report.
-- **Scheduling:** if the request already names cadence, time and destination, ask nothing and confirm in one sentence. Otherwise ask one question with the skill's preset first (e.g. "Weekly · Mon 9 am · Summary · Teams (Recommended)") plus "Customize". Only "Customize" walks through, one decision at a time:
+- **Scheduling:** if the request already names cadence, time and destination, ask nothing and confirm in one sentence. Otherwise ask one question with the skill's preset first (label e.g. "Weekly on Mondays (Recommended)", description "9 am · Summary · Teams") plus "Customize". Only "Customize" walks through, one decision at a time:
   1. Frequency: Daily only for Store Pulse, then Weekly (first), Every 2 weeks, Monthly.
   2. Day (weekly or every 2 weeks), first-run date (every 2 weeks), or day of month 1–28 (monthly).
   3. Time: 7 am, 9 am, 12 pm, 5 pm or other.

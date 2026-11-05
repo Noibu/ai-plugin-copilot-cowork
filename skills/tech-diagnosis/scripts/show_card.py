@@ -53,7 +53,8 @@ def normalize_render_result(result):
 STAGE_WORDS = {'dependencies': 'a packaged report file is missing', 'import': 'the card builder could not be loaded',
                'read report': 'the report file could not be read', 'read candidates': 'the A/B candidates file could not be read',
                'build': 'the report did not pass validation'}
-NEXT_STEP = ('Then the next-step question (references/ux-guidelines.md section 3) as the last thing in the turn; '
+NEXT_STEP = ('Then the next-step question (references/ux-guidelines.md section 3) as the last thing in the turn, '
+             'built from priorityOptions (labels and descriptions as given, in order, up to 5; name any others in the question text); '
              'in a scheduled run, no question: add the Noibu links and copyable follow-up lines instead.')
 FALLBACK_INSTRUCTIONS = ('Explicit failure: START the card step with fallback_lead verbatim (one plain sentence saying the visual card '
                          'could not be built or displayed, and the actual reason), then the same report as Markdown in the card\'s '
@@ -113,7 +114,13 @@ def main():
         set_result(outcome)
         return
     outcome['bytes'] = len(json.dumps(card, ensure_ascii=False, separators=(',', ':')).encode('utf-8'))
-    if candidates is not None:
+    if candidates is None:
+        # The next-step question's options, in card order, so the question always matches the card.
+        try:
+            outcome['priorityOptions'] = bp.priority_options(report)
+        except Exception as exc:
+            errors.append(f'priority options: {type(exc).__name__}: {exc}')
+    else:
         # A/B: bind each displayed rank to its title and createInput hash, so "Create A/B test N"
         # is checked against exactly what this card showed (validate_candidates.py hash semantics).
         try:

@@ -6,8 +6,9 @@ description: <One sentence on what it does for the merchant.> Use when <trigger 
 <!--
 Template for a Noibu Cowork skill. Copy this folder to skills/<skill-folder-name>/, then:
   1. Fill in the <placeholders> and delete these comments.
-  2. Run `python design/sync.py` to add references/ux-guidelines.md (and the shared card scripts, once sync owns them).
-  3. Keep this file under ~5,000 tokens; put query detail in references/queries.md.
+  2. Run `python3 design/sync.py` to add references/ux-guidelines.md, and copy the card scripts from an existing report skill.
+  3. Mark any later edit to this skill's copy of the card builder with `# SKILL-SPECIFIC (<skill>): <why>` (design/README.md section 4).
+  4. Keep this file under ~5,000 tokens; put query detail in references/queries.md.
 The Output section below is standard. Change only the <placeholders> in it.
 -->
 
@@ -40,18 +41,16 @@ The Output section below is standard. Change only the <placeholders> in it.
 
 ## Output
 
-Follow `references/ux-guidelines.md`. For this skill:
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
 
-- **Summary:** <what the 2–3 sentences should lead with, e.g. "the biggest step drop and its size">.
-- **Card:** write `noibu.presentation/1` with `workflow: "<skill-folder-name>"` and render it with the card runner (`references/card-quickstart.md`). Use:
-  - KPIs: <list, max 5>
-  - Visual: <funnel | mix bars | gauge | none>
-  - Tables: <list, max 2 in overview>
-  - Findings: up to 3, each with one evidence sentence and a `fix` that starts with the Next check
-  - Link buttons (≤2, verified console URLs only): <e.g. "View issues in Noibu" (/issues), "View sessions in Noibu" (/sessions)>
-- **Next step:** the standard Report options. <Add or swap one skill-specific option if needed, e.g. "Compare by device".>
-- **Drill-down ("Investigate N"):** <what extra queries to run> → finding card (buttons: <e.g. Open issue in Noibu · View sessions in Noibu>) → Finding options.
-- **Scheduled runs:** preset <e.g. "Weekly · Mon 9 am · Summary · Teams">; window <e.g. last 7 days vs previous 7>; alert-only <yes, threshold: … | no> | <"Not schedulable">.
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
+- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
+- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
+- **Summary leads with:** <e.g. "the biggest step drop and its size">.
+- **Card:** KPIs <list, max 5> · visual <funnel | mix bars | gauge | none> · tables <list, max 2> · up to 3 findings, each with a `shortTitle` (≤5 words), a ≤60-character title, one evidence sentence and a `fix` that starts with the Next check · link buttons <e.g. "View issues in Noibu" (/issues), "View sessions in Noibu" (/sessions)>.
+- **Drill-down options** (one priority: added as the second option; no priorities: both): <e.g. "Break down by device"> · <e.g. "Change the date range">.
+- **After a priority is picked:** <what extra queries to run> → finding card (buttons: <e.g. Open issue in Noibu · View sessions in Noibu>) → Get the fix · Open a ticket · Draft a pull request · Back to the report.
+- **Scheduled runs (only when asked):** preset <e.g. label "Weekly on Mondays", description "9 am · Summary · Teams">; window <e.g. last 7 days vs previous 7>; alert-only <yes, threshold: … | no> | <"Not schedulable">.
 
 ## Guardrails
 

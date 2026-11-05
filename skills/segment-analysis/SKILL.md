@@ -22,7 +22,7 @@ Use the packaged [report display](references/card-quickstart.md).
 - State each ranking's volume filter, population and top-N bounds. A capped result cannot establish a global winner. Retain five-row previews/all rows; history/campaign/landing tables use `supporting`.
 - Use up to three visible `overviewNotes` for material attribution, reconciliation or currency caveats; retain detailed evidence too.
 - Each top opportunity has a factual tag, specific cohort, actual traffic unit and concise evidence; `fix` holds expandable investigation/verification.
-- Card order: overview, then opportunities, then Evidence & coverage. Next steps (Investigate, Download as PDF, Schedule this report) come from the question after the card. Shared styling supplies light panels and orange measured declines.
+- Card order: overview, then opportunities, then Evidence & coverage. The question after the card offers the card's priorities. Shared styling supplies light panels and orange measured declines.
 
 ## Interpretation
 
@@ -40,12 +40,14 @@ Use the packaged [report display](references/card-quickstart.md).
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question. The card carries Noibu link buttons only; investigate, download and schedule are offered by the question. No dashboards. In a scheduled run, ask nothing.
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response.
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
+- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
 - Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
 - Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
-- Scheduled runs: preset "Weekly · Mon 9 am · Summary"; last 7 days vs the previous 7. Daily is not offered.
+- **Drill-down options** (one priority: added as the second option; no priorities: both): "Focus on one country" · "Change the date range".
+- **Scheduled runs (only when asked):** preset label "Weekly on Mondays", description "9 am · Summary · Teams"; last 7 days vs the previous 7. Daily is not offered.
 
 ## Browser prerequisite, only for a requested browser step
 

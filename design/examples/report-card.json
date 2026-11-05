@@ -5,9 +5,6 @@
  "body": [
   {
    "type": "Container",
-   "style": "default",
-   "showBorder": true,
-   "roundedCorners": true,
    "spacing": "None",
    "items": [
     {
@@ -230,80 +227,202 @@
        "spacing": "Large"
       },
       {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Added to cart",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "4,000",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↑ 5.3%",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Good"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Started checkout",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "50.0%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "— flat",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Default"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Payment submitted",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "22.5%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↓ 2.5 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Warning"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Completed order",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "20.5%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↓ 2.7 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Warning"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
        "type": "RichTextBlock",
        "inlines": [
         {
          "type": "TextRun",
-         "text": "% of sessions that added to cart; each period uses its own cart base.",
+         "text": "% of 4,000 sessions that added to cart",
          "size": "Small",
          "isSubtle": true
         }
        ],
-       "spacing": "None"
-      },
-      {
-       "type": "Chart.VerticalBar.Grouped",
-       "title": "% of sessions that added to cart",
-       "yAxisTitle": "% of sessions that added to cart",
-       "yMin": 0,
-       "yMax": 100,
-       "data": [
-        {
-         "legend": "Oct 3 – Nov 2",
-         "color": "sequential7",
-         "values": [
-          {
-           "x": "Added to cart",
-           "y": 100
-          },
-          {
-           "x": "Started checkout",
-           "y": 50.0
-          },
-          {
-           "x": "Payment submitted",
-           "y": 22.5
-          },
-          {
-           "x": "Completed order",
-           "y": 20.5
-          }
-         ]
-        },
-        {
-         "legend": "Previous 30 days",
-         "color": "sequential3",
-         "values": [
-          {
-           "x": "Added to cart",
-           "y": 100
-          },
-          {
-           "x": "Started checkout",
-           "y": 50.0
-          },
-          {
-           "x": "Payment submitted",
-           "y": 25.0
-          },
-          {
-           "x": "Completed order",
-           "y": 23.2
-          }
-         ]
-        }
-       ],
-       "fallback": {
-        "type": "RichTextBlock",
-        "inlines": [
-         {
-          "type": "TextRun",
-          "text": "Funnel: 4,000 added to cart → 50.0% started checkout → 22.5% submitted payment → 20.5% completed (previous: 50.0%, 25.0%, 23.2%).",
-          "size": "Small",
-          "isSubtle": true
-         }
-        ]
-       }
+       "spacing": "Small"
       },
       {
        "type": "Accordion",
@@ -405,7 +524,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "4,000"
+                 "text": "4,000 (100%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -421,7 +540,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "3,800"
+                 "text": "3,800 (100%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -460,7 +579,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "2,000"
+                 "text": "2,000 (50.0%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -476,7 +595,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "1,900"
+                 "text": "1,900 (50.0%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -515,7 +634,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "900"
+                 "text": "900 (22.5%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -531,7 +650,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "950"
+                 "text": "950 (25.0%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -570,7 +689,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "820"
+                 "text": "820 (20.5%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -586,7 +705,7 @@
                "inlines": [
                 {
                  "type": "TextRun",
-                 "text": "880"
+                 "text": "880 (23.2%)"
                 }
                ],
                "horizontalAlignment": "Right"
@@ -596,6 +715,30 @@
            ],
            "separator": true,
            "spacing": "Small"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "type": "Accordion",
+       "spacing": "Small",
+       "pages": [
+        {
+         "type": "AccordionPage",
+         "headerTitle": "Details & definitions",
+         "headerSize": "Small",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Each stage is a share of the sessions that added to cart in the same period; each period uses its own base. Checkout completion = completed orders ÷ started checkouts.",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ]
           }
          ]
         }
@@ -770,9 +913,6 @@
   },
   {
    "type": "Container",
-   "style": "default",
-   "showBorder": true,
-   "roundedCorners": true,
    "spacing": "Medium",
    "items": [
     {
@@ -893,9 +1033,6 @@
   },
   {
    "type": "Container",
-   "style": "default",
-   "showBorder": true,
-   "roundedCorners": true,
    "spacing": "Medium",
    "items": [
     {
@@ -1013,6 +1150,18 @@
      ]
     }
    ]
+  },
+  {
+   "type": "RichTextBlock",
+   "inlines": [
+    {
+     "type": "TextRun",
+     "text": "1 more: PayPal button error on product pages. Ask for \"priority 3\".",
+     "size": "Small",
+     "isSubtle": true
+    }
+   ],
+   "spacing": "Small"
   },
   {
    "type": "Accordion",

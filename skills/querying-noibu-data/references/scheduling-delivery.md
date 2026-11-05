@@ -9,7 +9,7 @@ Cowork facts this workflow relies on (Microsoft Learn, *Use Copilot Cowork*): sc
 Follow the [UX guidelines](ux-guidelines.md): a schedule asks questions at most once, at setup; every run after that is silent.
 
 - If the request names the skill, store, cadence, time and destination, ask nothing and confirm in one sentence.
-- Otherwise ask **one** question with the skill's preset first (its SKILL.md names it, e.g. "Weekly · Mon 9 am · Summary · Teams (Recommended)") plus "Customize". Only "Customize" walks through frequency → day or date → time → timezone → detail → destination, one decision per question.
+- Otherwise ask **one** question with the skill's preset first (its SKILL.md names it, label e.g. "Weekly on Mondays (Recommended)", description "9 am · Summary · Teams") plus "Customize". Only "Customize" walks through frequency → day or date → time → timezone → detail → destination, one decision per question.
 - Email still always confirms the exact recipient addresses in chat (section 2).
 - Tell the user once that Cowork drafts scheduled sends for approval unless approved ahead of time, and ask them to approve the first run's send so later runs deliver on their own.
 - Where the skill offers it (e.g. technical diagnosis), offer **alert-only**: deliver only when a stated threshold is crossed or a new priority appears; otherwise the run ends quietly.

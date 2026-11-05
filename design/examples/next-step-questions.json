@@ -1,6 +1,29 @@
 {
- "_note": "AskUserQuestion payloads that follow each card. Labels ≤5 words, header ≤12 chars, 2–5 options, nothing written after the question.",
+ "_note": "AskUserQuestion payloads after each card (design/README.md section 5). Options after a report are the card's priorities only, in card order, up to 5. Nothing is written after the question.",
  "after-report": {
+  "questions": [
+   {
+    "header": "Next step",
+    "question": "Which priority should I investigate for example.com?",
+    "multiSelect": false,
+    "options": [
+     {
+      "label": "Mobile payment submission drop",
+      "description": "Priority 1 · ~1,900 sessions"
+     },
+     {
+      "label": "Delivery step exits",
+      "description": "Priority 2 · ~640 sessions"
+     },
+     {
+      "label": "PayPal button error",
+      "description": "Priority 3 · ~310 sessions"
+     }
+    ]
+   }
+  ]
+ },
+ "after-report-one-priority": {
   "questions": [
    {
     "header": "Next step",
@@ -8,26 +31,18 @@
     "multiSelect": false,
     "options": [
      {
-      "label": "Investigate #1",
-      "description": "Payment submission fell on mobile: find the cause and the fix"
+      "label": "Mobile payment submission drop",
+      "description": "Priority 1 · ~1,900 sessions"
      },
      {
-      "label": "Investigate #2",
-      "description": "More shoppers leave at delivery options"
-     },
-     {
-      "label": "Download as PDF",
-      "description": "Save this report to your Cowork output folder"
-     },
-     {
-      "label": "Schedule this report",
-      "description": "Get a fresh version weekly, by email or Teams"
+      "label": "Compare by device",
+      "description": "Split the checkout funnel into mobile and desktop"
      }
     ]
    }
   ]
  },
- "after-report-no-findings": {
+ "after-report-no-priorities": {
   "questions": [
    {
     "header": "Next step",
@@ -36,21 +51,17 @@
     "options": [
      {
       "label": "Compare by device",
-      "description": "Split the funnel into mobile and desktop"
+      "description": "Split the checkout funnel into mobile and desktop"
      },
      {
       "label": "Change the date range",
       "description": "Look at a different window"
-     },
-     {
-      "label": "Schedule this report",
-      "description": "Get a fresh version weekly, by email or Teams"
      }
     ]
    }
   ]
  },
- "after-finding": {
+ "after-detail-card": {
   "questions": [
    {
     "header": "Next step",
@@ -77,7 +88,7 @@
    }
   ]
  },
- "after-result": {
+ "after-result-card": {
   "questions": [
    {
     "header": "Next step",
@@ -96,6 +107,6 @@
    }
   ]
  },
- "fallback-text": "Reply with one: Investigate 1 · Investigate 2 · Download as PDF · Schedule this report",
- "skipped-recovery": "Say **next steps** anytime to see these options again, or type one: Investigate 1 · Investigate 2 · Download as PDF · Schedule this report"
+ "fallback-text": "Reply with one: Mobile payment submission drop · Delivery step exits · PayPal button error",
+ "skipped-recovery": "Say **next steps** anytime to see these options again, or type one: Mobile payment submission drop · Delivery step exits · PayPal button error"
 }
