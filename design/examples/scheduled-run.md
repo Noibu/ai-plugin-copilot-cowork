@@ -6,7 +6,7 @@ Fictional data for `example.com`. Shows the setup question, the self-contained s
 
 ```json
 {"questions": [{"header": "Schedule", "question": "How should the checkout report for example.com run?", "multiSelect": false, "options": [
-  {"label": "Weekly · Mon 9 am · Teams (Recommended)", "description": "Summary detail, last 7 days vs the previous 7, posted to a Teams channel you pick"},
+  {"label": "Weekly on Mondays (Recommended)", "description": "9 am · Summary · last 7 days vs the previous 7 · Teams channel you pick"},
   {"label": "Customize", "description": "Choose frequency, day, time, timezone, detail and where it goes"}]}]}
 ```
 

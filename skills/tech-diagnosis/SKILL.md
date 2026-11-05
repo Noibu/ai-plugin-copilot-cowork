@@ -27,20 +27,22 @@ description: Diagnose Noibu errors and Core Web Vital performance issues, explai
 
 - Use the **local** [report display](references/card-quickstart.md) and linked [display runner](scripts/show_card.py), [canonical builder](scripts/build_presentation.py) and [console helper](scripts/console_links.py). Resolve `skill_dir` to the actual loaded **tech-diagnosis** directory containing this SKILL.md, not the shared skill, the copied wrapper or the package root. This local Adaptive Card path remains complete when skills are materialized independently; no sibling filesystem assumption or wide path search. Performance findings need structured p75 cards: value/units, threshold bands/marker, page/device/traffic/window and observed status only. Missing values remain unknown.
 - Include [verified Noibu links](../querying-noibu-data/references/console-urls.md); metric overview URLs do not imply preserved filters.
-- Offer Investigate / Get the fix and **Open a ticket** in the next-step question, even before an integration is connected. Ticket clicks use the [destination-first chooser](../querying-noibu-data/references/ticket-handoff.md); wait for selection before provider discovery/creation. Ignore requires an actual issue and supported status tool.
+- After the user picks a priority, offer Get the fix and **Open a ticket** in that finding's next-step question, even before an integration is connected. Ticket clicks use the [destination-first chooser](../querying-noibu-data/references/ticket-handoff.md); wait for selection before provider discovery/creation. Ignore requires an actual issue and supported status tool.
 - Investigate/Get fix permit read-only source inspection and a proposal, not edits/PRs. Repository writes, draft PRs, tickets, status changes and vendor messages require their requested scope and approvals; never merge/deploy. Missing integrations yield an explicitly unsaved draft/specification.
 - Data does not prove every session was blocked. Revenue-loss projections are only for requested money impact; redact sensitive HTTP fields.
 - Requested schedules use [connected delivery](../querying-noibu-data/references/scheduling-delivery.md), retaining focused/survey scope and fresh error/performance windows. Reporting does not require a repository connection or authorize automatic remediation/status writes.
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question. The card carries Noibu link buttons only; investigate, download and schedule are offered by the question. No dashboards. In a scheduled run, ask nothing.
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response.
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
+- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
 - Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
 - Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
 - A dependency failure keeps the exact missing filename/path and supplied root; don't infer an absent ZIP member or tenant filesystem cause.
-- Scheduled runs: preset "Weekly · Mon 9 am · Summary" with alert-only offered (deliver only when a new merchant error passes the active-fix threshold or a vital crosses into Poor).
+- **Drill-down options** (one priority: added as the second option; no priorities: both): "Check a specific page" · "Change the date range".
+- **Scheduled runs (only when asked):** preset label "Weekly on Mondays", description "9 am · Summary · Teams", with alert-only offered (deliver only when a new merchant error passes the active-fix threshold or a vital crosses into Poor).
 
 ## Browser prerequisite, only for a requested browser step
 
