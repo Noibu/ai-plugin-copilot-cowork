@@ -1,0 +1,22 @@
+name: UX guidelines check
+
+on:
+  pull_request:
+  push:
+    branches: [beta]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Every skill has the current UX guidelines
+        run: python design/sync.py --check
+      - name: Reference cards fit Cowork's card schema
+        run: |
+          for f in design/examples/*-card.json; do
+            python skills/querying-noibu-data/scripts/cowork_card_check.py "$f"
+          done

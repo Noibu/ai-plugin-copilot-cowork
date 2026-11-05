@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
   "manifestVersion": "devPreview",
-  "version": "21.1.15",
+  "version": "22.0.0",
   "id": "2b1b1694-3a0f-4d10-b590-fd33a92eb90f",
   "developer": {
     "name": "Noibu",
@@ -15,7 +15,7 @@
   },
   "description": {
     "short": "Ecommerce conversion, checkout, error and experiment insights from Noibu",
-    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to analyze store health, checkout, products, traffic segments, technical errors and Core Web Vitals, accessibility, and A/B testing (finding, building and launching tests) using your own Noibu data. Ten workflows: Noibu Setup, Querying Noibu Data, Store Pulse, Checkout Analysis, Product Analysis, Segment Analysis, Technical Diagnosis, Accessibility Audit, Build Business Context and A/B Testing. Reports appear as an interactive board when the Noibu report widget is available, with actions to investigate findings, save a report to OneDrive, download a PDF, save a private Cowork app snapshot, schedule refreshed reports, open tickets, create A/B test drafts and build A/B tests through a pull request or Shopify preview theme. Every write, send, schedule or share needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
+    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to analyze store health, checkout, products, traffic segments, technical errors and Core Web Vitals, accessibility, and A/B testing (finding, building and launching tests) using your own Noibu data. Ten workflows: Noibu Setup, Querying Noibu Data, Store Pulse, Checkout Analysis, Product Analysis, Segment Analysis, Technical Diagnosis, Accessibility Audit, Build Business Context and A/B Testing. Reports appear as a card in the chat with links into Noibu, followed by clickable next steps to investigate findings, save a report to OneDrive, download a PDF, schedule refreshed reports, open tickets, create A/B test drafts and build A/B tests through a pull request or Shopify preview theme. Every write, send, schedule or share needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
   },
   "icons": {
     "color": "color.png",

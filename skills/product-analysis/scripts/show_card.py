@@ -1,5 +1,6 @@
 """Build once and request at most one render through documented Cowork ToolResult.
-Host acknowledgement is terminal CARD_ONLY, not independent client visibility.
+Host acknowledgement means the card step is done (CARD_THEN_NEXT_STEP): no recap or second render,
+then the next-step question from references/ux-guidelines.md. It is not independent client visibility.
 Unknown delivery is not failure and never authorizes data replay or a second render.
 """
 import importlib.util
@@ -52,9 +53,11 @@ def normalize_render_result(result):
 STAGE_WORDS = {'dependencies': 'a packaged report file is missing', 'import': 'the card builder could not be loaded',
                'read report': 'the report file could not be read', 'read candidates': 'the A/B candidates file could not be read',
                'build': 'the report did not pass validation'}
-FALLBACK_INSTRUCTIONS = ('Explicit failure: START the reply with fallback_lead verbatim (one plain sentence saying the visual card '
-                         'could not be built or displayed, and the actual reason), then a concise measured text fallback that keeps '
-                         'the actual error; no render retry.')
+NEXT_STEP = ('Then the next-step question (references/ux-guidelines.md section 3) as the last thing in the turn; '
+             'in a scheduled run, no question: add the Noibu links and copyable follow-up lines instead.')
+FALLBACK_INSTRUCTIONS = ('Explicit failure: START the card step with fallback_lead verbatim (one plain sentence saying the visual card '
+                         'could not be built or displayed, and the actual reason), then the same report as Markdown in the card\'s '
+                         'section order, keeping the actual error; no render retry. ' + NEXT_STEP)
 
 
 def fallback_lead(stage, exc, built=True):
@@ -118,7 +121,7 @@ def main():
         except Exception as exc:
             errors.append(f'reply map: {type(exc).__name__}: {exc}')
     outcome.update(stage='render', render_attempted=True, status='unknown', response_policy='UNKNOWN_NO_REPLAY', allow_text_fallback=False,
-                   consumer_instructions='Outcome unknown: do not say display failed, do not replay data, do not render again. A short uncertainty notice is permitted.')
+                   consumer_instructions='Outcome unknown: do not say display failed, do not replay data, do not render again. A short uncertainty notice is permitted. ' + NEXT_STEP)
     try:
         result = tools.core.render_ui(type=card['type'], version=card['version'], body=card['body'])
     except (ToolDenied, ToolRefused):
@@ -143,8 +146,8 @@ def main():
     if state == 'rendered':
         # Commit ack BEFORE optional diagnostics. A logging exception cannot revoke it.
         outcome.update(status='rendered', card_file=receipt.get('card_file'), acknowledgement=receipt,
-                       response_policy='CARD_ONLY', allow_text_fallback=False,
-                       consumer_instructions='STOP. Host render acknowledged. No preamble, recap, failed-display claim, text fallback, visibility gate or second render. Client visibility remains independently unverified.')
+                       response_policy='CARD_THEN_NEXT_STEP', allow_text_fallback=False,
+                       consumer_instructions='Card shown. Do not recap or repeat its data, claim a display failure, add a text fallback or render again. ' + NEXT_STEP + ' Client visibility remains independently unverified.')
         if a.get('debug') is True:  # Explicit diagnostic use only; default success streams no chat log.
             try:
                 log('%s card acknowledged (%d bytes); client visibility unverified', outcome['variant'], outcome['bytes'])

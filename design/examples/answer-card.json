@@ -1,0 +1,253 @@
+{
+ "type": "AdaptiveCard",
+ "version": "1.6",
+ "fallbackText": "Conversion 1.62% site-wide on Nov 1.",
+ "body": [
+  {
+   "type": "Container",
+   "style": "default",
+   "showBorder": true,
+   "roundedCorners": true,
+   "spacing": "None",
+   "items": [
+    {
+     "type": "Container",
+     "style": "emphasis",
+     "bleed": true,
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": 3,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "CONVERSION · BY DEVICE",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        },
+        {
+         "type": "Column",
+         "width": 2,
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "example.com · Nov 1 (UTC)",
+             "size": "Small",
+             "isSubtle": true
+            }
+           ],
+           "horizontalAlignment": "Right"
+          }
+         ],
+         "verticalContentAlignment": "Center"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "Container",
+     "items": [
+      {
+       "type": "ColumnSet",
+       "columns": [
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Site-wide",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "1.62%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↑ 0.08 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Good"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Mobile",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "1.10%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↓ 0.05 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Warning"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        },
+        {
+         "type": "Column",
+         "width": "stretch",
+         "items": [
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "Desktop",
+             "size": "Small",
+             "weight": "Bolder",
+             "isSubtle": true
+            }
+           ]
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "2.48%",
+             "size": "Large",
+             "weight": "Bolder"
+            }
+           ],
+           "spacing": "Small"
+          },
+          {
+           "type": "RichTextBlock",
+           "inlines": [
+            {
+             "type": "TextRun",
+             "text": "↑ 0.21 pp",
+             "size": "Small",
+             "weight": "Bolder",
+             "color": "Good"
+            }
+           ],
+           "spacing": "None"
+          }
+         ],
+         "style": "emphasis",
+         "verticalContentAlignment": "Bottom"
+        }
+       ],
+       "spacing": "Small"
+      },
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "Purchasing sessions ÷ sessions · 18,240 sessions · vs Oct 31",
+         "size": "Small",
+         "isSubtle": true
+        }
+       ],
+       "spacing": "Medium"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "ColumnSet",
+   "columns": [
+    {
+     "type": "Column",
+     "width": "auto",
+     "style": "emphasis",
+     "selectAction": {
+      "type": "Action.OpenUrl",
+      "url": "https://console.noibu.com/00000000-0000-4000-8000-000000000000/sessions"
+     },
+     "items": [
+      {
+       "type": "RichTextBlock",
+       "inlines": [
+        {
+         "type": "TextRun",
+         "text": "View sessions in Noibu ↗",
+         "size": "Small",
+         "weight": "Bolder",
+         "color": "Accent"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "spacing": "Medium"
+  }
+ ]
+}

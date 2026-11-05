@@ -1,6 +1,6 @@
 ---
 name: store-pulse
-description: Show a Noibu store-health snapshot with KPI cards, a purchase funnel, and actions to save a private dashboard, export, or schedule recurring reports; optionally include products and traffic channels.
+description: Show a Noibu store-health snapshot with KPI tiles and a purchase funnel, with follow-ups to export or schedule a recurring report; optionally include products and traffic channels.
 ---
 
 # Store Pulse
@@ -15,24 +15,21 @@ description: Show a Noibu store-health snapshot with KPI cards, a purchase funne
 
 ## Report and actions
 
-- Put one or two measured conclusions inside the card, using the packaged [report display](references/card-quickstart.md).
+- Lead with one or two measured conclusions as the prose summary, then the card from the packaged [report display](references/card-quickstart.md).
 - Show light unfilled Sessions/Engagement/Conversion/AOV/RPS groups and a connected five-stage funnel with rates against total sessions, comparison context and exact counts.
 - Rate deltas use pp; volume/value deltas use relative %, undefined when prior is zero. Explicit measured downward changes use orange; captions remain separate.
-- Place the saved-dashboard action (see the runtime guide) below all dashboard content, before supported investigation opportunities; keep save/download/scheduling in the final section.
-- Saved dashboards use [saved dashboard](../querying-noibu-data/references/saved-dashboard.md): reuse the existing private app, preserve domain/window/optional blocks, verify totals and the saved snapshot by rereading it, and always ask refresh cadence/local time/IANA timezone/notification, with explicit manual/decline allowed. Do not require a spreadsheet or visitor connection for saved-data mode.
-- **Schedule report** uses [shared connected delivery](../querying-noibu-data/references/scheduling-delivery.md). Store Pulse alone adds **Daily** to Weekly/Every 2 weeks/Monthly; weekly remains initially selected.
+- Scheduling uses [shared connected delivery](../querying-noibu-data/references/scheduling-delivery.md). Store Pulse alone adds **Daily** to Weekly/Every 2 weeks/Monthly; weekly remains initially selected.
 - Daily means every calendar day, including weekends, at confirmed local time/IANA timezone; no weekday/first-run/monthday fields. Recurrence does not change source windows: fetch fresh last 24 hours versus preceding 24 hours, or the confirmed alternative, on every run.
 
-## In-chat report completion
+## Output
 
-Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question. The card carries Noibu link buttons only; investigate, download and schedule are offered by the question. No dashboards. In a scheduled run, ask nothing.
 
-Scheduled Email always requires chat confirmation of the exact final recipient email list EVEN IF addresses were supplied; no schedule/send before that gate. Never infer the signed-in user from Email selected. See shared scheduling-delivery.md. Any private app save/build must ask refresh cadence, local time/IANA timezone and notification (manual/decline allowed), verify a same-app unattended DATA writer, and only then create/update a confirmed refresh schedule; no reminder substitute or unverified refresh-success claim.
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response.
+- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
+- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
+- Scheduled runs: preset "Daily · 8 am · Summary"; rolling last 24 hours vs the preceding 24 hours. Store Pulse is the only skill that offers Daily.
 
 ## Browser prerequisite, only for a requested browser step
 
 Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
-
-## Local report completion contract (21.1.13)
-
-Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

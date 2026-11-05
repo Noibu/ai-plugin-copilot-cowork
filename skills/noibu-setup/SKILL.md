@@ -1,6 +1,6 @@
 ---
 name: noibu-setup
-description: Connect and verify Noibu in Microsoft 365 Copilot Cowork, choose an authorized store, and explain which optional capabilities (report board, browser, scheduling, apps, GitHub and ticket connectors) are available. Use for "set up Noibu", "connect Noibu", "is Noibu working", "which stores can I see", or a first Noibu request.
+description: Connect and verify Noibu in Microsoft 365 Copilot Cowork, choose an authorized store, and explain which optional capabilities (report cards, browser, scheduling, GitHub and ticket connectors) are available. Use for "set up Noibu", "connect Noibu", "is Noibu working", "which stores can I see", or a first Noibu request.
 ---
 
 # Set up Noibu
@@ -15,22 +15,17 @@ description: Connect and verify Noibu in Microsoft 365 Copilot Cowork, choose an
 
 Report each one as **available**, **not available** or **not checked**, based on what this session actually exposes. Never claim one from documentation alone.
 
-- **Report board.** The interactive board needs the Noibu tool `noibu_show_report`. If it is not listed, reports still work as text and tables.
+- **Report cards.** Reports appear as a card in the chat with Noibu links and clickable next steps. If a card can't be shown, the same report appears as text and tables.
 - **Browser.** Cowork's browser is the user's Microsoft Edge from Cowork on the web, when the administrator has enabled browser access. It is optional for analytics. Automated axe scanning additionally needs page-script execution, which Cowork does not document; see [accessibility execution](../accessibility-audit/references/execution-and-review.md). Otherwise a clearly labelled limited review is available.
 - **Files.** OneDrive saves (Word) and downloads (PDF) use Cowork's built-in file creation.
-- **Private Cowork app.** Saving a dashboard uses the Cowork App skill (Frontier program); see [private Cowork app](../querying-noibu-data/references/saved-dashboard.md). Saved apps hold a snapshot and stay private unless the user chooses to share.
-- **Scheduling.** Scheduled prompts are managed under Automations; see [scheduling and delivery](../querying-noibu-data/references/scheduling-delivery.md). Email and Teams are built in; Slack and Notion need their plugins.
+- **Scheduling.** Scheduled prompts are managed under Automations; see [scheduling and delivery](../querying-noibu-data/references/scheduling-delivery.md). Email and Teams are built in; Slack and Notion need their plugins. Scheduled sends need the user's approval once, on the first run.
 - **A/B testing.** Recommendations and requested DRAFT creation use Noibu only; the live-site check uses the local Edge browser when connected. Building a test additionally uses a GitHub or Azure DevOps connector (or a patch file) and, on Shopify theme stores, Noibu's theme preview tools. Nothing is merged, published or started without the user's confirmation.
 - **Source and tickets.** Technical fixes and PRs need a GitHub (or Azure DevOps) connector approved by the administrator; tickets need Linear, Jira (Atlassian), GitHub or Notion. Do not change security settings or add connectors on the user's behalf.
 
-## In-chat report completion
+## Output
 
-Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
+Follow the [UX guidelines](references/ux-guidelines.md). This is a conversation workflow: answer in short prose, and offer every choice (store, next workflow, save or not) as a clickable question. The card rules apply only if an optional report card is shown.
 
 ## Browser prerequisite, only for a requested browser step
 
 Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
-
-## Report-scope clarification
-
-Setup is a non-report prerequisite/conversation workflow; business context is document-first with an optional report board. CARD ONLY applies only after a successful optional in-chat report, not setup answers, clarification, document delivery or approved context questions. Do not synthesize a report merely to force either workflow into that scope.

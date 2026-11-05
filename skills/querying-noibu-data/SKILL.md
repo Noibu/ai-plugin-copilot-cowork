@@ -8,7 +8,7 @@ description: Shared Noibu tool routing, domain resolution, query semantics, tele
 - Use [runtime/actions](references/runtime.md) for connection, browser, output and external-action behavior.
 - Discover the exposed tool by its unqualified `noibu_…` name; never hardcode an installation prefix. Current tool schemas are authoritative.
 - On supported calls include a specific `rationale`, active topical `skill`, short `skillStep` and `skillVersion: "1.1.0"`.
-- Full reports use [report display](references/card-quickstart.md); focused answers may remain prose. For any scheduling request read [connected delivery](references/scheduling-delivery.md).
+- Everything the user sees follows the [UX guidelines](references/ux-guidelines.md). Full reports use [report display](references/card-quickstart.md); focused answers may remain prose. For any scheduling request read [connected delivery](references/scheduling-delivery.md).
 
 ## Speed rules (Cowork)
 
@@ -94,14 +94,14 @@ Example aggregate envelope; adapt to the exposed schema:
 - Retrieval does not authorize context/status/draft/lifecycle/job writes or messages. Resolve exact user-requested objects and use supported approvals; read state before retrying ambiguous writes. Tool failures do not authorize outbound feedback.
 - Heatmaps/replays require actual supported MCP UI; numeric evidence/returned links remain useful if rendering fails. Never fabricate a heatmap or claim unverified rendering.
 
-## In-chat report completion
+## Output
 
-Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question. The card carries Noibu link buttons only; investigate, download and schedule are offered by the question. No dashboards. In a scheduled run, ask nothing.
+
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response.
+- Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
+- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
 
 ## Browser prerequisite, only for a requested browser step
 
 Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
-
-## Local report completion contract (21.1.13)
-
-Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

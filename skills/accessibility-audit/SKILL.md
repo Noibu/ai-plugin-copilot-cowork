@@ -33,7 +33,7 @@ Follow [execution setup](references/execution-and-review.md) for this product: i
 - Report distinct violated rules, affected page/target elements, raw rule/node instances, pooled fixes and incomplete checks separately, with completed/failed/unscanned pages and rendered states.
 - Follow [report format](references/report.md): verified PDF attachment, concise summary INSIDE the report card from the same normalized evidence, severity/fix table and top finding. Preserve its legal text/disclaimer exactly; automated checks do not certify compliance.
 - Keep iframe/shadow-root/hidden-state/manual limits visible; unreviewed pages are not clean. Limited/blocked reports retain unknown axe counts, including in PDFs.
-- Use [inline presentation](../querying-noibu-data/references/presentation.md) for **Auto-draft PR** / **Auto-create tickets**, visibly scoped to actual top finding IDs. [Remediation actions](references/remediation-actions.md) resolve connections/destinations after selection; rendering creates nothing.
+- Offer **Auto-draft PR** / **Auto-create tickets** in the next-step question, scoped to the actual top finding IDs named in the card. [Remediation actions](references/remediation-actions.md) resolve connections/destinations after selection; rendering creates nothing.
 - Investigate/Get fix/source remediation uses [repository/CI handoff](../tech-diagnosis/references/github-handoff.md). Preserve completed audit evidence while connection/ref/ownership verification is pending; vendor/managed components need owner handoff. Scanning/reporting does not require any repository connection.
 
 ## Recurrence
@@ -43,16 +43,15 @@ Follow [execution setup](references/execution-and-review.md) for this product: i
 - Missing execution requires a concrete blocker and consent before an alternative. Never replay exports as fresh or silently downgrade axe-only scope.
 - Report scheduling does not authorize remediation, PRs, tickets, remote jobs or setup-time delivery.
 
-## In-chat report completion
+## Output
 
-Successful in-chat reports are CARD ONLY. Put every unique conclusion, priority, window, comparison scope, limitation and next-action hint inside the card before display; stop after the card, with no summary/recap prose before or after it. This does not suppress errors, unavailable-renderer fallbacks, prerequisite questions or separate user-requested action confirmations. Never claim a failed display succeeded. Follow shared card-quickstart.md; at most one render_ui call per response.
+Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question. The card carries Noibu link buttons only; investigate, download and schedule are offered by the question. No dashboards. In a scheduled run, ask nothing.
 
-Scheduled Email always requires chat confirmation of the exact final recipient email list EVEN IF addresses were supplied; no schedule/send before that gate. Never infer the signed-in user from Email selected. See shared scheduling-delivery.md. Any private app save/build must ask refresh cadence, local time/IANA timezone and notification (manual/decline allowed), verify a same-app unattended DATA writer, and only then create/update a confirmed refresh schedule; no reminder substitute or unverified refresh-success claim.
+- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response.
+- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
+- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
+- Audits keep their normalized summary inside the card (see [report format](references/report.md)); the prose before it is one sentence naming the top fix.
 
 ## Browser prerequisite, only for a requested browser step
 
 Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
-
-## Local report completion contract (21.1.13)
-
-Use this skill’s [local display guide](references/card-quickstart.md), [runner](scripts/show_card.py), [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [exact checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py). This own-skill display route has no sibling filesystem dependency. Load querying-noibu-data by name for query/action guidance at its actual returned location; do not assume that loading markdown materializes its scripts. Comparison acquisition and actual current/prior metric rows follow the [local contract](references/comparison-acquisition.md). A host render acknowledgement is terminal CARD ONLY with no client-visibility gate; unknown delivery never means failed or permits whole-report replay.

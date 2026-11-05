@@ -363,8 +363,6 @@ def action(data, kind, target=None):
             require(all(f.get('ownership') not in {'merchant-content', 'vendor'} and f.get('category') != 'vendor' for f in data.get('findings', []) if f['id'] in batch_ids), 'Batch PR includes a content/vendor handoff')
     if finding and finding.get('category') != 'vendor' and (kind in {'get-fix', 'draft-pr'} or kind == 'investigate' and technical) or batch_ids and kind == 'draft-pr':
         result['execution'] = {'route': 'repository-source', 'legacyRoute': 'github-source', 'providers': ['GitHub', 'Azure DevOps'], 'connection': 'discover-applicable-authenticated-accounts', 'selection': 'zero-ask-connect-one-reuse-multiple-ask', 'deduplicate': 'provider-and-account-not-surfaces', 'capabilities': 'repo-read-pr-ticket-pipeline-separate', 'repository': 'resolve-or-ask', 'mode': 'read-only'}
-    elif kind == 'save-dashboard':
-        result['execution'] = {'route': 'cowork-app', 'dataMode': 'persistent-snapshot', 'completion': 'saved-verified-or-specific-blocker', 'reuseExisting': True, 'audience': 'owner-only-no-new-grants', 'privateDeployment': 'only-verified-owner-only-scope-under-native-approval', 'schedule': 'require-refresh-preferences', 'refreshPreferences': ['cadence', 'localTime', 'ianaTimezone', 'notification'], 'manualOrDeclineAllowed': True, 'refreshWriter': 'verified-unattended-same-app-data-update-and-reread', 'refreshRun': ['fresh-noibu-query', 'validate', 'update-same-app-id', 'reread-private-app', 'record-freshness-and-errors'], 'refreshCompletion': 'completed-update-and-reread-not-schedule-created'}
     elif kind == 'schedule':
         result['execution'] = {'route': 'cowork-scheduled-prompt', 'provider': 'discover-send-capability', 'destination': 'resolve-or-ask', 'completion': 'schedule-saved-or-specific-blocker', 'deliveryVerification': 'separate-from-schedule-creation', 'existing': 'match-including-paused', 'emailRecipientState': 'pending-chat-confirmation', 'emailGate': 'confirm-final-exact-addresses-even-if-supplied-before-schedule-or-send', 'defaultRecipient': None}
     elif kind == 'save-report' and data.get('host') == 'copilot-chat':
@@ -654,7 +652,7 @@ def render(data, candidates=None, standalone=False, embed_controller=True):
         if pr_scope:
             scope_text += '<p>PR review: ' + escape('; '.join(f['title'] for f in pr_scope)) + '. Source/ownership verification and selected repository-provider connection are required before a draft PR can be created.</p>'
         findings.append('<section class="noibu-finding"><h3>' + ('Draft patches or tickets for these top findings?' if chat else 'Draft PRs or open tickets for these top findings?') + '</h3>' + scope_text + '<div class="viz-row">' + audit_actions + '</div></section>')
-    save = button('Save as private Cowork app', 'save-dashboard', primary=True) if data['workflow'] in ANALYTICS and not chat else ''
+    save = ''  # No dashboard action (design/README.md, decision 3).
     controls = ('' if outlined else save) + button('Prepare for Copilot Pages' if chat else 'Save report to OneDrive', 'save-report', primary=data['workflow'] not in ANALYTICS) + button('Download Report', 'export-report')
     controls += render_links(data.get('noibuLinks', []))
     if data['workflow'] in SCHEDULABLE and not chat:
@@ -705,8 +703,6 @@ def render(data, candidates=None, standalone=False, embed_controller=True):
         values['TITLE'] = 'Overview'
     fragment = re.sub(r'\{\{([A-Z]+)\}\}', lambda match: values[match.group(1)], template)
     fragment = fragment.replace('class="noibu-board"', f'class="noibu-board" data-noibu-workflow="{data["workflow"]}"', 1)
-    if data['workflow'] in ANALYTICS and not chat:
-        fragment = fragment.replace('<p class="noibu-generated">', '<p class="noibu-site-note">Save as private Cowork app keeps this saved snapshot private to you; it remains owner-only and unshared; private app deployment must preserve verified access without new grants. Chat asks how often to refresh, local time, IANA timezone and notification (manual/decline allowed). Refresh needs a verified unattended same-app writer and a completed update/reread before it is called verified.</p><p class="noibu-generated">', 1)
     require(len(fragment.encode()) < 1000000, 'Presentation exceeds size limit')
     if not standalone:
         return fragment
@@ -716,10 +712,11 @@ def render(data, candidates=None, standalone=False, embed_controller=True):
 # Adaptive Card (Cowork built-in Adaptive Cards skill), in the Noibu insights design language
 # (docs/design/noibu-design-language-skills.md) translated to Adaptive Card elements:
 # flat cards with a tinted header strip and uppercase label, monochrome data, colour only on
-# deltas/severity, ↑ ↓ arrows, max 3 priority cards, action bar last.
+# deltas/severity, ↑ ↓ arrows, max 3 priority cards, no action bar (design/README.md).
 # Report text goes into RichTextBlock/TextRun (never Markdown-parsed), so data can't inject
-# links or formatting. Tenant test 2026-10-28: card buttons didn't reach the conversation, so
-# actions are "Reply with" hints. Host extensions (charts, gauge, progress bars) carry fallbacks.
+# links or formatting. Tenant test 2026-10-28: card buttons didn't reach the conversation, so the
+# card only carries Noibu link buttons; next steps are the AskUserQuestion after the card.
+# Host extensions (charts, gauge, progress bars) carry fallbacks.
 CARD_LIMIT = 24000  # bytes; Teams swaps larger cards for a 'too large to display' placeholder
 
 
@@ -1264,10 +1261,27 @@ def _vital(perf, compact=False):
     return [reading, legend] if compact else [reading, gauge, legend]
 
 
-def _reply_hint(*phrases, align=None):
-    # Fixed command phrases; the agent maps them to the board's actions (adaptive-card-board.md).
-    # One run, because renderers trim spaces at TextRun edges.
-    return _rich(_run('Reply with: ' + ' · '.join(phrases), size='Small', color='Accent'), spacing='Small', align=align)
+def _generated(value):
+    """Footer time as people read it ("Nov 2, 2026, 9:00 pm UTC"), never an ISO timestamp."""
+    made = timestamp(value)
+    offset = made.utcoffset()
+    zone = 'UTC' if not offset else 'UTC' + ('+' if offset.total_seconds() >= 0 else '−') + f'{abs(int(offset.total_seconds())) // 3600:02d}:{abs(int(offset.total_seconds())) % 3600 // 60:02d}'
+    return f'{_MONTHS[made.month - 1]} {made.day}, {made.year}, {made.hour % 12 or 12}:{made.minute:02d} {"am" if made.hour < 12 else "pm"} {zone}'
+
+
+LINK_BUTTONS = 2  # design/README.md 4.5: at most two Noibu link buttons per card
+
+
+def _link_buttons(links):
+    """Button-styled Noibu links at the foot of the card: verified console links only (validated upstream).
+    Built as body elements with selectAction because render_ui receives the card body, not top-level actions."""
+    columns = [{'type': 'Column', 'width': 'auto', 'style': 'emphasis', 'selectAction': {'type': 'Action.OpenUrl', 'url': link['url']},
+                'items': [_rich(_run(link['label'] + ' ↗', size='Small', weight='Bolder', color='Accent'))]} for link in links[:LINK_BUTTONS]]
+    return {'type': 'ColumnSet', 'spacing': 'Medium', 'columns': columns}
+
+
+def _inline_link(link, spacing='Small'):
+    return _rich(_run(link['label'] + ' ↗', size='Small', color='Accent', selectAction={'type': 'Action.OpenUrl', 'url': link['url']}), spacing=spacing)
 
 
 def _details_block(details, target):
@@ -1295,10 +1309,14 @@ def render_adaptive_card(data, candidates=None, compact=False):
     # one "Details & definitions" toggle, so nothing is lost and the card stays scannable.
     fold_tables = wf in {'product-analysis', 'segment-analysis'}
     details = []
-    summary, more = _split(data['summary'], SUMMARY_CHARS)
-    overview = [_rich(_run(summary), spacing='Small')]
-    if more:
-        details.append(('Summary', more))
+    overview = []
+    if wf not in ANALYTICS | {'tech-diagnosis'}:
+        # Analytics and technical reports put the summary in chat prose before the card
+        # (design/README.md 2.1), so the card doesn't repeat it. Audits keep it in the card.
+        summary, more = _split(data['summary'], SUMMARY_CHARS)
+        overview.append(_rich(_run(summary), spacing='Small'))
+        if more:
+            details.append(('Summary', more))
     if data.get('overviewContext'):
         shown, folded = _split(data['overviewContext'], LINE_CHARS)
         if folded:
@@ -1376,8 +1394,6 @@ def render_adaptive_card(data, candidates=None, compact=False):
     if details:
         overview.append(_toggle('Details & definitions', 'noibu-details', spacing='Medium'))
         overview.append(_details_block(details, 'noibu-details'))
-    if outlined and not chat:
-        overview.append(_reply_hint('Save as private Cowork app', align='Right'))
     body = [_card('Overview' if outlined else wf.replace('-', ' '), overview, meta=data['domain']['name'] + ' · ' + window, spacing='None')]
 
     # 2. Priority cards: design cap of 3, ranked as supplied. Technical diagnosis keeps the tested
@@ -1396,14 +1412,6 @@ def render_adaptive_card(data, candidates=None, compact=False):
     for n, (section, item) in enumerate(plan, 1):
         if section:
             body.append(_eyebrow(section, spacing='Large'))
-        technical = wf in {'tech-diagnosis', 'accessibility-audit'} or item.get('category') in {'merchant', 'performance', 'accessibility'}
-        replies = [f'Investigate {n}']
-        if wf in {'tech-diagnosis', 'accessibility-audit'} or item.get('performance'):
-            replies.append(f'Get fix {n}')
-        if technical:
-            replies.append(f'{"Draft a ticket" if chat else "Open a ticket"} for {n}')
-        if item.get('category') == 'vendor':
-            replies.append(f'Vendor message for {n}')
         label = f'Priority {n}' + (' · ' + item['tag'] if item.get('tag') and item['tag'].lower() != f'priority {n}' else '')
         if item.get('performance'):
             label = item['performance']['metric'] + (' · ' + item['performance']['status'] if item['performance'].get('status') else '')
@@ -1430,7 +1438,9 @@ def render_adaptive_card(data, candidates=None, compact=False):
             title = 'Next check' if item.get('fix') and (wf in {'checkout-analysis', 'tech-diagnosis'} or item.get('performance')) else 'Investigation & verification' if item.get('fix') else 'Full evidence'
             content.append(_toggle(title, f'noibu-finding-{n}'))
             content.append(_folded(f'noibu-finding-{n}', folded))
-        content.append(_reply_hint(*replies))
+        if item.get('noibuLinks'):
+            # Next steps live in the question after the card; the card only links into Noibu.
+            content.append(_inline_link(item['noibuLinks'][0]))
         if compact and wf in {'segment-analysis', 'checkout-analysis'}:
             # Spend compact bytes on required five-row sections and measured evidence, not card chrome.
             if chip:
@@ -1450,25 +1460,21 @@ def render_adaptive_card(data, candidates=None, compact=False):
         content = [_rich(_run(item['title'], size='Medium', weight='Bolder')), _rich(_run(what, isSubtle=True), spacing='Small'),
                    _toggle('Hypothesis & metric', f'noibu-test-{item["rank"]}'),
                    _folded(f'noibu-test-{item["rank"]}', [_rich(_run('Hypothesis ', size='Small', weight='Bolder'), _run(_prose(item['hypothesis']), size='Small')), _rich(_run('Success metric ', size='Small', weight='Bolder'), _run(_prose(item['metric']), size='Small'), spacing='Small')])]
-        if caps.get('createDraft'):
-            content.append(_reply_hint(f'Create A/B draft {item["rank"]}'))
         body.append(_card(f'Test {item["rank"]}', content, meta=item['validation']))
 
     # Caveats (progressive disclosure), then the action bar card last.
     if monitoring or data.get('caveats'):
         body.append(_toggle('Evidence & coverage', 'noibu-caveats', spacing='Medium'))
         body.append({'type': 'Container', 'id': 'noibu-caveats', 'isVisible': False, 'items': [_rich(_run('• ' + _prose(c), size='Small', isSubtle=True)) for c in data.get('caveats', [])] + [_rich(_run('Monitor — ' + f['title'] + ': ' + _prose(f['evidence']) + ' Next check: ' + _prose(f.get('fix', 'Recheck if volume or critical impact rises.')), size='Small')) for f in monitoring]})
-    verified_links = data.get('noibuLinks', []) + [link for f in data.get('findings', []) for link in f.get('noibuLinks', [])]
-    if verified_links:
-        body.append(_eyebrow('Verified reader links', spacing='Medium'))
-        body += [_rich(_run(link['label'], size='Small', color='Accent', selectAction={'type': 'Action.OpenUrl', 'url': link['url']})) for link in verified_links]
-    actions = ['Prepare for Copilot Pages' if chat else 'Save report to OneDrive', 'Download report']
-    if wf in SCHEDULABLE and not chat:
-        actions.append('Schedule insights' if wf in {'product-analysis', 'segment-analysis'} else 'Schedule report')
-    if data.get('contextHash') and caps.get('persistContext'):
-        actions.append('Save approved context to Noibu')
-    body.append(_card('Save & download' if chat else 'Download & schedule', [_reply_hint(*actions, align='Right')]))
-    body.append(_rich(_run('Generated ' + _prose(data['generatedAt']) + ' · ' + _comparison(data) + ' · nothing is saved or scheduled until you confirm', size='Small', isSubtle=True), spacing='Small'))
+    # Report-level Noibu links: the first two become the card's buttons, any others stay as inline links.
+    report_links = data.get('noibuLinks', [])
+    if len(report_links) > LINK_BUTTONS:
+        body.append(_eyebrow('More in Noibu', spacing='Medium'))
+        body += [_inline_link(link, spacing='None') for link in report_links[LINK_BUTTONS:]]
+    # No action bar: download, schedule and save are offered by the next-step question after the card.
+    if report_links:
+        body.append(_link_buttons(report_links))
+    body.append(_rich(_run('Generated ' + _generated(data['generatedAt']) + ' · ' + _comparison(data), size='Small', isSubtle=True), spacing='Medium'))
 
     # Cowork's render_ui takes {type, version '1.6', body}; no $schema, and ActionSet is folded into Accordions.
     card = {'type': 'AdaptiveCard', 'version': '1.6', 'fallbackText': _prose(data['summary']), 'body': _accordionize(body)}
@@ -1536,8 +1542,8 @@ def _ab_text(label, value, limit, key, compact):
 
 def _ab_card(data, candidates, compact=False):
     """A/B chat cards (ab-testing skill): findings (one block per test), one test's report, or the
-    implement card once a draft exists. Reply hints replace the Claude widget's sendPrompt buttons:
-    Cowork render_ui has no working buttons (tenant test 2026-10-28), and a reply is the user's request."""
+    implement card once a draft exists. Cowork card buttons can't post back to the chat (tenant test
+    2026-10-28), so next steps are the AskUserQuestion after the card (design/README.md section 5)."""
     view = data['abView']
     items = candidate_data(data, candidates)
     require(items, 'A/B cards need the validated candidates file')
@@ -1565,13 +1571,12 @@ def _ab_card(data, candidates, compact=False):
                 content += _ab_text('Why this test', report['why'], AB_WHY_CHARS, f'noibu-ab-why-{item["rank"]}', compact)
             if more:
                 content += [_toggle('Full change', f'noibu-ab-what-{item["rank"]}'), _folded(f'noibu-ab-what-{item["rank"]}', [_rich(_run(more, size='Small', isSubtle=True))])]
-            content.append(_reply_hint(f'Preview test {item["rank"]}', f'Create A/B test {item["rank"]}'))
             if compact:
                 body.append({'type': 'Container', 'separator': True, 'spacing': 'Medium', 'items': [_eyebrow(f'Test {item["rank"]}')] + content})
             else:
                 body.append(_card(f'Test {item["rank"]}', content))
         made = timestamp(data['generatedAt'])
-        footer = f'Generated {_MONTHS[made.month - 1]} {made.day}, {made.year} · nothing is created in Noibu until you reply'
+        footer = f'Generated {_MONTHS[made.month - 1]} {made.day}, {made.year} · nothing is created in Noibu until you choose a test'
     elif view['kind'] == 'test':
         require(view['rank'] in by_rank, 'No candidate with that rank')
         item = by_rank[view['rank']]
@@ -1622,7 +1627,6 @@ def _ab_card(data, candidates, compact=False):
         file_name = view.get('reportFile') or report.get('reportFile')
         if file_name:
             content.append(_rich(_run('Full report file: ' + file_name, size='Small', isSubtle=True), spacing='Small'))
-        content.append(_reply_hint(f'Create A/B test {item["rank"]}'))
         body.append(_card(f'Test {item["rank"]} of {n} · {domain}', content, spacing='None'))
         footer = 'Recommendation only · previews are approximations · creating a test makes a draft that serves no traffic'
     else:
@@ -1634,7 +1638,7 @@ def _ab_card(data, candidates, compact=False):
         content = [_rich(_run(item['title'], size='Medium', weight='Bolder'), spacing='None'),
                    _rich(_run('Draft ' + view['draftId'], color='Accent', selectAction={'type': 'Action.OpenUrl', 'url': url}), _run(' · flag key ' + view['flagKey']), spacing='Small'),
                    _rich(_run("It serves no traffic until it's started, and its variation code has to be live first. I can automate that: write the code with Noibu's snippet in it, open a pull request, and take it all the way to a live test. Nothing goes live without your approval.", isSubtle=True), spacing='Small'),
-                   _reply_hint(f'Automate the implementation {item["rank"]}')]
+                   _link_buttons([{'label': 'Open draft in Noibu', 'url': url}])]
         body.append(_card(f'{lead} · Test {item["rank"]}', content, spacing='None'))
         footer = None
     if footer:
