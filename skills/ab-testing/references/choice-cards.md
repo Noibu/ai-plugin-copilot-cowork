@@ -5,7 +5,7 @@ The Claude design drew each pick-one-thing moment as a widget card with label-on
 When `AskUserQuestion` is unavailable or fails, send the same question as one plain message listing the labels ("Reply with one: …") and wait. Never skip the question because the tool is missing, and never pick for the person. Unattended runs never reach these questions (the finder defaults to "All goals", and the build half never picks a test on its own).
 
 Contents:
-1. Card 4a — choose a test (SKILL.md Stage 1)
+1. Card 4a — choose a test (SKILL.md Stage 1; full steps in `references/build/stage-1-pick-and-setup.md`)
 2. Card 4b — pick an existing test
 3. The goal question (finder Block 2)
 4. The pages question (page-views and bounce follow-up)
@@ -28,7 +28,7 @@ Claude's labels ("Look for new A/B test opportunities", "Create a specific A/B t
 
 ## 2. Card 4b — pick an existing test
 
-`header: "Test"`, `question: "Which test should I implement?"`. One option per surviving test (SKILL.md Stage 1 steps 1–3), by rank, newest run first on ties. Labels and descriptions come from `scripts/ab_flow.py test-options` (never hand-shortened): each label is the title cut to five words or fewer, keeping the word that tells two similar titles apart ("Sticky add to cart mobile" / "Sticky add to cart desktop"), else suffixed `#rank`, or `(run N)` for the same title from two runs; labels are always distinct; the description is the full title exactly as `candidates.json` spells it. No "(Recommended)", source page, metric or "Draft #id" tag: the Stage 1b summary shows the test in full before anything is created. At most five options; with more, the question text ends "…or type another test's name (for example “<title 6>”)." **No tests left:** no question; one line saying why, then ask card 4a with its other two options.
+`header: "Test"`, `question: "Which test should I implement?"`. One option per surviving test (`references/build/stage-1-pick-and-setup.md` Stage 1 steps 1–3), by rank, newest run first on ties. Labels and descriptions come from `scripts/ab_flow.py test-options` (never hand-shortened): each label is the title cut to five words or fewer, keeping the word that tells two similar titles apart ("Sticky add to cart mobile" / "Sticky add to cart desktop"), else suffixed `#rank`, or `(run N)` for the same title from two runs; labels are always distinct; the description is the full title exactly as `candidates.json` spells it. No "(Recommended)", source page, metric or "Draft #id" tag: the Stage 1b summary shows the test in full before anything is created. At most five options; with more, the question text ends "…or type another test's name (for example “<title 6>”)." **No tests left:** no question; one line saying why, then ask card 4a with its other two options.
 
 ## 3. The goal question (finder Block 2)
 
@@ -51,18 +51,18 @@ Defined in `references/run-modes.md` sections 3 and 5 (labels, descriptions and 
 
 | Moment | header | Question | Options (label — description) |
 |---|---|---|---|
-| Re-invocation (SKILL.md) | Restart? | You've started this again for <domain>. Should I start over or continue where we left off? | Start over (Recommended) — Begin again from the domain lookup; anything in progress is dropped · Continue where we left off — Pick up at <step> |
+| Re-invocation (`references/invocation.md`) | Restart? | You've started this again for <domain>. Should I start over or continue where we left off? | Start over (Recommended) — Begin again from the domain lookup; anything in progress is dropped · Continue where we left off — Pick up at <step> |
 | Setup (Stage 1 step 6e), one call with several questions | Repository / Provider / Staging / Platform | To build “<title>”, where does <domain>'s code live? · Which connected account should I use? · What is the staging URL? (options [] for free text) · Is <store> built on Shopify? | Shopify: Shopify theme · Headless Shopify · Another platform · Not sure |
 | Connection needed (run-modes.md section 4) | Code host | To open a pull request for “<title>”, where is <domain>'s code hosted? | GitHub · Azure DevOps · GitLab · Bitbucket (others typed) |
 | Connect now? | Connect | <one line on what connecting unlocks> | I've connected it — Re-check and continue · Continue without — Use the next path (patch file / another preview) |
 | Split checkout (split-checkout.md) | Next test | Which test should I build instead? | Up to four passing tests (labels from `ab_flow.py test-options`, full title as description) + Stop here for now |
-| Blast radius / not actionable (SKILL.md) | Change | <why it can't ship as described>. What next? | Build the nearest version (Recommended) · up to three passing tests (labels from `ab_flow.py test-options`) · Stop here for now |
+| Blast radius / not actionable (`references/platform-restrictions.md`) | Change | <why it can't ship as described>. What next? | Build the nearest version (Recommended) · up to three passing tests (labels from `ab_flow.py test-options`) · Stop here for now |
 | "Create a specific test" fails the check | Change | <two sentences> | Build the nearest version (Recommended) · Describe a different change · Stop here |
 | "Create a specific test" passed: after its findings card (`findings-card.md`) | A/B test | Build “<title>” for <domain>? | Build this test (Recommended) — Check your store and code setup, then choose how much to automate · Preview test 1 — <title> · Create A/B test 1 — Create it as a draft in Noibu; nothing goes live · Describe a different change — Start again from a new description |
 | Readiness: goal not instrumented | Goal | Add to cart and checkout events aren't recorded here. Switch to page-view goals or stop? | Switch to page views (Recommended) · Stop here |
 | Split checkout found in readiness | Goal | Checkout runs on <host>, tracked separately. Which goal instead? | Increase add to cart rate (Recommended) · Increase page views · Stop here |
-| Browser blocked mid-run (SKILL.md Setup) | Browser | <page> showed a verification check. How should I continue? | I'll pass it in the browser · Continue without the site |
-| Schedule (SKILL.md) | Cadence / Goal / Site check | How often? · Which goal? · Should scheduled runs check the live site? | Weekly · Every two weeks · Monthly / goal labels / Noibu data only (Recommended) · Require the live-site check |
+| Browser blocked mid-run (`references/browser-setup.md`) | Browser | <page> showed a verification check. How should I continue? | I'll pass it in the browser · Continue without the site |
+| Schedule (`references/scheduling.md`) | Cadence / Goal / Site check | How often? · Which goal? · Should scheduled runs check the live site? | Weekly · Every two weeks · Monthly / goal labels / Noibu data only (Recommended) · Require the live-site check |
 | Preview theme room / reuse / delete (`shopify-theme-preview.md`) | Theme room / Reuse / Delete | as that file says | as that file says, reasons in the descriptions |
 | Merge gate (Stage 4, `full`) | Merge | Merge the pull request when you're ready, then tell me. | I've merged it — Confirm it's live, then start the test · Hold, I want changes — Nothing is started |
 | Implement fallback (findings-card.md) | Build | Automate the implementation of “<title>”? | Automate the implementation (Recommended) · Not now |

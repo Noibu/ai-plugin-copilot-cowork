@@ -84,9 +84,8 @@ Apply the inclusion rules, in this order:
    success metric is a checkout metric or whose change sits on a checkout
    page, and list none of them under "Outside your goal": the checkout
    session is on another domain and the test could not measure it. Then
-   check every survivor against SKILL.md's "Platform restrictions and
-   blast radius" for this store's platform, as its "Finder synthesis"
-   bullet says.
+   check every survivor against `references/platform-restrictions.md`
+   for this store's platform, as its "Finder synthesis" bullet says.
 4. Hold to the goal. When a goal was chosen, every test in "The tests"
    uses the goal's success metric, because that is the question the user
    asked. A survivor that most directly moves a different metric goes

@@ -16,7 +16,7 @@ Cowork has one browser: the person's own **Microsoft Edge**, driven through `bro
 
 1. **Is `browser_actions` in the tool list** (loaded or deferred)? No → no browser (step 3). Yes → the readiness message opens the run's tab with `create_tab` on the store URL (`intention: other`, `step_title` "Open your store"). Any result with a tab id means the browser is usable: keep that tab id; it is the run's tab for the read and the before looks.
 2. **The tab could not be opened** (no local browser connected, a client error, a timeout after the tool's one allowed retry): follow `references/browser-readiness.md` in one short message — only now, because a browser step is actually blocked — and continue every non-browser step. If the person makes the browser available before Block 3, use it; otherwise the run has no browser. Do not retry in a loop.
-3. **Neither:** no browser. Continue on Noibu data alone (Phase 1's no-browser path, description-only previews), and a footer line suggests running again with Cowork open in Edge. Never stop the run for want of a browser (scheduled runs with a required live-site check are the one exception, in SKILL.md).
+3. **Neither:** no browser. Continue on Noibu data alone (Phase 1's no-browser path, description-only previews), and a footer line suggests running again with Cowork open in Edge. Never stop the run for want of a browser (scheduled runs with a required live-site check are the one exception, in `references/browser-setup.md`).
 
 Say nothing else in chat about the browser; the reports' capture line and footer name what was read.
 
@@ -29,7 +29,7 @@ Say nothing else in chat about the browser; the reports' capture line and footer
 | Look at a surface (above the fold, visibility, what a shopper sees) | the `get_screenshot` image. It is your look, not a file: describe what it shows in `walkthrough.json` (`look` entries), never claim an image was saved |
 | Cart add / remove (cart and checkout goals) | `dom_click` on the page's own add-to-cart control (node id from `get_dom`), `wait`, re-read; later `dom_click` the remove control of **that line only** (`references/site-validation.md`, "Cart round trip") |
 | Consent banner or popup in the way | Leave the person's existing consent choices alone. Only when a banner or popup covers the content you must read, close it with its decline or close control (never Accept), and say so in `walkthrough.json` `meta.fixUps` |
-| Bot check, login wall, CAPTCHA | Never bypassed: SKILL.md "Switching mid-run" (`request_browser_interaction`, or continue without that surface) |
+| Bot check, login wall, CAPTCHA | Never bypassed: `references/browser-setup.md` "Switching mid-run" (`request_browser_interaction`, or continue without that surface) |
 | A tab that vanished (`tab-not-found`) | The tool's rule: one `create_tab` with the URL, retried once on timeout; then say the tab could not be reopened and continue without the browser |
 | Mobile | No phone-size view exists. Mobile layout claims come from the scroll/click data and are marked inferred. Only when the person asks to see mobile, ask them (one line) to narrow their Edge window to phone width themselves; shoot it with `get_screenshot` and caption it "narrow desktop window, not a phone" |
 | End of the run | There is no close-tab action: leave the run's tab on the store page it last showed (never on a checkout step). Say nothing about it unless the person asks |
