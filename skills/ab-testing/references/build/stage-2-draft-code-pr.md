@@ -1,6 +1,6 @@
 # Build half, Stage 2: draft the test, write the code, open the PR
 
-Read this once the run mode is known (Stage 1b). "SDK file" is `references/shared/noibu-feature-flag-sdk.md`; `platforms.md` is `references/shared/platforms.md`; "6a"–"6e", "Stage 1 step N" and "Rules that apply throughout" are sections of SKILL.md. Before any write, `scripts/ab_flow.py check-write <mode> <write>` must allow it.
+Read this once the run mode is known (Stage 1b). "SDK file" is `references/shared/noibu-feature-flag-sdk.md`; `platforms.md` is `references/shared/platforms.md`; "6a"–"6e" and "Stage 1 step N" are sections of `references/build/stage-1-pick-and-setup.md`; "Rules that apply throughout" is in SKILL.md. Before any write, `scripts/ab_flow.py check-write <mode> <write>` must allow it.
 
 Runs in every mode. 2a–2c always; 2d only in `full` and `pr` (or a follow-up "create the pull request"); 2e in `preview` (and wherever no push is possible). In `theme` and `preview` nothing is pushed to the repository.
 
@@ -19,7 +19,7 @@ The Implementation panel on `https://console.noibu.com/<domainId>/ab-tests/<test
 - Paste Noibu's implementation snippet into the flag script as a comment for traceability.
 - Don't gate the variation by CSS breakpoint when targeting is set in Noibu ("mobile" includes tablets). Let the flag decide.
 - Use the site's own components and design tokens so B looks native.
-- Write and review it under SKILL.md's "Platform restrictions and blast radius" (its Stage 2c bullet: the file-by-file diff review and the PR body's "Blast radius" section).
+- Write and review it under `references/platform-restrictions.md` (its Stage 2c bullet: the file-by-file diff review and the PR body's "Blast radius" section).
 - Validate before committing, offline in the workspace: JSON files parse (`python -c "import json…"`); JS files pass `node --check` when Node is available in the workspace; Liquid/template syntax is reviewed by reading. The repository's own lint or build cannot run here: say so in the PR body.
 - In `theme` mode (and in `full` when the preview method is the theme preview) the same edits go into the Noibu theme change (`references/shopify-theme-preview.md` section 2).
 

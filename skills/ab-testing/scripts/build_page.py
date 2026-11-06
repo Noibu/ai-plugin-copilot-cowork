@@ -116,6 +116,26 @@ def _pair(folder: Path, t: dict):
     return (before, after) if before and after else (None, None)
 
 
+def _evidence(items):
+    """Evidence lines as the validator wants them: `numbers` is a non-empty object of named figures.
+    A model writing page.json often gives the figures as one string ("26% vs 79%") or a list; those
+    are kept under a single key rather than failing the whole build."""
+    out = []
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        item = dict(item)
+        numbers = item.get('numbers')
+        if isinstance(numbers, (str, int, float)) and str(numbers).strip():
+            item['numbers'] = {'figures': numbers}
+        elif isinstance(numbers, list) and numbers:
+            item['numbers'] = {f'figure{i}': n for i, n in enumerate(numbers, 1)}
+        elif not isinstance(numbers, dict) or not numbers:
+            item['numbers'] = {'figures': item.get('claim') or 'see why'}
+        out.append(item)
+    return out
+
+
 def report_file(prefix: str, rank: int) -> str:
     return f'{prefix}-test-{rank}.html'
 
@@ -265,7 +285,7 @@ def candidates(page: dict, wt: dict, prefix: str, folder: Path) -> dict:
         facts = h.get('siteFacts') or _site_facts(wt, template)
         test = {'rank': i, 'title': t['title'], 'reportFile': report_file(prefix, i), 'surfaceTemplate': template,
                 'what': t.get('what'), 'why': t.get('why'), 'hypothesis': t['createInput'].get('hypothesis'),
-                'successMetric': t['createInput']['successMetric'], 'evidence': h.get('evidence', []),
+                'successMetric': t['createInput']['successMetric'], 'evidence': _evidence(h.get('evidence', [])),
                 'validation': validation, 'variations': variations, 'setup': t.get('setup'), 'createInput': t['createInput'],
                 'consoleFollowUps': h.get('consoleFollowUps', []), 'overlap': t.get('overlap'), 'fixFirst': t.get('fixFirst')}
         for key, value in (('surface', t.get('surface')), ('metricVolume', h.get('metricVolume') or t.get('metricVolume')),

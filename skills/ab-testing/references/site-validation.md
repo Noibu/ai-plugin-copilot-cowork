@@ -57,7 +57,7 @@ Adding and removing one item is the maximum state-changing action; it happens on
 
 Each surface may get ONE fix-up, no more, and all fix-ups go in one message. What is still missing after it goes on the reports as a caveat, and the screenshot look in Phase 4 is the last look.
 - A page failed to load or timed out: one more `navigate_to` + read. A `tab-not-found` follows the browser tool's rule (one `create_tab`), then the run continues without that surface.
-- A verification page, login wall or CAPTCHA: never bypassed — SKILL.md "Switching mid-run".
+- A verification page, login wall or CAPTCHA: never bypassed — `references/browser-setup.md` "Switching mid-run".
 - The add-to-cart click did not register (the cart shows no new line) twice: stop, describe the cart from the empty-cart read and from click data, and say so in the reports.
 - Every policy page `notFound`: one more same-origin footer link; an off-site help center only if the same-origin pages said nothing about shipping.
 - The collection record recognized no cards, or the product record has no title or price: one targeted look (`dom_scroll` to the grid or buy box, `get_dom`, `get_screenshot`) and record what it shows. Never re-read the whole site.
