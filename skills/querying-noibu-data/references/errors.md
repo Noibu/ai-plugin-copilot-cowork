@@ -43,7 +43,7 @@ If the user uses a left-column label, translate to the right.
 
 ## ARL is Directional, NOT Factual
 
-`revLostAnnualized` (ARL) and `revLost` are Noibu **projections** computed from conversion-rate variance × cart value × leads, extrapolated to a year. Correlation-based, assumption-dependent, artifact-prone.
+`revLostAnnualized` (ARL) and `revLost` are Noibu **projections** computed from conversion-rate variance × cart value × leads, extrapolated to a year. Correlation-based, assumption-dependent and prone to distortion.
 
 **Always caution when you surface revLost or ARL.** Footer-style note under the data, e.g.:
 

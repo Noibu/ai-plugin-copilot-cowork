@@ -1,49 +1,90 @@
 ---
 name: tech-diagnosis
-description: Diagnose Noibu errors and Core Web Vital performance issues, explain likely causes, and recommend or draft a requested fix.
+description: "Diagnose technical issues and Core Web Vital performance problems using Noibu data, and recommend a fix. Use when you want to know what's broken across the store, why an error is happening, what's causing errors, the root cause of poor page performance, how to fix a technical issue, why an error rate spiked, or where errors are concentrated."
 ---
 
-# Technical diagnosis
+# Tech diagnosis
 
-- For Noibu data work, first invoke skill `querying-noibu-data` and use its actual loaded directory for [shared query guidance](../querying-noibu-data/SKILL.md); reading a sibling link alone does not load its executable assets. If the shared skill cannot load, report that query-guidance blocker rather than inventing a filesystem path or fetching without its rules. Open its [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `tech-diagnosis`; resolve store/platform and saved context. An already measured technical report can still use the self-contained local display path below; it needs no shared sibling files.
-- Specific issue/error/page/metric requests are focused diagnoses; general “what is broken” requests are surveys. Default performance is current 30 days versus the immediately preceding equal 30 days, acquired together before presentation; label the active-error survey's separate seven-day window.
+Two modes:
 
-## Survey
+- **Scan**: no specific issue is named. Scans for the highest-value errors and page-speed problems and delivers a prioritized report card.
+- **Diagnosis**: a specific signal is named. Produces one self-contained finding: summary, cause, fix.
 
-- Read the matching `references/platform-<name>.md` file (shopify, bigcommerce, magento, woocommerce), or `references/platform-generic.md`. Search active errors by occurrences, up to three pages of 30, and in the same parallel batch fetch the p75 vitals below; stop paging when sufficient distinct candidates exist.
-- Active fix candidates need last occurrence within 48 hours, >10 seven-day occurrences, usable stack and merchant-owned frames. Deduplicate primary file/signature; distinguish infrastructure/telemetry/vendors.
-- Rank by occurrences × page criticality: checkout 5, cart 4, product 3, collection 2, home 1, other 0.5. Vendor code receives an owner handoff. Low-volume vendor signals (for example 8 events/4 sessions) are monitoring coverage, not padded priorities unless a material justified critical impact is evidenced. Set disposition: monitor and retain counts/window/uncertainty/next check; structured errorRecency is seven-day events plus actual lastSeenHours. Merchant active-fix threshold stays >10 events in seven days and last seen within 48 hours.
-- Fetch p75 LCP/INP/CLS by page/group/device using [performance guidance](references/performance.md); rank by traffic/severity without mixing unlike score scales.
-- Present separate merchant/performance/vendor sections, at most two findings each, with windows, occurrences/traffic, last seen and next actions.
+## When to use it
 
-## Focused diagnosis
+Use it for what's broken across the store, why an error happens, why a page is slow, how to fix a technical issue, and where errors concentrate.
 
-- Read [error guidance](references/errors.md) or [performance guidance](references/performance.md); fetch matching details, diagnosis, trends and segment evidence.
-- Separate observations, Noibu AI explanations and causal hypotheses. Exact source lines/element claims need inspection.
-- Return impact, evidence, likely cause/uncertainty, proposed fix and verification together; do not hide essential guidance behind a button.
-- Initial Noibu diagnosis does not require a browser or repository connection. For Investigate/Get fix or natural-language source diagnosis/fix/PR requests, follow [repository/CI handoff](references/github-handoff.md): verify/reuse connection, otherwise prompt to connect; resolve repository/ref and inspect merchant source. Keep useful unverified guidance while access is pending.
+Don't use it for:
 
-## Presentation and actions
+- Where shoppers drop off in checkout: `checkout-analysis`.
+- Product or collection performance: `product-analysis`.
+- Channel, device or country conversion: `segment-analysis`.
+- Accessibility violations: `accessibility-audit`.
 
-- Use the **local** [report display](references/card-quickstart.md) and linked [display runner](scripts/show_card.py), [canonical builder](scripts/build_presentation.py) and [console helper](scripts/console_links.py). Resolve `skill_dir` to the actual loaded **tech-diagnosis** directory containing this SKILL.md, not the shared skill, the copied wrapper or the package root. This local Adaptive Card path remains complete when skills are materialized independently; no sibling filesystem assumption or wide path search. Performance findings need structured p75 cards: value/units, threshold bands/marker, page/device/traffic/window and observed status only. Missing values remain unknown.
-- Include [verified Noibu links](../querying-noibu-data/references/console-urls.md); metric overview URLs do not imply preserved filters.
-- After the user picks a priority, offer Get the fix and **Open a ticket** in that finding's next-step question, even before an integration is connected. Ticket clicks use the [destination-first chooser](../querying-noibu-data/references/ticket-handoff.md); wait for selection before provider discovery/creation. Ignore requires an actual issue and supported status tool.
-- Investigate/Get fix permit read-only source inspection and a proposal, not edits/PRs. Repository writes, draft PRs, tickets, status changes and vendor messages require their requested scope and approvals; never merge/deploy. Missing integrations yield an explicitly unsaved draft/specification.
-- Data does not prove every session was blocked. Revenue-loss projections are only for requested money impact; redact sensitive HTTP fields.
-- Requested schedules use [connected delivery](../querying-noibu-data/references/scheduling-delivery.md), retaining focused/survey scope and fresh error/performance windows. Reporting does not require a repository connection or authorize automatic remediation/status writes.
+## Guardrails
+
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **No client-side data joins.** Read each Noibu source on its own terms.
+- **Don't overstate impact.** "Present in X sessions", not "blocking X users". No revenue projections or lost-revenue figures.
+- **Plain language.** Translate Noibu labels; keep identifiers in code style.
+- **No citation sections.**
+- **Never narrate internals.** No tool names, query parameters, state values, filter logic or fallback decisions. Retries happen silently.
+- **Page criticality is internal only.** Checkout > Cart > Product page > Collection > Home > Other. Never a labelled field.
+- **Name third-party services specifically.** If the stack trace says Klaviyo, GTM or Shop Pay, use that name.
+- **Root cause, never suppression.** A fix addresses why the error happens. Never wrap code in try/catch to silence an error or add null checks that hide the real issue.
+- **Never merge anything.** A person reviews and approves every pull request.
+- On every `noibu_*` call, pass `skill: "tech-diagnosis"` and a short `skillStep`.
+
+## Before you start
+
+Run once: `ls scripts/card.py references/scan.md references/platforms.md references/diagnosis.md references/follow-ups.md`
+
+Then:
+
+1. **Store.** A UUID: use it. A name: resolve it. Nothing: ask which store in one clickable question listing up to five of the user's domains. Note the store's **platform** (Shopify, Magento, WooCommerce, BigCommerce or other).
+2. **Mode.** Pick it from the request:
+   - **Scan**: no specific issue given. A domain name alone is a scan. "Run tech diagnosis", "what's broken", "scan for issues".
+   - **Diagnosis**: a specific issue is named with the store: an error name, a metric and a page, a Noibu issue number, or a page URL.
+   - **Share with vendor**, **ignore an issue**, **schedule**: the request says so. Go straight to `references/follow-ups.md`.
+   - **Unclear**: ask "Are you looking for a scan of what's broken across the store, or do you have a specific issue in mind?"
+3. **Window.** The last 30 days unless the user names another.
+
+## Workflow
+
+**Scan**
+
+1. Send first, before any query: "Scanning <store> for the top technical errors and performance issues. This may take a moment."
+2. Read the platform's frame paths: `references/platforms.md`.
+3. Scan errors, scan page speed, and rank: `references/scan.md`.
+4. Write the report data: `references/scan.md`, "Report data".
+5. Deliver the report: the Output section below.
+
+**Diagnosis**
+
+1. Follow `references/diagnosis.md` from Step 1. Classify stack frames with `references/platforms.md`.
+2. The first thing the user sees is the finding, never narration.
+3. End with the closing question that file defines.
+
+**After a scan or a diagnosis**: the user picks a priority, or asks to see the fix, draft a pull request, open a ticket, share findings, share with a vendor, ignore an issue, or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
+A full report is three separate steps, in this order:
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
-- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
-- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
-- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
-- A dependency failure keeps the exact missing filename/path and supplied root; don't infer an absent ZIP member or tenant filesystem cause.
-- **Drill-down options** (one priority: added as the second option; no priorities: both): "Check a specific page" · "Change the date range".
-- **Scheduled runs (only when asked):** preset label "Weekly on Mondays", description "9 am · Summary · Teams", with alert-only offered (deliver only when a new merchant error passes the active-fix threshold or a vital crosses into Poor).
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-## Browser prerequisite, only for a requested browser step
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
+A focused question gets prose with the number, its window and its base; a card only if it helps.
+
+Download, save and schedule run only when the user asks. Never offer them.
+
+In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add: "Diagnose a specific error", "Check speed on a specific page".
+- Schedule preset: Weekly on Mondays · 9 am · errors from the last 7 days, page speed from the last 30.
