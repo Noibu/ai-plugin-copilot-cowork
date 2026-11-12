@@ -14,15 +14,6 @@ Official Noibu AI plugin for Microsoft 365 Copilot Cowork. It connects Cowork to
 | `build-business-context` | Interviews you and saves a business-context file to Noibu |
 | `querying-noibu-data` | The reference the other skills use for calling Noibu's tools |
 
-## Status
-
-Preview. Not every skill has been run end to end in a Cowork tenant, and two have not been run at all:
-
-- `ab-testing`: the finder, the Shopify theme preview and the live-code check are untested.
-- `accessibility-audit`: Noibu's tools can start a scan but cannot return its results, so the skill reports findings only once you paste them in.
-
-Cowork cannot open a store's pages or run code in them. Every skill works from Noibu's data and tools; where a page has to be looked at, the skill gives you the link and what to check.
-
 ## Layout
 
 The repository root is the app package.
