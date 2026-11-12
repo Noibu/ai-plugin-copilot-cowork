@@ -1,51 +1,77 @@
 ---
 name: product-analysis
-description: Analyze Noibu product and collection performance, add-to-cart opportunities, and purchase friction; present a priority report card with investigation, export and scheduling follow-ups.
+description: "Analyze product and collection performance using Noibu data. Use when you want to know which products are underperforming, what your best-selling product type is, why a product isn't converting, how your collections are performing, which products get views but no sales, or where shoppers drop off in the product funnel."
 ---
 
-# Product and collection performance
+# Product analysis
 
-- Read [shared query guidance](../querying-noibu-data/SKILL.md). Open [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `product-analysis`; resolve the store and saved context. Default to 30 days.
-- Focused questions use only necessary queries. For a full review, follow [queries](references/queries.md): products by views, product-page cart opportunities, collections and product types, **sent as one parallel batch**; compare suitable cohorts and run targeted follow-ups for supported signals.
+Finds which products and collections are winning or losing, and why, from Noibu session and page data. A full analysis ends in one report card with the product funnel, the top products and collections, and the priorities ranked by sessions affected.
 
-## Report and opportunities
+## When to use it
 
-Use the packaged [report display](references/card-quickstart.md), not a custom redesign.
+Use it for product, collection and product-type performance: views, add-to-cart rates, conversion, and where shoppers leave the product funnel.
 
-- Lead with one or two measured conclusions as the prose summary before the card; the card doesn't repeat them.
-- Keep session count, session conversion and measured median completed cart value/currency in `overviewContext`.
-- Prefer a complete product-viewer cohort funnel: viewed product → cart → purchase. Name a focused cohort in `funnelContext`; never derive a store-wide funnel from top-N products. Any-cart purchase after viewing is not purchase of that product.
-- Declare viewers/cart/all-session denominators and use counts for geometry. Missing stages stay omitted.
-- Use two primary `placement: "overview"` tables, normally products and collections by sessions; other tables use `supporting`. Retain Show more/Show less, five-row previews and all source rows/full names. Numeric session counts may use `barColumn`.
-- Label URL-based collection cohorts when events are sparse; omit unmeasured ATC, prices and revenue/session.
-- Show the strongest two or three opportunities, fewer if warranted. Use a factual tag, specific product/collection, actual traffic unit and concise evidence with material limitations.
-- Put the investigation/verification plan in `fix`, under **Investigation & verification**. Additional real signals retain their IDs/count; do not invent fillers.
-- Card order: overview, then opportunities, then Evidence & coverage. The question after the card offers the card's priorities. Shared styling supplies light panels and orange measured declines.
+Don't use it for:
 
-## Interpretation
+- Where shoppers drop off inside checkout: `checkout-analysis`.
+- Channel, device or country comparisons across the whole store: `segment-analysis`.
+- The root cause and fix of one error or slow page: `tech-diagnosis`.
+- A quick read on the whole store's last 24 hours: `store-pulse`.
 
-- Whole-cart values are not product revenue; distinguish AOV from median value.
-- Compare price tiers only with measured prices/confirmed context, not title guesses. Without credible peers, use measured cart-opportunity scores and funnel behavior.
-- Title variants/localized URLs may split a product; disclose suspected duplicates rather than silently merging.
-- Low scroll does not prove a control was unseen; country differences do not establish shipping restrictions; errors correlated with low conversion do not prove causation.
-- Exposure is not proven blocked users or recoverable sales. Preserve attribution/identity limitations.
+## Guardrails
 
-## Follow-ups
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Conversion is only comparable within the same price tier.** Never flag a low conversion rate as underperformance without a same-tier benchmark. `references/queries.md` has the full rule and the other data limits.
+- **An empty store.** If total sessions in the window are zero or a handful, say plainly that the store has no traffic in this window and offer a wider range or another store.
+- **Work quietly.** Don't narrate resolving the store, reading files, confirming field names or running queries. The summary is the first thing the user sees.
+- On every `noibu_*` call, pass `skill: "product-analysis"` and a short `skillStep`.
 
-- Reuse evidence for Investigate and exports. Route technical causes to tech-diagnosis and its [repository/CI handoff](../tech-diagnosis/references/github-handoff.md); normal analysis does not require a repository.
-- Scheduling uses [shared connected delivery](../querying-noibu-data/references/scheduling-delivery.md) with fresh product scope, rolling windows and comparison rules. Daily is not offered here.
+## Before you start
+
+Run once: `ls scripts/card.py references/queries.md references/report.md references/follow-ups.md`
+
+Then, before any query:
+
+- **Resolve the store.** Use the domain the user gave (name or UUID). If they gave none and the account has one domain, use it. Otherwise ask which store in one clickable question listing up to five of their domains. Ask nothing else.
+- **Confirm every field name by its role before using it.** The `querying-noibu-data` skill maps the role names used here to the real Noibu tools and columns and documents query limits. If it isn't available, read tool and field names from the live Noibu tool schema.
+- **Window:** the default in `querying-noibu-data`; if none, the last 30 days.
+
+## Workflow
+
+Pick the route from the request.
+
+**Quick answer**: one focused question ("which products get the most views?", "how is the Sale collection performing?").
+
+1. Open `references/queries.md` and run only the one or two queries the question needs.
+2. Answer in a few sentences, with a small table if it helps.
+3. Offer the full analysis. On yes, run it.
+
+**Full analysis**: a broad request, a bare invocation, or yes to that offer.
+
+1. Run the four-step workflow: `references/queries.md`.
+2. Write the report data: `references/report.md`.
+3. Deliver the report: the Output section below.
+
+**After a report**: the user picks a priority, or types a request to investigate, download or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
+A full report is three separate steps, in this order:
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
-- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
-- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
-- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
-- **Drill-down options** (one priority: added as the second option; no priorities: both): "Break down by device" · "Change the date range".
-- **Scheduled runs (only when asked):** preset label "Weekly on Mondays", description "9 am · Summary · Teams"; last 7 days vs the previous 7. Daily is not offered.
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-## Browser prerequisite, only for a requested browser step
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
+A focused question gets prose with the number, its window and its base; a card only if it helps.
+
+Download, save and schedule run only when the user asks. Never offer them.
+
+In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add: "Top products by sessions", "How collections are performing", "Product types compared", "Where shoppers leave the product funnel".
+- Schedule preset: Weekly on Mondays · 9 am · last 30 days.

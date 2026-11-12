@@ -1,59 +1,77 @@
 ---
 name: accessibility-audit
-description: Audit website accessibility with approved browser axe-core execution or completed axe exports; when execution is unavailable, guide setup and provide a clearly labelled limited browser review, prioritized with Noibu traffic where available.
+description: "Audit a website for WCAG 2.1 AA accessibility violations using Noibu's page scanner and traffic data, and turn the findings into prioritized fixes. Use when you want to know what's inaccessible across the store, check WCAG or ADA compliance, find contrast or heading errors, audit for screen reader support, generate an accessibility report, or fix accessibility violations with pull requests or tickets."
 ---
 
 # Accessibility audit
 
-- Read [shared query guidance](../querying-noibu-data/SKILL.md), [runtime/actions](../querying-noibu-data/references/runtime.md) and [execution setup](references/execution-and-review.md). Use skill `accessibility-audit`.
-- Discover browser capabilities before unnecessary traffic queries. Completed axe exports need provenance, not a new browser connection.
+Starts Noibu's WCAG 2.1 AA scan on the store's ten busiest pages and gives the links to the results. When the user brings findings back into the conversation, it pools the repeats into unique fixes, ranks them by severity and traffic, and reports them.
 
-## Prerequisites and execution
+The scan runs on Noibu's side, and its results open in the Noibu console. **This skill cannot read an audit's results.** It works on findings only once the user pastes or attaches them.
 
-Follow [execution setup](references/execution-and-review.md) for this product: it says which browser exists, what must be enabled, and whether page-script execution is available. An automated axe scan needs an exposed, documented operation that runs page JavaScript and returns an awaited result, approved for this website. Check prerequisites and ask only for what is missing. Never change tenant or browser security settings; terminal or script-runtime permissions do not grant browser scripting.
+## When to use it
 
-- Read the current browser capability and [scan/findings procedure](references/scan-and-findings.md).
-- If page-script execution is exposed: confirm readiness, run the minimal approved probe, and only after it succeeds load the bundled checksum-pinned axe and run the bundled scan expression.
-- If it is not exposed (the expected case today), say so plainly, keep axe counts unknown and, unless the user asked for axe only, continue the clearly labelled **Browser-based accessibility review — axe not run**.
-- Distinguish transient navigation/readiness errors from a missing capability; follow the bounded retry procedure rather than calling a capability unavailable after one transient error, and never call a missing capability a temporary error.
-- Results come only from the page. Do not bypass a denial through shell, console, bookmarklets, another automation channel or a remote job.
-- Completed exports keep their original URL/time/state/engine/options and are not fresh scans. A separately requested remote job is outside this flow; QUEUED is not findings.
+Use it to find what's inaccessible across the store, check WCAG or ADA compliance, find contrast or heading errors, check screen reader support, produce an accessibility report, or fix violations with pull requests or tickets.
 
-## Scope and resume
+Don't use it for errors, crashes or slow pages (`tech-diagnosis`), or for conversion and funnel questions (`checkout-analysis`, `product-analysis`, `segment-analysis`).
 
-- A named-page request covers that page. Full-site audits select up to ten pages by 30-day Noibu pageviews using `noibu_get_page_visits`; explain scope. Traffic ranks priority but is optional for an explicitly supplied URL.
-- Reuse selected URLs/window and validate completed evidence on resume; preserve immutable original time/state/options and scan remaining pages only. One completed homepage in ten pages means nine pending, not ten new scans.
-- Without approved execution, guide permitted setup and rediscover capabilities. If the host has a browser and the request isn't axe-only, perform the distinct **Browser-based accessibility review — axe not run**; if execution-and-review.md says the host has no browser, return its traffic-ranked scan plan instead using supported snapshots/screenshots/read-only observations. Report reviewed/unreviewed pages, manual observations, verification items and unchecked states.
-- Limited review uses [the review exporter](scripts/build_review.py): zero completed axe scans, unknown automated severities, no invented axe violations. If inspection is unavailable or axe-only, return the precise prerequisite and selected scope.
+## Guardrails
 
-## Findings and deliverables
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Never state a finding, a count or a severity the user did not provide.** After starting audits, there is nothing to report but the pages and their links.
+- **Start an audit only when the user asks for one.** Each start is a new scan.
+- **Never name the scanning tool** in anything the user sees.
+- **Say what an automated audit is.** Every report of findings carries one sentence: automated checks find 30%–90% of issues on the scanned pages, and the result is informational, not legal advice or a compliance certification.
+- **Pool before scoring or reporting anything.** The same selector and criterion is one finding (`references/findings.md`, "Pooling").
+- **"Pageviews", never "visits".**
+- **"GitHub Issue", never bare "Issue".** "Automated tickets" is the umbrella term for any ticket or GitHub Issue this skill creates.
+- **"Severity"** is the scan's impact level (critical, serious, moderate, minor). **"Priority"** is the traffic-weighted ranking score; it decides order and is never shown as a number.
+- **"Auto-draft PR"**, never "Auto-fix".
+- **Every WCAG criterion links to its W3C Understanding page** in prose, PDFs, tickets and pull requests: `https://www.w3.org/WAI/WCAG21/Understanding/<slug>.html`.
+- **Never merge anything.** A person does every merge, close and status change.
+- **Link out; don't copy status.** Never reproduce a ticket's or GitHub Issue's live status in a report.
+- On every `noibu_*` call, pass `skill: "accessibility-audit"` and a short `skillStep`.
 
-- Pool confirmed shared-component findings by rule/criterion plus stable selector. Keep per-page nodes and count affected pageviews once per unique page.
-- Rank severity weight × log10(max(1, affected pageviews)) × min(2, 1 + 0.2 × affected page count). Missing traffic stays unknown; incomplete checks are verification items, not violations.
-- Report distinct violated rules, affected page/target elements, raw rule/node instances, pooled fixes and incomplete checks separately, with completed/failed/unscanned pages and rendered states.
-- Follow [report format](references/report.md): verified PDF attachment, concise summary INSIDE the report card from the same normalized evidence, severity/fix table and top finding. Preserve its legal text/disclaimer exactly; automated checks do not certify compliance.
-- Keep iframe/shadow-root/hidden-state/manual limits visible; unreviewed pages are not clean. Limited/blocked reports retain unknown axe counts, including in PDFs.
-- Offer **Auto-draft PR** / **Auto-create tickets** in the next-step question, scoped to the actual top finding IDs named in the card. [Remediation actions](references/remediation-actions.md) resolve connections/destinations after selection; rendering creates nothing.
-- Investigate/Get fix/source remediation uses [repository/CI handoff](../tech-diagnosis/references/github-handoff.md). Preserve completed audit evidence while connection/ref/ownership verification is pending; vendor/managed components need owner handoff. Scanning/reporting does not require any repository connection.
+## Before you start
 
-## Recurrence
+Run once: `ls scripts/card.py references/audit.md references/findings.md references/fix-locations.md`
 
-- Follow [connected delivery](../querying-noibu-data/references/scheduling-delivery.md). Confirm audit mode, standard, rendered states and fixed-URL versus traffic-ranked selection rule.
-- Verify approved browser readiness/execution in the scheduled runtime before promising fresh axe scans; interactive success does not prove unattended access.
-- Missing execution requires a concrete blocker and consent before an alternative. Never replay exports as fresh or silently downgrade axe-only scope.
-- Report scheduling does not authorize remediation, PRs, tickets, remote jobs or setup-time delivery.
+Then resolve the store. A UUID: use it. A name: `noibu_get_domain`. Neither: `noibu_list_domains`; use it if there is exactly one, else ask which in one clickable question listing up to five. Keep the domain's UUID, its integer `numId` and its name; the scan takes the `numId` and the result links take the UUID. Note the store's platform.
+
+## Workflow
+
+**Run an audit**: the user asks for an accessibility audit.
+
+1. Pull the top 10 pages by 30-day pageviews and start one scan per page: `references/audit.md`.
+2. Reply with the pages and their result links, as that file says. No card and no next-step question: there are no findings yet.
+
+**Report on findings**: the user pastes or attaches findings from an audit.
+
+1. Pool, score and sort them, and write the report data: `references/findings.md`.
+2. Deliver the report: the Output section below.
+
+**After a report**: the user picks a priority, or asks to download the report, draft pull requests or create tickets. Open `references/findings.md`, "After the report". Pull requests use `references/fix-locations.md`.
+
+**Schedule**: the user asks to run the audit on a schedule. Open `references/audit.md`, "Schedule".
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
+A full report is three separate steps, in this order:
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
-- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
-- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
-- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
-- Audits keep their normalized summary inside the card (see [report format](references/report.md)); the prose before it is one sentence naming the top fix.
-- **Next-step question:** this skill's own options (Auto-draft PR · Auto-create tickets, scoped to the top findings shown in the card), not the priority list.
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-## Browser prerequisite, only for a requested browser step
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
+A focused question gets prose with the number, its window and its base; a card only if it helps.
+
+Download, save and schedule run only when the user asks. Never offer them.
+
+In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add: "See every finding", "Pages scanned and their violation counts".
+- Schedule preset: Weekly on Mondays · 9 am · top 10 pages by 30-day pageviews.

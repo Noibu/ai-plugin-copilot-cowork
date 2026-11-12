@@ -1,49 +1,81 @@
 ---
 name: checkout-analysis
-description: Analyze Noibu checkout performance, funnel drop-off, payment and delivery mix, abandonment, and technical issues with a report card and investigation, export and scheduling follow-ups.
+description: "Analyze checkout performance and health using Noibu data. Use when you want to know where shoppers drop off in the checkout funnel, what payment or delivery methods customers are using, why completion rates are low, what priority errors are hurting checkout, or how cart and order values benchmark."
 ---
 
-# Checkout performance
+# Checkout analysis
 
-- Read [shared query guidance](../querying-noibu-data/SKILL.md). Open [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `checkout-analysis`; resolve the store and saved business context.
-- Default to the last 30 days versus the immediately preceding equal window; honor requested dates.
-- Focused questions use only relevant [queries](references/queries.md). For a full review:
-  - Fetch Q1–Q7, Q1b when row-level fields exist, and prior counterparts **in one parallel batch** (all independent); only follow-ups wait for results.
-  - Use distinct sessions reaching at least each stage. Express checkout may skip intermediate events.
-  - Compare each segment with its own prior window. Candidate regressions are ≥3 pp absolute or ≥10% relative with sufficient traffic; rank up to three supported findings.
-  - Run targeted follow-ups. Route merchant technical causes to tech-diagnosis; give UX/operations findings a concrete next check and verification plan.
+Finds where shoppers drop off in checkout and what changed, from Noibu session, order-value and error data. A full analysis ends in one report card with up to three priorities, ranked by sessions affected.
 
-## Report
+## When to use it
 
-Use the packaged [report display](references/card-quickstart.md); focused answers may remain prose.
+Use it for the checkout funnel, completion rates, abandonment, payment and delivery methods, checkout errors, and cart and order values.
 
-- Lead with one or two measured conclusions as the prose summary before the card; the card doesn't repeat them.
-- Overview: compact population/cart reach, percentage-led cart → checkout → payment → completion funnel: Added to cart shows its raw count and is the 100% baseline; later stages show their share of that SAME cart population (not previous stage), completion/device/value highlights, supported abandonment rows and populated payment/delivery bars.
-- Show exact windows, timezone, denominators, currency and express-checkout/coverage limits. Each period uses its OWN measured positive cart baseline for bars and rates; derive signed pp deltas from those rates, not counts. Show exact counts must expand actual current/prior session counts for EVERY stage in full AND compact. Missing/zero bases or unmeasured stages are Not measured, never invented zero rates. Keep checkout completion separate: completed / started checkout. See [funnel contract](../querying-noibu-data/references/funnel-visualization.md). Avoid duplicating KPIs as highlights.
-- Put abandonment tables at `placement: "overview"`; supporting data is expandable. Label bounded samples and never extrapolate sample cart values to all abandoned sessions.
-- Classify abandonment as observed behavior, not proven motives. Check continued product/category browsing before generic no-action. Payment/delivery mix measured only on purchases cannot establish gateway failure rates.
-- Each numbered opportunity needs its cohort, current/prior denominators, signed pp/relative delta and `fix` containing **Next check** plus verification. Do not pad findings or treat tiny order movements as major opportunities.
-- Missing slices stay omitted. With healthy completions but missing intermediate events, headline cart-to-completion rather than invented drops. An empty window warrants another date/store choice.
-- Estimates need a formula/baseline and are not guaranteed recovery. Lower discount use alone does not prove coupon failure.
+Don't use it for:
 
-## Follow-ups
+- Product or collection performance: `product-analysis`.
+- Channel, device or country comparisons across the whole store: `segment-analysis`.
+- The root cause and fix of one error or slow page: `tech-diagnosis`.
+- A quick read on the whole store's last 24 hours: `store-pulse`.
 
-- Keep the tested light layout: overview, numbered investigation cards, Evidence & coverage. The question after the card offers the card's priorities.
-- Investigate reuses the selected evidence; technical findings use the [repository/CI handoff](../tech-diagnosis/references/github-handoff.md), not ordinary UX/operations analysis.
-- Scheduling follows [connected delivery](../querying-noibu-data/references/scheduling-delivery.md), with fresh rolling comparisons; exports reuse evidence unless refresh is requested.
-- Issue/status changes require an explicit request, exact issue and supported status. Analysis/rendering authorizes no writes.
+## Guardrails
+
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Analyze what's present, never flag what's missing.** Which fields are populated varies by platform and account. An empty or null result is normal: skip that slice silently and build from the data that is there. No zero rows, no "no data" placeholder, and never a finding, priority or caveat about missing data, tracking or coverage.
+- **Trust cart to completion when the steps between aren't instrumented.** If checkout-started or payment-submitted counts are near zero while completions are healthy, those events aren't tracked for this store. Don't treat the apparent drops as real: use cart to completion as the headline rate and lean on device, country and discount splits for the drop story.
+- **An empty store is the one exception.** If total sessions in the window are zero or a handful, say plainly that the store has essentially no traffic in this window and offer a wider range or another store.
+- **Work quietly.** Don't narrate resolving the store, reading files, or choosing tools, queries or fields. Narrate only what the data shows.
+- On every `noibu_*` call, pass `skill: "checkout-analysis"` and a short `skillStep`.
+
+## Before you start
+
+Run once: `ls scripts/card.py references/queries.md references/report.md references/follow-ups.md`
+
+Then, before any query:
+
+- **Resolve the store, and keep the company id returned with it.** Use the domain the user gave (name or UUID). If they gave none and the account has one domain, use it. Otherwise ask which store in one clickable question listing up to five of their domains. Ask nothing else; take the default window and proceed. Priority errors and data-connection checks need the company id as well as the domain UUID.
+- **Confirm every field name by its role before using it.** The `querying-noibu-data` skill maps the role names used here ("session query tool", "funnel depth field") to the real Noibu tools and columns and documents query limits. If it isn't available, read tool and field names from the live Noibu tool schema. Don't stop or guess.
+- **Window:** the default in `querying-noibu-data`; if none, the last 30 days. The comparison is the equal-length window immediately before.
+
+## Workflow
+
+Pick the route from the request.
+
+**Quick answer**: one focused question ("where do people drop off?", "what payment methods are used?", "errors on my checkout pages?").
+
+1. Open `references/queries.md` and run only the one or two queries the question needs: funnel is Q1, why people abandon is Q1b, payment methods is Q3, errors is Q5.
+2. Answer in a few sentences, with a small table if it helps.
+3. Offer the full analysis. On yes, run it.
+
+**Full analysis**: a broad request, a bare invocation, or yes to that offer.
+
+1. Broad overview, current and previous window: `references/queries.md`, Step 1. Start by telling the user what you're doing in one line.
+2. Rates and their change against the previous window: `references/queries.md`, Step 2.
+3. Pick up to three regressions: `references/queries.md`, Step 3.
+4. Run only the follow-up queries those call for: `references/queries.md`, Step 4.
+5. Write the report data: `references/report.md`.
+6. Deliver the report: the Output section below.
+
+**After a report**: the user picks a priority, or types a request to investigate, ignore an issue, download or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
+A full report is three separate steps, in this order:
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
-- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
-- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
-- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
-- **Drill-down options** (one priority: added as the second option; no priorities: both): "Break down by device" · "Change the date range".
-- **Scheduled runs (only when asked):** preset label "Weekly on Mondays", description "9 am · Summary · Teams"; last 7 days vs the previous 7.
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-## Browser prerequisite, only for a requested browser step
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
+A focused question gets prose with the number, its window and its base; a card only if it helps.
+
+Download, save and schedule run only when the user asks. Never offer them.
+
+In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add: "Where shoppers leave checkout", "Mobile against desktop checkout", "Payment and delivery methods", "Checkout errors".
+- Schedule preset: Weekly on Mondays · 9 am · last 30 days against the previous 30.

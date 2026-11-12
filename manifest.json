@@ -15,7 +15,7 @@
   },
   "description": {
     "short": "Ecommerce conversion, checkout, error and experiment insights from Noibu",
-    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to analyze store health, checkout, products, traffic segments, technical errors and Core Web Vitals, accessibility, and A/B testing (finding, building and launching tests) using your own Noibu data. Ten workflows: Noibu Setup, Querying Noibu Data, Store Pulse, Checkout Analysis, Product Analysis, Segment Analysis, Technical Diagnosis, Accessibility Audit, Build Business Context and A/B Testing. Reports appear as a card in the chat with links into Noibu, followed by clickable next steps to investigate findings, save a report to OneDrive, download a PDF, schedule refreshed reports, open tickets, create A/B test drafts and build A/B tests through a pull request or Shopify preview theme. Every write, send, schedule or share needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
+    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to work from your store's session, error and conversion data. Check the store's health, analyze checkout, products and traffic segments, diagnose errors and slow pages, find and build A/B tests, and run accessibility audits. Reports appear as a card in the chat, followed by clickable next steps. Every write, send or schedule needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
   },
   "icons": {
     "color": "color.png",
@@ -23,9 +23,6 @@
   },
   "accentColor": "#20142D",
   "agentSkills": [
-    {
-      "folder": "./skills/noibu-setup"
-    },
     {
       "folder": "./skills/querying-noibu-data"
     },
@@ -58,10 +55,13 @@
     {
       "id": "noibu",
       "displayName": "Noibu",
-      "description": "Noibu ecommerce analytics: sessions, conversion, page visits, errors, performance, business context and A/B tests for the stores your Noibu account can access.",
+      "description": "Noibu ecommerce analytics: session, page-visit, conversion and revenue data, error diagnosis, A/B tests, Shopify theme changes and accessibility audits for Noibu-monitored stores.",
       "toolSource": {
         "remoteMcpServer": {
-          "mcpServerUrl": "https://mcp.noibu.com/mcp"
+          "mcpServerUrl": "https://mcp.noibu.com/mcp",
+          "mcpToolDescription": {
+            "file": "noibu-mcp-tools.json"
+          }
         }
       }
     }

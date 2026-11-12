@@ -1,54 +1,76 @@
 ---
 name: segment-analysis
-description: Compare devices, countries, channels, and campaigns using Noibu, identify conversion regressions, and provide a report card with investigation, export and scheduling follow-ups.
+description: "Analyze segment and traffic performance using Noibu data. Use when you want to know which channels, devices, or countries convert best, how mobile compares to desktop, where your traffic is coming from, which segments are underperforming, or where to find your best and worst converting customer segments."
 ---
 
-# Segment conversion analysis
+# Segment analysis
 
-- Read [shared query guidance](../querying-noibu-data/SKILL.md). Open [runtime/actions](../querying-noibu-data/references/runtime.md) only for a connection problem or a save, export, schedule, ticket or browser action. Use skill `segment-analysis`; resolve the store and saved context. Default to 30 days.
-- Focused questions need only relevant queries. For a full review, follow [queries](references/queries.md):
-  - Fetch device, country and UTM source/medium aggregates plus a direct whole-domain baseline **in one parallel batch**.
-  - Compare channels with peers of similar intent/objective; compare devices with their own history. Use equal halves with exact dates for within-window device ratios.
-  - Assess traffic quality and sparse purchases; zero conversion or geography alone does not identify bots.
-  - Select up to three supported signals and run campaign, landing-page or funnel follow-ups.
+Compares how devices, countries and channels convert, from Noibu session data. A full analysis ends in one report card with conversion by device, the top countries and channels, and three priorities ranked by sessions affected.
 
-## Report and opportunities
+## When to use it
 
-Use the packaged [report display](references/card-quickstart.md).
+Use it for which channels, devices or countries convert best or worst, how mobile compares to desktop, and where traffic comes from.
 
-- Lead with one or two measured conclusions as the prose summary before the card; the card doesn't repeat them.
-- Overview: site-wide/mobile/desktop conversion, purchasing/session denominators, exact window/timezone and a few nonduplicative country/channel highlights. No mandatory funnel.
-- Under Show more/Show less, use three `placement: "overview"` tables when supported: Countries, Best converting channels, Most visited channels. Include Sessions/CVR/Revenue per session with measured currency components kept separate.
-- State each ranking's volume filter, population and top-N bounds. A capped result cannot establish a global winner. Retain five-row previews/all rows; history/campaign/landing tables use `supporting`.
-- Use up to three visible `overviewNotes` for material attribution, reconciliation or currency caveats; retain detailed evidence too.
-- Each top opportunity has a factual tag, specific cohort, actual traffic unit and concise evidence; `fix` holds expandable investigation/verification.
-- Card order: overview, then opportunities, then Evidence & coverage. The question after the card offers the card's priorities. Shared styling supplies light panels and orange measured declines.
+Don't use it for:
 
-## Interpretation
+- Where shoppers drop off inside checkout: `checkout-analysis`.
+- Product or collection performance: `product-analysis`.
+- The root cause and fix of one error or slow page: `tech-diagnosis`.
+- A quick read on the whole store's last 24 hours: `store-pulse`.
 
-- A stable device gap is not a regression. A worsening ratio driven by faster desktop improvement or traffic mix does not prove mobile deteriorated.
-- Separate country opportunity, channel intent and campaign objective; exposure is not proven blocked users or lost orders.
-- Do not merge source/medium aliases or call all unattributed sessions Direct without evidence.
-- Missing UTM share needs a complete unattributed aggregate and whole-domain denominator, not overlapping cohort sums. Missing tags do not prove a tracking defect.
-- For absent paid-traffic UTM rows, use the shared guide's referrer-parameter recovery and label results a lower bound.
-- Preserve low-volume uncertainty, count discrepancies and currency boundaries; do not invent signals to fill cards.
+## Guardrails
 
-## Follow-ups
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Bot filter first.** No segment becomes a priority before it has passed the bot filter in `references/queries.md`.
+- **An empty store.** If total sessions in the window are zero or a handful, say plainly that the store has no traffic in this window and offer a wider range.
+- **Work quietly.** Don't narrate resolving the store, reading files or confirming field names.
+- On every `noibu_*` call, pass `skill: "segment-analysis"` and a short `skillStep`.
 
-- Investigate retains the selected evidence. Route genuine technical findings to tech-diagnosis and its [repository/CI handoff](../tech-diagnosis/references/github-handoff.md), not ordinary marketing findings.
-- Scheduling uses [shared connected delivery](../querying-noibu-data/references/scheduling-delivery.md), fresh rolling scope and the confirmed equal-half/other baselines. Daily is not offered here.
+## Before you start
+
+Run once: `ls scripts/card.py references/queries.md references/report.md references/follow-ups.md`
+
+Then, before any query:
+
+- **Resolve the store.** Use the domain the user gave (name or UUID). If they gave none and the account has one domain, use it. Otherwise ask which store in one clickable question listing up to five of their domains. Ask nothing else.
+- **Confirm every field name by its role before using it.** The `querying-noibu-data` skill maps the role names used here to the real Noibu tools and columns. If it isn't available, read tool and field names from the live Noibu tool schema.
+- **Window:** the last 30 days unless the user names another.
+
+## Workflow
+
+Pick the route from the request.
+
+**Quick answer**: one focused question ("which channel converts best?", "how does mobile compare to desktop?", "which countries are underperforming?").
+
+1. Open `references/queries.md`, run only the one or two queries the question needs, and answer directly.
+2. Offer the full analysis in one clickable question with two options: "Yes: survey device, country and channel, then dig into anomalies" and "No thanks".
+
+**Full analysis**: a broad request, a bare invocation, or yes to that offer.
+
+1. Run the workflow: `references/queries.md`.
+2. Write the report data: `references/report.md`.
+3. Deliver the report: the Output section below.
+
+**After a report**: the user picks a priority, or types a request to investigate, download or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
-Follow the [UX guidelines](references/ux-guidelines.md) for everything the user sees: a 2–3 sentence summary, then one card, then the next-step question offering the card's priorities. The card carries Noibu link buttons only. Download, save and schedule run only when the user asks and are never offered or mentioned. No dashboards. In a scheduled run, ask nothing.
+A full report is three separate steps, in this order:
 
-- Build the card with this skill's [local display guide](references/card-quickstart.md): write the `noibu.presentation/1` report, then run the [runner](scripts/show_card.py), which uses the [builder](scripts/build_presentation.py), [console helper](scripts/console_links.py), [checker](scripts/cowork_card_check.py) and [comparison adapter](scripts/comparison_acquisition.py) in this folder. Never hand-write card JSON; at most one render_ui call per response. Build the next-step question from the runner's `priorityOptions`.
-- Give every finding a `shortTitle` of 5 words or fewer (the question shows it) and a title of 60 characters or fewer.
-- Load querying-noibu-data by name for query and action guidance. Current/prior comparisons follow the [local contract](references/comparison-acquisition.md).
-- Scheduled email always confirms the exact recipient addresses in chat, even if supplied ([connected delivery](../querying-noibu-data/references/scheduling-delivery.md)).
-- **Drill-down options** (one priority: added as the second option; no priorities: both): "Focus on one country" · "Change the date range".
-- **Scheduled runs (only when asked):** preset label "Weekly on Mondays", description "9 am · Summary · Teams"; last 7 days vs the previous 7. Daily is not offered.
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-## Browser prerequisite, only for a requested browser step
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-Use the local [Edge connection/readiness guide](references/browser-readiness.md). Never prompt for browser setup during ordinary analytics/report display or repeat it when the browser is usable; explain the blocked step and continue nonbrowser work.
+A focused question gets prose with the number, its window and its base; a card only if it helps.
+
+Download, save and schedule run only when the user asks. Never offer them.
+
+In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add: "Mobile against desktop", "Which countries underperform", "Which channel converts best", "Where traffic comes from".
+- Schedule preset: Weekly on Mondays · 9 am · last 30 days.

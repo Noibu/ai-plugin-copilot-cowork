@@ -1,117 +1,118 @@
 ---
 name: ab-testing
-description: "Find, build and launch A/B tests on a Noibu-monitored store: ranked test ideas from 30 days of Noibu data and the live site, a Noibu draft, flag-gated variation code, a pull request or Shopify preview theme, automated QA, and a started test after your merge. Use for \"what should we A/B test\", CRO or experiment ideas, building a specific test, implementing a test found earlier in this chat, replies such as \"Preview test 2\", \"Create A/B test 2\" or \"Automate the implementation 2\", or taking a Noibu draft test live. Replaces the former ab-test-opportunity-finder skill. Requires the Noibu connector. Do NOT use to read an existing test's results or verdict (querying-noibu-data) or for general store health (store-pulse)."
+description: "Find, build and launch A/B tests on a Noibu-monitored store: ranked test ideas from 30 days of Noibu data, flag-gated variation code, a pull request or a Shopify theme preview, a guided check, and a started test. Use for \"what should we A/B test\", CRO or experiment ideas, building a specific test, implementing a test already found, or taking a Noibu draft test live. Requires the Noibu connection."
 ---
 
-# Noibu A/B test (find, pick, build, run) — Microsoft 365 Copilot Cowork
+# A/B testing (find, pick, build, run)
 
-Takes a Noibu-monitored store from "what should we test?" as far as the user wants: a code preview, a pull request, a Shopify preview theme, or a running experiment. Six stages, three human gates:
+Takes a Noibu-monitored store from "what should we test?" as far as the user wants: a list of ranked test ideas, a draft test in Noibu, the variation code, a pull request or a Shopify theme preview, or a running experiment.
 
-0. Resolve the store domain to its Noibu UUID (one call; nothing else runs before the first question)
-1. Find opportunities → **user picks one** (the choose-a-test question is the first thing the user sees); then, once a test is picked, detect the environment and ask setup questions only when needed
-1b. Summarize the picked test inline and **the user picks what to automate** (the run mode)
-2. Draft the test in Noibu, write the variation code, open a pull request
-3. Build or locate a preview and run automated QA
-4. Hand off: **the user confirms they merged the pull request** (full mode), or picks the next step (partial modes)
-5. Verify the code is live, then start the test
+Everything is done through Noibu's tools and data. Nothing here opens the store's pages or runs code in them; where a page has to be looked at, a person looks, with the link and the checklist this skill gives them.
 
-Never merge, publish, deploy or start a test before its gate. The only writes before the merge gate are a Noibu **draft** test, a branch + pull request, an **unpublished** Noibu preview theme, and a patch file; a partial mode creates only the subset its option promised (`scripts/ab_flow.py check-write`). The finder half writes nothing in Noibu: its report files and its cart round trip (one item added, then only that line removed) are its only side effects.
+It has two halves, joined at the point where a test is picked:
 
-"Pull request" (PR) means the provider's equivalent (GitHub or Azure DevOps pull request, GitLab merge request). Questions and cards always say "pull request"; once the run is talking about a specific one, use the provider's own word.
+- **The finder** finds the test opportunities from Noibu data alone: readiness checks, two batches of queries, a check of each idea against what the data shows is already on the store, synthesis, and one report card listing the tests.
+- **The build** takes one picked test through a check of the store's code, a Noibu draft, the variation code, a pull request or theme preview, a check the user does, a merge or publish the user makes, proof from data that the code is live, and the start.
 
-**How Cowork differs from the Claude design:** `references/cowork-host-map.md`. In short: every pick-one-thing card is one `AskUserQuestion`; the findings, per-test and implement cards are Adaptive Cards rendered by this skill's local runner, each followed by one next-step `AskUserQuestion`; a test's full report is a standalone HTML file published to the user's output files; the browser is the user's local Microsoft Edge (`browser_actions`), which reads pages but cannot run page scripts, resize to a phone or download files.
+## When to use it
 
-**Legacy name:** this skill replaces `ab-test-opportunity-finder` (21.1.x); requests, schedules and handoffs naming it are handled here unchanged, and legacy `noibu.ab-candidates/2` files still validate.
+Use it for "what should we A/B test", conversion or experiment ideas, building a specific test, implementing a test already found in this conversation, or taking a Noibu draft test live.
 
-**Call metadata:** on every `noibu_*` call pass `skill: "ab-testing"` and a short `skillStep`. Load the `querying-noibu-data` skill by name before the first `noibu_*` call.
+Don't use it for:
 
-## When NOT to Use
-
-- Reading an existing test's results, verdict or configuration — `querying-noibu-data`.
-- Starting, stopping or editing a test outside this skill's build flow — `querying-noibu-data`'s A/B guidance; stopping is permanent and needs the person's explicit request.
-- Fixing a bug, error or slow page — `tech-diagnosis` (a defect inside a test's surface becomes a "Fix first" line here, never a test).
-- Store health, checkout, product or segment reporting — `store-pulse`, `checkout-analysis`, `product-analysis`, `segment-analysis`. Accessibility — `accessibility-audit`. Saving business facts — `build-business-context`.
-
-## Setup, on every invocation (before anything else)
-
-1. **Package check.** This skill cannot run without its reference files and scripts. In one `bash` call from the skill's folder, run `ls references/output-format.md references/noibu-query-battery.md references/site-validation.md references/preview.md references/findings-card.md references/run-modes.md references/finder/phases.md scripts/build_page.py scripts/validate_candidates.py scripts/show_card.py scripts/build_presentation.py scripts/dom_facts.py scripts/ab_flow.py`. If any is missing, stop and say so in one line ("The A/B testing skill package is incomplete: <files> are missing. Re-upload the plugin, then run this again."). Do not improvise the queries, reports, `candidates.json` or cards by hand: a hand-rolled run cannot be validated, previewed or acted on.
-2. **Browser check.** Is `browser_actions` in the tool list (loaded or deferred)? Looking costs nothing; do not open a tab yet. Present: the first browser step opens the run's tab, and only a failed `create_tab` triggers `references/browser-readiness.md`. Absent, or the person declines: the finder continues on Noibu data alone and QA is deferred. A bot check, login wall, blank page or dead tab mid-run is never bypassed and never ends the run. Scheduled and unattended runs follow their recorded choice. All of this, including the mid-run question and the unattended ladder, is `references/browser-setup.md`: read it now.
-3. **Restart or continue.** Every invocation starts at Stage 0 unless this chat already has a run in progress; then ask the "Restart?" question first. The rule, the question and what "start over" drops are `references/invocation.md`, which also holds the task-list wording (the progress bar the user watches; never internal terms). Read it now.
-
-## The two halves and where their text lives
-
-- **The finder half** (`references/finder/`): readiness checks, two batches of Noibu queries, a DOM read of the live site, synthesis, previews, one standalone "Recommended test" report file per test plus `candidates.json`, and the in-chat **findings card** followed by its next-step question. Nothing is published to the user's files until a "Preview test N" reply; once a draft exists the **implement card** offers "Automate the implementation N" (`references/findings-card.md`). It runs only when the user picks "Look for new opportunities" or "Create a specific test" on card 4a. Its four files are read together, in one message, when that route starts: `run-rules.md`, `browser.md`, `goal-and-readiness.md`, `phases.md`; its other references and `scripts/` are used when those files say.
-- **The build half**: Stage 0 below, then `references/build/stage-1-pick-and-setup.md` (pick, environment, run mode), then `references/build/stage-2-draft-code-pr.md`, `stage-3-qa.md`, `stage-4-5-handoff-and-start.md`, each read when its stage begins.
-
-## When a reply wakes this chat
-
-Cowork cards can't send button clicks, so each findings, per-test and implement card is followed by one next-step question (`references/findings-card.md`). A choice or typed reply such as "Preview test 2" arrives as the person's own message: it is their decision, so act on it directly, without re-asking, re-ranking or re-validating. This chat's `candidates.json` is the source; the runner's `abReplyMap` binds the reply to what the card showed. Handlers, all in `references/findings-card.md` "Answering a reply":
-
-- **"Preview test N"**: render `test-report-<N>.json` (one `render_ui` via `scripts/show_card.py`) and, in the same response, publish `<domain-short>-test-<N>.html` to the user's output files; then the per-test card's question. An unconfirmed render gets the test as Markdown instead; a failed publish gets one line. Never paste a URL or file path.
-- **"Create A/B test N"**: validate candidate and hash, de-duplicate with `noibu_list_ab_tests`, `noibu_create_ab_test` with `createInput` unchanged (a DRAFT only), then the implement card and its question.
-- **"Automate the implementation N"**, "build test 2", or a typed request naming a test from this chat: the test is already picked. `references/build/stage-1-pick-and-setup.md` "Entering with the test already picked": load this chat's `candidates.json`, find the test, de-duplicate, skip cards 4a/4b, go to step 6 and Stage 1b. Stage 0 still runs first.
-- **"Build this test"** (after "Create a specific test"): Stage 1 from step 3 with that test as the pick. **"Describe a different change"**: ask the specific-test prompt again.
-
-A second "Automate" for a test already being built gets one line pointing at the running build; a second "Create" for a drafted test shows its implement card again (`existing`).
-
-## References (read, never restate)
-
-| File | Read when |
-|---|---|
-| `references/platform-restrictions.md` | Any test is proposed or built: the finder's synthesis, the "Create a specific test" check, Stage 1 step 6a, Stage 2c. Can this merchant action it, and can it ship without risk to the rest of the site? A failing test is reframed or stopped there, never built as described. |
-| `references/shared/platforms.md` | Stage 1 step 6. `references/shared/noibu-feature-flag-sdk.md` before Stage 2b. If either is missing, stop and say the shared A/B references are missing; never work from memory. |
-| `references/choice-cards.md` | Any pick-one-thing question: the exact `AskUserQuestion` payloads. |
-| `references/shopify-theme-preview.md` | Step 6a finds a Shopify Online Store theme store. |
-| `references/git-hosts.md` | Step 6b: providers, repository, PR operations, CI preview config, the patch hand-off. |
-| `references/split-checkout.md` | The picked test touches checkout (step 6). |
-| `references/run-modes.md` | Stage 1b, and again when a partial mode ends. |
-| `references/qa-checklist.md` | Stage 3, or QA deferred to production. |
-| `references/scheduling.md` | The person asks for the finder on a cadence. Only the finder is scheduled; a scheduled run never creates or starts anything. |
-| `references/handoffs/candidates.md` | Never during a run (`build_page.py` writes `candidates.json`). |
-
-## Stage 0: Resolve the store domain
-
-One call, nothing else: `noibu_get_domain` (fallback `noibu_list_domains`); keep its UUID, `numId`, `siteType` and `companyId` for every call that follows. No other lookup runs before card 4a: provider, repository, theme tools and preview method are detected in Stage 1 step 6, after a test is picked.
-
-## Stage 1 and 1b: in brief (the full steps are `references/build/stage-1-pick-and-setup.md`; read it now)
-
-**Tests live in the chat that found them**: only this chat's `candidates.json` is ever read; never a published report, OneDrive copy, earlier conversation or pasted link.
-
-**Card 4a is the first thing the user sees in every run** (header "A/B test", "What would you like to do for <domain>?"): "Look for new opportunities" · "Create a specific test" · "Implement an existing test" (only when this chat holds a finder run for this domain). No titles, no setup questions on it.
-
-- **Look for new opportunities** → the finder: read its four files plus `noibu-query-battery.md`, `site-validation.md`, `choice-cards.md` in one message, then follow them from Block 1 to the findings card. Stop there and wait for a reply; never ask card 4b after it.
-- **Create a specific test** → the prompt in the stage file, the platform-restrictions check, then the finder with that change as the one test; its next-step question is the build question.
-- **Implement an existing test** → steps 1 to 3 (collect, validate, de-duplicate), then card 4b.
-- Then **step 6** (environment profile: platform and theme gate, provider and repository, preview and proof of live, repository de-duplication and split checkout, and the setup questions only for what is still unresolved) and **Stage 1b** (the inline test summary, then the run-mode question from `references/run-modes.md`; unattended never `full`).
-
-## Stages 2 to 5
-
-Once the mode is recorded, read `references/build/stage-2-draft-code-pr.md` and run Stage 2; then `stage-3-qa.md` when the mode includes Stage 3; then `stage-4-5-handoff-and-start.md`. Read each when its stage begins.
-
-## Local display contract
-
-Cards are rendered with this skill's own copies of the display bundle (`references/card-quickstart.md`; `scripts/show_card.py`, `build_presentation.py`, `console_links.py`, `cowork_card_check.py`, `validate_candidates.py`, `build_page.py`, `dom_facts.py`, `ab_flow.py`): no sibling filesystem dependency. One `render_ui` per response, through the runner; after a host acknowledgement comes only the card's next-step question (`references/ux-guidelines.md`); `status: unknown` is not failure and never permits a second render; the Markdown fallback only as `references/findings-card.md` says; a denial or refusal is respected, never routed around.
+- Reading the results of a test that is running or stopped: `querying-noibu-data`.
+- Where shoppers drop off in checkout, or which products, channels or devices underperform: `checkout-analysis`, `product-analysis`, `segment-analysis`.
+- The root cause and fix of an error or slow page: `tech-diagnosis`.
 
 ## Guardrails
 
-- **Never merge, publish, deploy, start or stop** anything before its gate: the person merges the pull request; a test is started (`noibu_advance_ab_test` RUNNING) only after their merge confirmation AND a verified live check; a test is never stopped by this skill; a preview theme is never published.
-- **Pre-merge writes are only** a Noibu DRAFT, a branch + pull request, an unpublished Noibu preview theme and a patch file, and each run mode makes only the subset it promised. The finder writes nothing in Noibu or on the repository; a scheduled run never creates drafts, branches, pull requests or preview themes.
-- **Deletes are destructive and always asked:** delete or discard a preview theme only after the person's go-ahead for that exact theme in this run; never delete a Noibu test, a branch or a pull request.
-- **Storefront conduct:** add one item and remove only that line; never check out, pay, create an account, enter personal data or sign in on the person's behalf; never bypass a verification page; leave consent choices alone unless a banner blocks the read (then decline, never Accept).
-- **Secrets and authorization:** never ask for tokens, passwords or codes in chat; a reply on a card is the person's request, and native approval prompts still apply.
-- **Honesty:** every number comes from this run; mobile claims without a phone-size view are inferred; a description is never presented as a screenshot; a capture or a pull request is never claimed unless a tool result shows it.
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Three gates, never skipped.** The user picks the test. The user picks what to automate. The user merges the pull request or publishes the theme. Never merge, publish, deploy or start a test before its gate.
+- **The finder writes nothing in Noibu.** A draft is created only when the user asks for one, or by the build once a test and a mode are picked.
+- **Do only what the chosen mode promised.** More happens only when the user picks it.
+- **Only recommend or build what the merchant can ship, built so it can't break the store** (`references/platforms.md`). A recommendation the merchant can't action wastes their time, and a variation is production code that goes live for every visitor.
+- **Never create a draft, branch or pull request for a checkout-metric or checkout-page test on a split-checkout store.**
+- **Never start a test whose code isn't live.** Proof comes from Noibu data or the user's own confirmation, never from an assumption.
+- **Theme changes go to a copy.** Never discard a theme change or delete a preview theme without the user's go-ahead for that exact one.
+- **Tests live in the conversation that found them.** The `candidates.json` in this conversation's working folder is the only place tests are read from. A test proposed in another conversation was ranked against data and a site that have since moved on; a fresh run beats offering it again.
+- **Every number comes from this run's queries or pages.**
+- **Say what the data can't show.** The finder never saw the page. A claim about what a page contains comes from click data, a click label, the business context or the store's code, or it is marked unconfirmed.
+- **Never sign in to the Noibu console for the user**, and never build a console link from anything but ids a Noibu tool returned.
+- **Be explicit about what was verified and what wasn't.**
+- **Don't narrate.** No "I'm now checking…", no summaries between tool calls, no description of what a question already shows. The chat carries the gates, a blocker, the report, a test's summary before the automation question, the links and checklist for the user's check, and the hand-off.
+- **Nothing after a question.** After any clickable question, write nothing and wait. With no answer, don't pick for the user: send one short line listing the options, and wait.
+- Platform- and host-specific steps run only when that platform or host was detected. Never assume Shopify or GitHub.
+- On every `noibu_*` call, pass `skill: "ab-testing"` and a short `skillStep`.
 
-## Rules that apply throughout
+## Before you start
 
-- Platform- and provider-specific steps run only when step 6 detected that platform or provider. Never assume Shopify or GitHub.
-- **Connection prompts only when the user has picked the thing they unlock** (`references/run-modes.md`, "When the pick needs a connection"): say in one line which connection would unlock it and ask whether to connect now or continue without; never re-authorization steps or a token.
-- The Noibu theme tools run only when the theme gate is open (6a); theme writes go only into the open Noibu theme change this run started; never publish a theme or call a Shopify mutation.
-- Work from `candidates.json` for everything it carries; never re-derive or retype it. Cite the shared SDK and platform files instead of copying them.
-- Never create a draft, branch or PR for a checkout-metric or checkout-page test on a split-checkout store.
-- Link every Noibu issue mentioned to its console URL (`scripts/console_links.py`). **`console.noibu.com` in the browser only when the person is already signed in there**: never sign in for them; prefer the `noibu_*` tools.
-- Be explicit about what was verified and what wasn't. Do only what the chosen mode promised.
-- **No line after a question.** Every rendered card is followed by its next-step question; after any `AskUserQuestion`, output nothing, then wait.
-- **Cards only where something is shown; questions only where something is asked.** The Stage 1b summary and the Stage 4 hand-off are plain structured chat text with real links.
-- **Don't narrate.** No "I'm now checking…", no summaries between tool calls, no description of what a card or task list already shows. The chat carries only the gates, a blocker, the end, and the one-line "what you'll see" before each page of visible QA. While the finder runs, its quiet-mode rules apply (`references/finder/run-rules.md`).
-- **The end of a finder run is one message**: the findings lead (one sentence per test: title, change, key number; never dropped), the findings card, its Markdown fallback when the runner did not confirm `status: rendered`, then its next-step question, and nothing after it. Not a summary, a bullet per test, a caveat or what the run did on the store: those go on the report as `caveats`. A message that is only the question, with nothing about the tests, is a failed run from the person's point of view.
-- **No recap anywhere else either.** Text in the chat is for a question, a blocker, the Stage 1b summary, the merge gate and the Stage 4 hand-off (`references/build/stage-4-5-handoff-and-start.md`); keep it to those lines.
+Run once: `ls scripts/card.py references/finder.md references/queries.md references/tests-file.md references/platforms.md references/build.md references/follow-ups.md`
+
+Then:
+
+1. **Resolve the store**, one call: `noibu_get_domain` (fall back to `noibu_list_domains`). Keep its UUID, its `numId` and its `siteType` for everything that follows. Nothing else is looked up before the opening question: the repository, the platform's details and the preview method are detected after a test is picked, because the picked test often answers them.
+2. **A run already in progress.** If this conversation already has a run of this skill past the opening question and not yet ended, and the skill is asked for again with no new instruction, ask once: "You've started this again for <domain>. Should I start over or continue where we left off?"
+   - "Start over (Recommended)": begin again from the opening question; anything in progress is dropped. Recommend "Continue" in its place only when a draft, branch or pull request already exists.
+   - "Continue where we left off": name the step in plain words ("the goal question", "the pull request").
+
+## Workflow
+
+**The opening question**, first in every run: "What would you like to do for <domain>?" Up to three options, in this order, with these labels:
+
+| Label | Description |
+|---|---|
+| Look for new A/B test opportunities | "Analyze the last 30 days of data for fresh, ranked test ideas." Add "for <goal>" when the request named a goal; otherwise add "I'll ask which goal first." |
+| Create a specific A/B test | "Describe the change you want to test and I'll build it." When the request already describes a change, add "(Recommended)" to the label and quote the change. |
+| Implement an existing A/B test | "Pick from the tests found earlier in this conversation for <domain>." Only when this conversation holds a finder run for this store. |
+
+Skip it when the request already names the route: a named test to build goes straight to the build; a described change is "Create a specific A/B test".
+
+**Look for new A/B test opportunities**
+
+1. Open `references/finder.md` and `references/queries.md` together, and follow `references/finder.md` from the goal question to synthesis. Pass on a goal the request already stated.
+2. Write the tests file and the report data: `references/tests-file.md`.
+3. Deliver the report: the Output section below. Then wait.
+
+If readiness stopped the run, its one sentence is the answer. If the finder found nothing, say so in one line and ask the opening question again.
+
+**Create a specific A/B test**
+
+1. If the change isn't described yet, reply with exactly this and wait: "What would you like to test on <domain>? Tell me the change, which page it's on, and (if you know) what it should improve — e.g. add to cart rate, checkout starts, checkout completes, or product page views."
+2. Check the change against `references/platforms.md` ("Where the rules are applied"). A change that fails gets that section's answer.
+3. Run the finder with that change stated as the test to build, so it is checked against the data and written as one test in `candidates.json`. If the finder can't produce it, build `createInput` from the description: the title is the change, the hypothesis says it was requested directly with no measured gap behind it, and the metric is the goal the user named (ask if none).
+4. Go straight to the build with that test: `references/build.md`.
+
+**Implement an existing A/B test**
+
+1. Take the tests from every `candidates.json` this conversation holds for this store. Drop any in `killed`, and any that `noibu_list_ab_tests` shows as RUNNING or STOPPED.
+2. Ask "Which test should I implement?" with one option per test, by rank: the title and nothing else. A question takes five options; with more tests, say how many more there are and that a typed title works.
+3. With none left, say why in one line and ask the opening question again with its other two options.
+4. Build the picked test: `references/build.md`.
+
+**After the tests are shown**: the user picks a test, or asks to create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
+
+**Checking a test that is running** ("check the quick add test"): `references/build.md`, "Checking a running test is healthy".
+
+**Building a test**: `references/build.md`, read stage by stage. It cites `references/platforms.md` for the platform rules and the flag SDK.
+
+## Output
+
+A full report is three separate steps, in this order:
+
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
+
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
+
+A focused question gets prose with the number, its window and its base; a card only if it helps.
+
+Download, save and schedule run only when the user asks. Never offer them.
+
+In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add: "Look for tests on a different goal", "Create a specific A/B test".
+- Schedule preset: Weekly on Mondays · 9 am · last 30 days.

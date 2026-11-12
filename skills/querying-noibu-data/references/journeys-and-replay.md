@@ -12,9 +12,9 @@ Default to `noibu_get_page_visits` for journey-shaped questions. The vast majori
 
 If the user is asking for an aggregate (count, rate, percentage, ranking by URL) — route to `noibu_get_page_visits` and stop. A URL in the prompt is not by itself a redirect signal; it may be the anchor for the shape question below. Load `references/page-visits.md` for field-level detail.
 
-### Funnel-shaped *visualization* requests are different
+### Requests to see the funnel
 
-When the user asks to chart a conversion funnel, retrieve distinct stage-session counts and use the bundled funnel-visualization reference to present a table or the Noibu report board. No specific widget tool is required. Analytical funnel questions use the matching session/page dataset.
+When the user asks to **see** the ecommerce conversion funnel ("show me the checkout funnel", "funnel for the last 7 days against the previous 7"), fetch the per-step session counts and answer with the table described in `references/sessions.md`, "The conversion funnel". Analytical funnel questions ("where do users drop off", "abandonment by step") still end at `noibu_get_page_visits`.
 
 ## noibu_list_page_group_journeys (narrow)
 
@@ -58,7 +58,7 @@ Compare `totalMatchingSessions` to the sum of `sessionCount` across returned pat
 
 ## noibu_show_session_replay
 
-Returns a Noibu MCP replay UI for one page visit, plus metadata. The host renders it only when the server declares an MCP Apps `ui://` resource (`text/html;profile=mcp-app`); verify in the tenant. If the UI cannot render, use a permitted server-returned `jazzUrl` or explain the display limitation; do not claim a video played. Never construct a replay link.
+Shows ONE page visit from a session as a video in the conversation, and returns the session's full page-visit metadata (URLs, durations, key events per visit). May return a `jazzUrl` for the full session — use it only if present; never construct or mention a Noibu console link otherwise.
 
 USE ONLY when the user **explicitly** asks to watch / see / view a session replay or video. Examples of when to call it:
 
@@ -78,4 +78,4 @@ Specifically:
 - Only specify `pageVisitIndex` when the user has expressed interest in a specific page visit (e.g., "show me page visit 3").
 
 **Multiple replays:**
-- When showing multiple replays from the same session, call the tool once per page visit and write the summary immediately after each replay before calling the tool for the next. This produces: [iframe] → summary → [iframe] → summary, rather than batching all summaries at the end.
+- When showing multiple replays from the same session, call the tool once per page visit and write the summary immediately after each replay before calling the tool for the next. This produces: replay → summary → replay → summary, rather than batching all summaries at the end.
