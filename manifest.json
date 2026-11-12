@@ -24,6 +24,9 @@
   "accentColor": "#20142D",
   "agentSkills": [
     {
+      "folder": "./skills/noibu-setup"
+    },
+    {
       "folder": "./skills/querying-noibu-data"
     },
     {
