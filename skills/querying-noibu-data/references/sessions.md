@@ -53,6 +53,6 @@ When the user asks how many sessions reached each step, or asks to see the funne
 
 1. Fetch the per-step session counts with `noibu_search_sessions`.
 2. Answer with one table: step, sessions, share of the first step, and drop from the step before.
-3. When a comparison period was asked for, add its change per step. For the first step that is the change in its session count. For every later step it is the difference between the two periods' shares of the first step.
+3. When a comparison period was asked for, add its change per step. For the first step that is the change in its session count. For every later step it is the difference between the two periods' shares of the first step, in percentage points (pp), not a relative %.
 
 Analytical funnel questions ("where do users drop off", "abandonment by step") are page-level; answer them from `noibu_get_page_visits` with `references/page-visits.md`.

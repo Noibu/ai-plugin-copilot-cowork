@@ -13,8 +13,8 @@ Five numbers, in this order: Sessions → Engagement → Conversion → AOV → 
 | Metric | Format | Comparison |
 |---|---|---|
 | Sessions | Integer | change against the previous period |
-| Engagement | Percentage | difference between the two rates |
-| Conversion | Percentage | difference between the two rates |
+| Engagement | Percentage | difference between the two rates, in percentage points (pp) |
+| Conversion | Percentage | difference between the two rates, in percentage points (pp) |
 | AOV | Currency | change against the previous period |
 | RPS | Currency | change against the previous period |
 

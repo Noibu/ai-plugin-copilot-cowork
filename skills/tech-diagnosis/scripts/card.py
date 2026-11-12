@@ -526,18 +526,20 @@ def _format(value, kind, currency=None):
 
 
 def _change(current, prior, kind):
-    """(direction, text) or None. Always reads as "%": for a rate it is the difference between the
-    two rates; for counts and money it is the relative change. No prior value, no change."""
+    """(direction, text) or None. For a rate it is the difference between the two rates, in
+    percentage points ("pp"); for counts and money it is the relative change, in "%". No prior
+    value, no change."""
     if current is None or prior is None:
         return None
     if kind == 'rate':
         delta = current - prior
+        text = _percent(abs(delta))[:-1] + 'pp'
     elif prior == 0:
         return None
     else:
         delta = (current - prior) / abs(prior) * 100
-    text = _percent(abs(delta))
-    if text == '0%':
+        text = _percent(abs(delta))
+    if text in ('0%', '0pp'):
         return 'flat', text
     return ('up' if delta > 0 else 'down'), text
 
