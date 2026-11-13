@@ -1,6 +1,6 @@
 # After the tests are shown
 
-Read this when the user picks a test from the next-step question, or types one of the requests below. Each section is one request. Work from this conversation's `candidates.json`; never re-run the finder, re-rank or re-validate to answer one of these.
+Read this when the user picks a test from the next-step question, skips that question, or types one of the requests below. Each section is one request. Work from this conversation's `candidates.json`; never re-run the finder, re-rank or re-validate to answer one of these.
 
 Find a test by its title (exact, then ignoring case), falling back to its rank ("test 2"). If neither matches, say which tests this run has and ask which one.
 
@@ -8,12 +8,16 @@ Find a test by its title (exact, then ignoring case), falling back to its rank (
 
 Arrives as a picked option from the next-step question.
 
-The "Full reports" line above the question already links this test's page, so write no text: don't link the page again and never write the test's record, or any part of it, in the chat. Ask one clickable question, header "Next step":
+Write one line as reply text, "Full report:" and the link to that test's report page file, and never the test's record, or any part of it, in the chat. Then ask one clickable question, header "Next step":
 
 - "Create A/B test in Noibu": "Creates a draft. It serves no traffic until it's started."
 - "Not now": "Keep the idea; nothing is created."
 
 Write nothing after the question. "Not now" ends the turn with no text.
+
+## The question is skipped
+
+Reply with the recovery line the card script returned. Under it, write the "Full reports" line again: "Full reports:" followed by a link to each published page file, in rank order. Then stop.
 
 ## Open a test's report
 
@@ -49,7 +53,7 @@ If this conversation has no finder run for that domain (the working folder is go
 
 ## Download a test's report
 
-Only when the user asks ("download this", "give me test 2 as a PDF"). The report page is not the download: a PDF is still made. One PDF per test, saved in the Cowork output folder as `<domain>-test-<rank>.pdf`.
+Only when the user asks ("download this", "give me test 2 as a PDF"). The report page is not the download: a PDF is still made. One PDF per test, saved in the Cowork output folder under its report page's file name, ending `.pdf` (`quick-add-on-collection-cards.pdf`). If the run built no pages, make the name the same way: the test's title in lowercase words joined by hyphens.
 
 Use the figures in `candidates.json`; don't query again. The report is for a busy merchant: what the test is, why the data supports it, and the setup. It has no images of the page. In this order:
 

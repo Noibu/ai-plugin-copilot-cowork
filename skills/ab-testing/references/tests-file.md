@@ -186,7 +186,7 @@ The control is always the current experience: `isControl: true` goes on "Origina
 
 Once `candidates.json` is written, build the pages: copy `scripts/report.py` to `.aether/scripts/report.py`, then RunScript `report.py` with the arg `candidates` set to the path of `candidates.json`. Pass nothing else.
 
-- It writes one page per test, named `<domain without www>-test-<rank>.html`, into a `pages` folder beside `candidates.json`, and returns `pages`: each test's rank, title and file path, in rank order.
+- It writes one page per test, named after its test's title (`quick-add-on-collection-cards.html`), into a `pages` folder beside `candidates.json`, and returns `pages`: each test's rank, title and file path, in rank order.
 - A script can't write to the Cowork output folder. Once the script returns, publish each returned page to the Cowork output folder yourself, unchanged and under the same file name. The published files are the ones the summary links.
 - The script writes every heading and label on a page. Never write a page's HTML yourself, and never edit a page after it is built. To change a page, correct `candidates.json` and run the script again.
 - If it returns `error`, or can't be run at all, or a page can't be published, don't retry. Carry on without the pages, and in place of the "Full reports" line write one sentence saying the full report pages couldn't be built and why, using the reason the script or RunScript gave.
@@ -216,7 +216,12 @@ Write a second JSON file in the working folder for the report card, from `candid
 | `why` | the test's `why` |
 | `noPrioritiesReason` | only when no test cleared the bar: one sentence saying why |
 
-Timestamps carry their timezone. Then follow the Output section of SKILL.md.
+Timestamps carry their timezone. Then follow the Output section of SKILL.md, in exactly this order:
+
+1. Write the summary as reply text, before the card is run. Its wording, and whether the question needs the extra options, are settled here, so nothing is left to work out once the card is on screen.
+2. Run the card.
+3. Write the "Full reports" line as reply text, straight after the card. Don't plan or think it through first: anything worked out between the card and the question is hidden from the user, and the line is lost with it.
+4. Ask the next-step question.
 
 **The summary** for this report says, in 2–3 sentences: the goal the tests serve, the strongest measured problem behind them, that the tests rest on Noibu data and the live store was not read, and any other caveat that changes how the tests should be read (traffic is thin; the goal was switched). It never recaps the tests.
 

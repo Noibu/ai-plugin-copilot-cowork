@@ -73,7 +73,7 @@ Skip it when the request already names the route: a named test to build goes str
 
 1. Open `references/finder.md` and `references/queries.md` together, and follow `references/finder.md` from the goal question to synthesis. Pass on a goal the request already stated.
 2. Write the tests file, build each test's report page and write the report data: `references/tests-file.md`.
-3. Deliver the report: the Output section below. Then wait.
+3. Deliver the report: the Output section below, in the order `references/tests-file.md` gives ("The report data"), with the "Full reports" line between the card and the next-step question. Then wait.
 
 If readiness stopped the run, its one sentence is the answer. If the finder found nothing, say so in one line and ask the opening question again.
 
@@ -91,7 +91,7 @@ If readiness stopped the run, its one sentence is the answer. If the finder foun
 3. With none left, say why in one line and ask the opening question again with its other two options.
 4. Build the picked test: `references/build.md`.
 
-**After the tests are shown**: the user picks a test, or asks to open its report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
+**After the tests are shown**: the user picks a test, skips the question, or asks to open its report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
 
 **Checking a test that is running** ("check the quick add test"): `references/build.md`, "Checking a running test is healthy".
 
@@ -113,6 +113,6 @@ Download, save and schedule run only when the user asks. Never offer them.
 
 In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
 
-- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file. Straight after the card, write the "Full reports" line that links each test's report page (`references/tests-file.md`), then ask the next-step question. If the question is skipped, write the line again under the recovery line.
 - With fewer than two priorities, add: "Look for tests on a different goal", "Create a specific A/B test".
 - Schedule preset: Weekly on Mondays · 9 am · last 30 days.

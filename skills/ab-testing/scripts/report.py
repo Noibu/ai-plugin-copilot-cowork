@@ -11,8 +11,10 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from datetime import datetime, timezone
 
+NAME_LIMIT = 48  # characters in a page's file name, before .html
 MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split()
 
 CSS = """
@@ -106,8 +108,21 @@ def _generated(value):
     return f'{MONTHS[moment.month - 1]} {moment.day}, {moment.year}, {moment.hour % 12 or 12}:{moment.minute:02d} {"am" if moment.hour < 12 else "pm"} (UTC)'
 
 
-def short_domain(domain):
-    return re.sub(r'[^a-z0-9.-]+', '-', re.sub(r'^www\.', '', _s(domain).lower())).strip('-.') or 'store'
+def page_name(title, taken):
+    """A file name made from the test's title: plain words joined by hyphens, cut at a word when long, unique in the run."""
+    plain = unicodedata.normalize('NFKD', _s(title)).encode('ascii', 'ignore').decode().lower()
+    words = re.sub(r'[^a-z0-9]+', ' ', plain.replace("'", '')).split()
+    name = ''
+    for word in words:
+        if name and len(name) + 1 + len(word) > NAME_LIMIT:
+            break
+        name = f'{name}-{word}' if name else word[:NAME_LIMIT]
+    name = name or 'test'
+    unique, n = name, 2
+    while unique in taken:
+        unique, n = f'{name}-{n}', n + 1
+    taken.add(unique)
+    return unique
 
 
 def read_run(run):
@@ -195,7 +210,7 @@ def build(run, rank, test):
     metric = _s(run.get('successMetricLabel'))
     lead = (f'Goal: {esc(goal)}' + (f' (success metric: {esc(metric)})' if metric else '') + '. ') if goal else ''
     parts = ['<!doctype html>', '<html lang="en"><head><meta charset="utf-8">', '<meta name="viewport" content="width=device-width,initial-scale=1">',
-             f'<title>{esc(short_domain(domain))} test {rank}: {esc(test["title"])}</title>', f'<style>{CSS}</style></head><body>', '<div class="wrap"><header>',
+             f'<title>{esc(test["title"])}</title>', f'<style>{CSS}</style></head><body>', '<div class="wrap"><header>',
              f'<h1>A/B test recommendation for {esc(domain)}</h1>',
              f'<p>{lead}It is built from this store\'s Noibu data.</p>']
     if _s(run.get('dataLine')):
@@ -217,10 +232,9 @@ def write_pages(run, folder):
     """Write one page per test into the folder. Returns [{"rank", "title", "path"}] in rank order."""
     ranked = read_run(run)
     os.makedirs(folder, exist_ok=True)
-    prefix = short_domain(run['domain'])
-    pages = []
+    pages, taken = [], set()
     for rank, test in ranked:
-        path = os.path.join(folder, f'{prefix}-test-{rank}.html')
+        path = os.path.join(folder, page_name(test['title'], taken) + '.html')
         with open(path, 'w', encoding='utf-8') as handle:
             handle.write(build(run, rank, test))
         pages.append({'rank': rank, 'title': _s(test['title']), 'path': path})
@@ -264,7 +278,7 @@ HELP = f"""Noibu A/B test report pages for Copilot Cowork
 In Cowork (writes one page per test):
   {RUN_COMMAND}
   Returns {{"pages": [{{"rank", "title", "path"}}]}} in rank order and, on failure, "error".
-  A page is named <domain without www>-test-<rank>.html.
+  A page is named after its test's title, in lowercase words joined by hyphens: quick-add-on-collection-cards.html.
 
 On the command line:
   python report.py candidates.json --out <folder>
