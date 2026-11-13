@@ -22,7 +22,8 @@ The repository root is the app package.
 manifest.json         the app manifest
 color.png, outline.png
 noibu-mcp-tools.json  the Noibu connector's tool list (a snapshot of what Noibu's server offers)
-skills/<skill>/       SKILL.md, references/, and scripts/card.py for the skills that show a report card
+skills/<skill>/       SKILL.md, references/, and scripts/card.py for the skills that show a report card;
+                      ab-testing also has scripts/report.py, which builds a full report page per test
 ```
 
 ## Build the package
