@@ -4,28 +4,24 @@ Read this when the user picks a test from the next-step question, or types one o
 
 Find a test by its title (exact, then ignoring case), falling back to its rank ("test 2"). If neither matches, say which tests this run has and ask which one.
 
-## A test is picked: show its detail
+## A test is picked
 
-Arrives as a picked option, or typed ("show test 2", "tell me more about the quick add test").
+Arrives as a picked option from the next-step question.
 
-Give the test's full record, in this order, as plain text with these headings. Everything comes from the test's entry in `candidates.json`.
-
-1. **The test's title**, as the heading.
-2. **What to change:** `what`.
-3. **Why this test:** `why`, then the evidence behind it as a short list, one line per `evidence[]` entry with its numbers. Label correlational evidence.
-4. **Setup, as Noibu will receive it:** the six `setup` fields as a two-column table: Title, Hypothesis, Success metric, Secondary metrics, Targeting, Variations.
-5. **Traffic:** `metricVolume`.
-6. **Overlap** and **Fix first**, each only when present.
-7. **Dev notes:** each variation's `devNotes`.
-8. **Not confirmed on the store:** the test's `unconfirmed` lines, when there are any, with one sentence saying they are checked against the store's code when the test is built.
-9. **Run notes:** the data line and the run's `caveats`, as a short list.
-
-Then ask one clickable question, header "Next step":
+The "Full reports" line above the question already links this test's page, so write no text: don't link the page again and never write the test's record, or any part of it, in the chat. Ask one clickable question, header "Next step":
 
 - "Create A/B test in Noibu": "Creates a draft. It serves no traffic until it's started."
 - "Not now": "Keep the idea; nothing is created."
 
 Write nothing after the question. "Not now" ends the turn with no text.
+
+## Open a test's report
+
+Only when the user asks in their own words ("show test 2", "tell me more about the quick add test", "open the report for test 2").
+
+Reply with one line and nothing else: "Full report:" and the link to that test's report page file. If the request names no test, link every page of this run, in rank order. The page carries the test's whole record, so never write the record, or any part of it, in the chat.
+
+If the file is gone or the run built no pages, build them again from `candidates.json` as `references/tests-file.md` says ("The report pages"), then link. If they can't be built, say so and why in one sentence and stop. Never re-run the finder for this.
 
 ## Create the test in Noibu
 
@@ -53,7 +49,7 @@ If this conversation has no finder run for that domain (the working folder is go
 
 ## Download a test's report
 
-Only when the user asks ("download this", "give me test 2 as a PDF"). One PDF per test, saved in the Cowork output folder as `<domain>-test-<rank>.pdf`.
+Only when the user asks ("download this", "give me test 2 as a PDF"). The report page is not the download: a PDF is still made. One PDF per test, saved in the Cowork output folder as `<domain>-test-<rank>.pdf`.
 
 Use the figures in `candidates.json`; don't query again. The report is for a busy merchant: what the test is, why the data supports it, and the setup. It has no images of the page. In this order:
 

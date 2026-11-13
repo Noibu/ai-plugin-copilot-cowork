@@ -48,7 +48,7 @@ Don't use it for:
 
 ## Before you start
 
-Run once: `ls scripts/card.py references/finder.md references/queries.md references/tests-file.md references/platforms.md references/build.md references/follow-ups.md`
+Run once: `ls scripts/card.py scripts/report.py references/finder.md references/queries.md references/tests-file.md references/platforms.md references/build.md references/follow-ups.md`
 
 Then:
 
@@ -72,7 +72,7 @@ Skip it when the request already names the route: a named test to build goes str
 **Look for new A/B test opportunities**
 
 1. Open `references/finder.md` and `references/queries.md` together, and follow `references/finder.md` from the goal question to synthesis. Pass on a goal the request already stated.
-2. Write the tests file and the report data: `references/tests-file.md`.
+2. Write the tests file, build each test's report page and write the report data: `references/tests-file.md`.
 3. Deliver the report: the Output section below. Then wait.
 
 If readiness stopped the run, its one sentence is the answer. If the finder found nothing, say so in one line and ask the opening question again.
@@ -91,7 +91,7 @@ If readiness stopped the run, its one sentence is the answer. If the finder foun
 3. With none left, say why in one line and ask the opening question again with its other two options.
 4. Build the picked test: `references/build.md`.
 
-**After the tests are shown**: the user picks a test, or asks to create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
+**After the tests are shown**: the user picks a test, or asks to open its report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
 
 **Checking a test that is running** ("check the quick add test"): `references/build.md`, "Checking a running test is healthy".
 
