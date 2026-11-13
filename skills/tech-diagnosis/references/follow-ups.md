@@ -121,7 +121,7 @@ Take the issue number. Call `noibu_update_issue` to mark it ignored. After the t
 
 ## Schedule
 
-Only when the user asks ("schedule this", "scan every week").
+When the user picks the schedule option in the next-step question, or asks ("schedule this", "scan every week").
 
 - If a scheduled prompt for this store's scan already exists, change that one; don't add a second.
 - If the request already names how often and when, ask nothing more about timing.

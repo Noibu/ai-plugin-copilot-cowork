@@ -1,6 +1,6 @@
 # After a snapshot
 
-Read this when the user picks a thread from the next-step question, or types a request to schedule or download. Each section is one request.
+Read this when the user picks a thread or the schedule option from the next-step question, or types a request to schedule or download. Each section is one request.
 
 ## A thread is picked
 
@@ -17,7 +17,7 @@ If none fits, answer it with the Noibu tools directly, with the number, its wind
 
 ## Schedule
 
-Only when the user asks ("schedule this", "send me this every morning").
+When the user picks the schedule option in the next-step question, or asks ("schedule this", "send me this every morning").
 
 **One schedule per store.** The scheduled prompt is named `store-pulse-<domain with dots as dashes>`, e.g. `store-pulse-example-com`. Before creating one, look for a scheduled prompt with exactly that name. If it exists, this is an edit: change that one. Match on the exact name, never on the domain alone, and never touch another store's schedule.
 

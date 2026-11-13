@@ -131,4 +131,4 @@ Write one JSON file in the working folder in this shape, then follow the Output 
 
 **Empty kinds.** When one kind has nothing, say so in the summary: "No active errors found that you can fix directly", "No significant performance issues found", or "No third-party app errors detected". When all three are empty, send an empty `priorities` list and put the three facts in one sentence in `noPrioritiesReason`.
 
-**More than the question can hold.** The card draws the first three priorities and the next-step question offers the first five. Name any finding beyond those in the summary.
+**More than the question can hold.** The card draws the first three priorities and the next-step question offers the first four. Name any finding beyond those in the summary.

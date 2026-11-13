@@ -46,7 +46,7 @@ Then resolve the store. Use it without asking if it is already clear from the co
 
 **A focused question** about one of the snapshot's numbers ("what's my conversion today?", "how are my channels doing?"): run only the query it needs from `references/snapshot.md` or `references/blocks.md` and answer in prose.
 
-**After a snapshot**: the user picks a thread, or types a request to schedule or download. Open `references/follow-ups.md`.
+**After a snapshot**: the user picks a thread or the schedule option, or types a request to schedule or download. Open `references/follow-ups.md`.
 
 ## Output
 
@@ -60,10 +60,10 @@ Finding titles name the metric and the move in 60 characters or fewer. Each find
 
 A focused question gets prose with the number, its window and its base; a card only if it helps.
 
-Download, save and schedule run only when the user asks. Never offer them.
+Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
 In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
 
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
-- With fewer than two priorities, add: "Where's the biggest revenue opportunity?", "What changed since yesterday?".
+- With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Where's the biggest revenue opportunity?", "What changed since yesterday?".
 - Schedule preset: Weekly on Mondays · 9 am · the preceding 7 days.

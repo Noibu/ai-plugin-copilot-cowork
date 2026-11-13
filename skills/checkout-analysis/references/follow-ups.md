@@ -1,6 +1,6 @@
 # After a report
 
-Read this when the user picks a priority from the next-step question, or types a request about a report already in this conversation. Each section is one request. Act on the report the request refers to: the same store, window and evidence. If more than one recent report could be meant, ask which.
+Read this when the user picks a priority or the schedule option from the next-step question, or types a request about a report already in this conversation. Each section is one request. Act on the report the request refers to: the same store, window and evidence. If more than one recent report could be meant, ask which.
 
 ## Investigate a priority
 
@@ -42,7 +42,7 @@ Keep each section on one page where possible. Reply with one line saying where t
 
 ## Schedule
 
-Only when the user asks ("schedule this", "send me this every week").
+When the user picks the schedule option in the next-step question, or asks ("schedule this", "send me this every week").
 
 - If a scheduled prompt for this store's checkout analysis already exists, change that one; don't add a second.
 - If the request already names how often and when, ask nothing more about timing.

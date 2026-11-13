@@ -19,7 +19,8 @@ MAX_TABLES = 2              # two side-by-side half tables count as one
 PREVIEW_ROWS = 5
 COMPACT_ROWS = 3
 MAX_PRIORITIES = 3          # drawn on the card
-MAX_OPTIONS = 5             # offered in the next-step question
+MAX_OPTIONS = 5             # offered in the next-step question, the schedule option included
+SCHEDULE_NOTE = 'Run it automatically, weekly or on your own timing'
 MAX_LINK_BUTTONS = 2
 TITLE_CHARS, SHORT_WORDS, EVIDENCE_CHARS, CELL_CHARS, TAG_CHARS = 60, 5, 160, 40, 32
 NOT_MEASURED = 'Not measured'
@@ -52,7 +53,7 @@ _RANKED_COLUMNS = [('sessions', 'Sessions', 'count'), ('conversionRate', 'Conver
 
 SKILLS = {
     'checkout-analysis': {
-        'title': 'Overview', 'unit': 'sessions',
+        'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report',
         'context': [('sessions', 'count', '{} sessions'), ('addedToCartRate', 'rate', '{} added to cart')],
         'tiles': [_kpi('checkoutCompletion', 'Checkout completion', 'rate'), _kpi('mobileConversion', 'Mobile conversion', 'rate'),
                   _kpi('desktopConversion', 'Desktop conversion', 'rate'), _kpi('checkoutErrors', 'Checkout errors', 'count', good='down')],
@@ -64,7 +65,7 @@ SKILLS = {
                    _table('deliveryMethods', [('method', 'Delivery methods', 'text'), ('orders', 'Orders', 'count')], half=True)],
     },
     'product-analysis': {
-        'title': 'Overview', 'unit': 'sessions',
+        'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report',
         'context': [('sessions', 'count', '{} sessions'), ('conversionRate', 'rate', '{} conversion rate'), ('medianOrder', 'money', 'Median order {}')],
         'funnel': {'stages': [('viewedProduct', 'Viewed product'), ('addedToCart', 'Added to cart'), ('completedOrder', 'Completed order')],
                    'axis': '% of sessions that viewed a product', 'first': '{}', 'pill': True},
@@ -74,7 +75,7 @@ SKILLS = {
         'signals': ['Low add-to-cart rate', 'Cart abandonment', 'Low collection conversion', 'Underperforming product type', 'High bounce rate'],
     },
     'segment-analysis': {
-        'title': 'Overview', 'unit': 'sessions', 'tilesTitle': 'Conversion rate',
+        'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report', 'tilesTitle': 'Conversion rate',
         'tiles': [_kpi('siteWideConversion', 'Site wide', 'rate', sub='siteWideSessions'), _kpi('mobileConversion', 'Mobile', 'rate', sub='mobileSessions'),
                   _kpi('desktopConversion', 'Desktop', 'rate', sub='desktopSessions')],
         'tables': [_table('countries', [('country', 'Country', 'country')] + _CHANNEL_COLUMNS, top=('Top country', ['sessions', 'conversionRate'])),
@@ -83,7 +84,7 @@ SKILLS = {
         'signals': ['Low mobile conversion', 'High-traffic underperformer', 'Campaign drag', 'Localization gap', 'High-value channel', 'Device gap'],
     },
     'store-pulse': {
-        'title': 'Store Pulse', 'unit': 'sessions',
+        'title': 'Store Pulse', 'unit': 'sessions', 'schedule': 'Schedule Store Pulse',
         'tiles': [_kpi('sessions', 'Sessions', 'count'), _kpi('engagement', 'Engagement', 'rate'), _kpi('conversion', 'Conversion', 'rate'),
                   _kpi('aov', 'AOV', 'money'), _kpi('rps', 'RPS', 'money')],
         'funnel': {'stages': [('enterStore', 'Enter store'), ('viewProduct', 'View product'), ('addToCart', 'Add to cart'), ('startCheckout', 'Start checkout'), ('checkoutComplete', 'Checkout complete')],
@@ -93,7 +94,7 @@ SKILLS = {
                    _table('topProducts', [('name', 'Top Products by Traffic', 'text'), ('sessions', 'Sessions', 'count'), ('addToCartRate', 'Add to Cart', 'rate')])],
     },
     'tech-diagnosis': {
-        'title': 'Tech findings', 'unit': 'sessions',
+        'title': 'Tech findings', 'unit': 'sessions', 'schedule': 'Schedule this scan',
     },
     'ab-testing': {
         'title': 'A/B test opportunities', 'unit': 'sessions', 'items': 'tests', 'itemLabel': 'Test',
@@ -101,6 +102,7 @@ SKILLS = {
     },
     'accessibility-audit': {
         'title': 'Accessibility audit', 'unit': 'pageviews',
+        'schedule': 'Schedule the audit', 'scheduleNote': 'Start the page scans automatically, weekly or on your own timing',
         'context': [('pagesScanned', 'count', '{} pages scanned'), ('pageviews', 'count', '{} pageviews'), ('violationInstances', 'count', '{} violation instances'), ('uniqueFixes', 'count', '{} unique fixes')],
         'tiles': [_kpi('critical', 'Critical', 'count', good='down'), _kpi('serious', 'Serious', 'count', good='down'),
                   _kpi('moderate', 'Moderate', 'count', good='down'), _kpi('minor', 'Minor', 'count', good='down')],
@@ -921,6 +923,14 @@ def next_step(model):
                     {'label': 'Create a specific A/B test', 'description': 'Describe the change you want to test and I\'ll build it.'}]
         return options, f'To go deeper, ask: "{spec["ask"].format(n=1)} for {model["store"]}".' if count else f'To go deeper, ask about any part of this report for {model["store"]}.'
     for n, p in enumerate(model['priorities'][:MAX_OPTIONS], 1):
+    """The next-step question's options and the line to use if it is skipped.
+
+    The options are the priorities in card order, then the schedule option for a skill that has one.
+    """
+    spec = model['spec']
+    schedule = spec.get('schedule')
+    unit, options, seen = spec['unit'], [], {schedule.casefold()} if schedule else set()
+    for n, p in enumerate(model['priorities'][:MAX_OPTIONS - (1 if schedule else 0)], 1):
         label = p['short']
         if label.casefold() in seen:
             label = ' '.join(label.split()[:SHORT_WORDS - 1]) + f' #{n}'
@@ -932,6 +942,8 @@ def next_step(model):
         recovery = f'To go deeper, ask: "investigate {options[0]["label"]} for {model["store"]}".'
     else:
         recovery = f'To go deeper, ask about any part of this report for {model["store"]}.'
+    if schedule:
+        options.append({'label': schedule, 'description': spec.get('scheduleNote', SCHEDULE_NOTE)})
     return options, recovery
 
 
@@ -1032,7 +1044,8 @@ def _help():
         f'  {RUN_COMMAND}',
         '  Optional arg "compact": true draws the compact card.',
         '  Returns {"shown", "variant", "options", "recovery"} and, on failure, "error":',
-        '    options   the next-step question, in order: [{"label", "description"}]',
+        '    options   the next-step question, in order: [{"label", "description"}]; the schedule option,',
+        '              for every skill but ab-testing, is last',
         '    recovery  the line to reply with if the question is skipped',
         '    error     one sentence saying why the card was not built or shown',
         '',
@@ -1050,7 +1063,7 @@ def _help():
         '  kpis         {key: value}, keys per skill below',
         '  funnel       {stage: value}, stages per skill below, as distinct session counts',
         '  tables       {table: [row, …]}, a row is an object keyed by column',
-        '  priorities   ranked list, most affected first; the card draws 3, the question offers 5',
+        '  priorities   ranked list, most affected first; the card draws 3, the question offers 4',
         '  tests        ab-testing only, in place of priorities: ranked list of tests; the card draws 5',
         '  noPrioritiesReason   one sentence, used only when priorities is empty',
         '  reportPages  ab-testing only: true when the tests\' report pages were published; the question then',

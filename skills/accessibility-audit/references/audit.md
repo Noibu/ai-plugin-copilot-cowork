@@ -1,6 +1,6 @@
 # Running an audit
 
-Read this when the user asks for an accessibility audit, or asks to schedule one. It holds how the pages are chosen, how a scan is started, what to reply, and the schedule.
+Read this when the user asks for an accessibility audit, or picks the schedule option or asks to schedule one. It holds how the pages are chosen, how a scan is started, what to reply, and the schedule.
 
 The scan runs on Noibu's side: a crawler loads the page and runs WCAG checks on it. A scan is started with a tool, takes about a minute, and its results open in the Noibu console. No tool returns the results, so nothing about what a scan found can be said here.
 
@@ -42,7 +42,7 @@ Say nothing about what the scans found. Don't show the report card: it needs fin
 
 ## Schedule
 
-Only when the user asks ("schedule this", "run this every week").
+When the user picks the schedule option in the next-step question, or asks ("schedule this", "run this every week").
 
 - If a scheduled prompt for this store's audit already exists, change that one; don't add a second.
 - If the request already names how often and when, ask nothing more about timing.

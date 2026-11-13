@@ -58,7 +58,7 @@ Pick the route from the request.
 5. Write the report data: `references/report.md`.
 6. Deliver the report: the Output section below.
 
-**After a report**: the user picks a priority, or types a request to investigate, ignore an issue, download or schedule. Open `references/follow-ups.md`.
+**After a report**: the user picks a priority or the schedule option, or types a request to investigate, ignore an issue, download or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
@@ -72,10 +72,10 @@ Finding titles name the metric and the move in 60 characters or fewer. Each find
 
 A focused question gets prose with the number, its window and its base; a card only if it helps.
 
-Download, save and schedule run only when the user asks. Never offer them.
+Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
 In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
 
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
-- With fewer than two priorities, add: "Where shoppers leave checkout", "Mobile against desktop checkout", "Payment and delivery methods", "Checkout errors".
+- With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Where shoppers leave checkout", "Mobile against desktop checkout", "Payment and delivery methods", "Checkout errors".
 - Schedule preset: Weekly on Mondays · 9 am · last 30 days against the previous 30.

@@ -114,7 +114,7 @@ Write one JSON file in the working folder in this shape, then follow the Output 
 | `kpis.critical`, `serious`, `moderate`, `minor` | Pooled entries at each severity. Always send all four; a severity with none is a 0 |
 | `tables.pagesScanned` | One row per page, by pageviews descending: a short page name ("Homepage", "Bracelets collection"), its 30-day pageviews, its violation instances |
 | `tables.keyFindings` | One row per pooled entry, in priority order: the finding in plain English, its criterion as text ("1.4.3 Contrast (Minimum)"), its severity |
-| `priorities` | The top pooled entries in priority order, up to 5. The card draws the first three and the next-step question offers all five |
+| `priorities` | The top pooled entries in priority order, up to 5. The card draws the first three and the next-step question offers the first four |
 
 Each priority:
 
