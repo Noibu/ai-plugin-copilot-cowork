@@ -113,10 +113,8 @@ Download and save run only when the user asks. Never offer them. Schedule is off
 
 A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
 
-- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file. If the question is skipped, add the "Full reports" line under the recovery line (`references/follow-ups.md`).
-- With fewer than two priorities, add nothing: the script returns every option for this skill, and `references/follow-ups.md` says what each one does.
 If the scheduled prompt names somewhere to send the report (email through Outlook, Teams or Notion), send it after those lines, in the form this skill's schedule reference gives. If it can't be sent because the connector is missing or not connected, the report above still stands: add one line saying which connector to install so the next report can be sent, e.g. "Couldn't send this to Teams. Install the Teams connector in Cowork and the next report will be sent."
 
-- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
-- With fewer than two priorities, add: "Look for tests on a different goal", "Create a specific A/B test".
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file. If the question is skipped, add the "Full reports" line under the recovery line (`references/follow-ups.md`).
+- With fewer than two priorities, add nothing: the script returns every option for this skill, and `references/follow-ups.md` says what each one does.
 - Schedule preset: Weekly on Mondays · 9 am · last 30 days.

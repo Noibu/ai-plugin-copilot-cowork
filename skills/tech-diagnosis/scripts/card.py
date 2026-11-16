@@ -910,9 +910,14 @@ def build(report, compact=False, limit=CARD_LIMIT):
 
 
 def next_step(model):
-    """The next-step question's options (the priorities in card order; fixed routes for A/B testing) and the line to use if it is skipped."""
+    """The next-step question's options and the line to use if it is skipped.
+
+    The options are the priorities in card order (fixed routes for A/B testing), then the schedule option for a skill that has one.
+    Also the lines that end a scheduled run in place of the question: one lead-in, then one request per priority.
+    """
     spec = model['spec']
-    unit, options, seen = spec['unit'], [], set()
+    schedule = spec.get('schedule')
+    unit, options, seen = spec['unit'], [], {schedule.casefold()} if schedule else set()
     if spec.get('items') == 'tests':    # a fixed set of routes; the test itself is picked in a second question
         count = len(model['priorities'])
         if count and model.get('report_pages'):
@@ -922,32 +927,20 @@ def next_step(model):
                            else {'label': 'Implement this test', 'description': 'Create the test in Noibu and build it.'})
         options += [{'label': 'Look for tests on a different goal', 'description': 'Run the analysis again for another goal.'},
                     {'label': 'Create a specific A/B test', 'description': 'Describe the change you want to test and I\'ll build it.'}]
-        return options, f'To go deeper, ask: "{spec["ask"].format(n=1)} for {model["store"]}".' if count else f'To go deeper, ask about any part of this report for {model["store"]}.'
-    for n, p in enumerate(model['priorities'][:MAX_OPTIONS], 1):
-    """The next-step question's options and the line to use if it is skipped.
-
-    The options are the priorities in card order, then the schedule option for a skill that has one.
-    Also the lines that end a scheduled run in place of the question: one lead-in, then one request per priority.
-    """
-    spec = model['spec']
-    schedule = spec.get('schedule')
-    unit, options, seen = spec['unit'], [], {schedule.casefold()} if schedule else set()
-    for n, p in enumerate(model['priorities'][:MAX_OPTIONS - (1 if schedule else 0)], 1):
-        label = p['short']
-        if label.casefold() in seen:
-            label = ' '.join(label.split()[:SHORT_WORDS - 1]) + f' #{n}'
-        seen.add(label.casefold())
-        options.append({'label': label, 'description': f'{spec.get("itemLabel", "Priority")} {n}' + (f' · ~{p["affected"]:,} {unit}' if p['affected'] is not None else '')})
-    if options and spec.get('ask'):
-        recovery = f'To go deeper, ask: "{spec["ask"].format(n=1)} for {model["store"]}".'
-    elif options:
-        recovery = f'To go deeper, ask: "investigate {options[0]["label"]} for {model["store"]}".'
+        asks = [spec['ask'].format(n=n) for n in range(1, min(count, MAX_OPTIONS) + 1)]
     else:
-        recovery = f'To go deeper, ask about any part of this report for {model["store"]}.'
-    if options:
+        for n, p in enumerate(model['priorities'][:MAX_OPTIONS - (1 if schedule else 0)], 1):
+            label = p['short']
+            if label.casefold() in seen:
+                label = ' '.join(label.split()[:SHORT_WORDS - 1]) + f' #{n}'
+            seen.add(label.casefold())
+            options.append({'label': label, 'description': f'{spec.get("itemLabel", "Priority")} {n}' + (f' · ~{p["affected"]:,} {unit}' if p['affected'] is not None else '')})
         asks = [spec['ask'].format(n=n) if spec.get('ask') else f'investigate {o["label"]}' for n, o in enumerate(options, 1)]
+    if asks:
+        recovery = f'To go deeper, ask: "{asks[0]} for {model["store"]}".'
         scheduled = '\n'.join([f'{DIVE_DEEPER}:', ''] + [f'- "{ask} for {model["store"]}"' for ask in asks])
     else:
+        recovery = f'To go deeper, ask about any part of this report for {model["store"]}.'
         scheduled = f'{DIVE_DEEPER} about any part of this report for {model["store"]}.'
     if schedule:
         options.append({'label': schedule, 'description': spec.get('scheduleNote', SCHEDULE_NOTE)})
