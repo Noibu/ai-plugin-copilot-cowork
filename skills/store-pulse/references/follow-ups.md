@@ -1,6 +1,6 @@
 # After a snapshot
 
-Read this when the user picks a thread from the next-step question, or types a request to schedule or download. Each section is one request.
+Read this when the user picks a thread or the schedule option from the next-step question, or types a request to schedule or download. Each section is one request.
 
 ## A thread is picked
 
@@ -17,7 +17,7 @@ If none fits, answer it with the Noibu tools directly, with the number, its wind
 
 ## Schedule
 
-Only when the user asks ("schedule this", "send me this every morning").
+When the user picks the schedule option in the next-step question, or asks ("schedule this", "send me this every morning").
 
 **One schedule per store.** The scheduled prompt is named `store-pulse-<domain with dots as dashes>`, e.g. `store-pulse-example-com`. Before creating one, look for a scheduled prompt with exactly that name. If it exists, this is an edit: change that one. Match on the exact name, never on the domain alone, and never touch another store's schedule.
 
@@ -41,17 +41,27 @@ The send time is 9 am unless the user names another.
 
 If the scheduler has no every-other-week option, schedule it weekly and have the prompt stop without sending on the off weeks, by comparing the week number's parity with the week it was set up.
 
-**The scheduled prompt** runs with no conversation behind it, so it carries everything: *Run Store Pulse for <store> over <window rule> in <timezone>, compared to the period of the same length before.* Add the blocks to include if the user named any (top products, channel performance, paid ad performance), and any delivery below. The Output section of SKILL.md says what a scheduled run delivers in Cowork.
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
 
-Confirm in one sentence once the schedule exists, saying when it will run. If a delivery was set up, add that the first run's send needs approving once, after which later runs deliver without asking.
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
+
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked. The details for each destination are under "Sending it elsewhere".
+
+**The scheduled prompt** runs with no conversation behind it, so it carries everything: *Run Store Pulse for <store> over <window rule> in <timezone>, compared to the period of the same length before.* Add the blocks to include if the user named any (top products, channel performance, paid ad performance), and one send line per destination: *Then send the <summary or full report> to <destination>.* Apart from a send line, write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
+
+Confirm in one sentence once the schedule exists, saying when it will run and where each report is sent. If a destination was set up, add that the first run's send needs approving once, after which later runs deliver without asking.
 
 ### Sending it elsewhere
 
-Only if the user names a destination: email or Slack. Ask the user which detail level they want only if a destination is set: **Summary** (the summary and the headline numbers) or **Full report** (adds the funnel and any blocks included).
+For each destination picked:
 
-For each destination, check its connection first. If it isn't set up, say in one plain line which connection unlocks it, leave that destination out, and carry on with the rest. If no destination is left, the schedule still runs in Cowork; say so.
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- If at least one destination is left, ask which detail level the user wants: **Summary** (the summary and the headline numbers) or **Full report** (adds the funnel and any blocks included).
 
-**Email is a draft, never sent.** The run creates a draft in the user's connected mail account (Outlook or Gmail; ask which if both are connected), and the user reviews and sends it. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+**Email is a draft, never sent.** It goes through Outlook only: the run creates a draft in the user's Outlook, and the user reviews and sends it. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
 
 - Subject: "Store Pulse: <period>".
 - Body, in order: the summary paragraph; the headline table (Sessions, Engagement, Conversion, AOV, RPS, each with its current value and its change against the previous period).
@@ -63,17 +73,18 @@ For each destination, check its connection first. If it isn't set up, say in one
 - A closing line: "Generated <date and time> from Store Pulse for <store>."
 - Tables only. No charts, no images, no attachments.
 
-**Slack** posts to the channel the user names; ask which if they didn't.
+**Teams** posts to the channel or chat the user names; ask which if they didn't.
 
 - Summary: one message with the title "Store Pulse: <period>", the summary paragraph, then one line per headline number.
-- Full report: a canvas titled "Store Pulse: <period>" holding the summary, a "Headline metrics" table, and one section per included block (the funnel as a list, the others as tables); then a posted message, not a draft, with the title and the canvas link. A draft message is visible only to the person who made it.
-- If canvases aren't available on the workspace's plan, post the summary message and add: "Full canvas report requires a paid Slack plan."
+- Full report: the same message, followed by the headline table and one table per included block, as in the email.
+
+**Notion** adds a page under the page the user names; ask which if they didn't. The page is titled "Store Pulse: <period>" and holds what the email body holds at the chosen detail level.
 
 **When a run goes wrong:**
 
-- A destination can't be reached: say so in the run ("Couldn't reach <destination>; the connection may need signing in again") and still deliver to the others. Never skip the whole run silently.
+- A destination can't be reached: the report still appears in Cowork and still goes to the other destinations. The Output section of SKILL.md gives the line to add. Never skip the whole run silently.
 - The window has no traffic: still deliver, saying there was no traffic in this window.
-- End the run with one line naming every destination that received a draft or a message. Don't repeat the message body.
+- End the run with one line naming every destination that received a draft, a message or a page. Don't repeat the message body.
 
 ## Download
 

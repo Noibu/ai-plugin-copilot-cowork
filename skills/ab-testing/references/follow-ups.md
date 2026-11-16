@@ -14,6 +14,7 @@ The card script returns them; ask them exactly as given. Each one arrives as a p
 - **"Implement one of the tests"**: write no text. Ask one clickable question, "Which test should I implement?", with one option per test in rank order: the label is the test's title, the description "Test <rank>". A question takes five options; with more tests, say in the question how many more there are and that a typed title works. The picked test goes to "A test is picked". "Implement this test" is the same option when the run has one test: skip the question and go straight to "A test is picked" with it.
 - **"Look for tests on a different goal"**: run the finder again from the goal question (`references/finder.md`), leaving out the goal this run used.
 - **"Create a specific A/B test"**: that route in SKILL.md.
+- **"Schedule this report"**: go to "Schedule".
 
 When the question is skipped, reply with the recovery line the card script returned, then the "Full reports" line.
 
@@ -80,7 +81,7 @@ Reply with one line saying where the file is.
 
 ## Schedule
 
-Only when the user asks ("run this every Monday", "look for new tests each month"). What is scheduled is the finder only: looking for new opportunities with the goal fixed in the prompt, ending at the report. A scheduled run never creates a draft, a branch or a pull request.
+When the user picks the schedule option in the next-step question, or asks ("run this every Monday", "look for new tests each month"). What is scheduled is the finder only: looking for new opportunities with the goal fixed in the prompt, ending at the report. A scheduled run never creates a draft, a branch or a pull request.
 
 - If a scheduled prompt for this store's A/B test finder already exists, change that one; don't add a second.
 - If the request already names how often and when, ask nothing more about timing.
@@ -91,6 +92,35 @@ Only when the user asks ("run this every Monday", "look for new tests each month
   4. "Something else": the user names the day and time
 - The goal: if this conversation already ran the finder for the store, use that run's goal. Otherwise ask the goal question from `references/finder.md` once. "All goals" is a valid answer.
 
-Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* The Output section of SKILL.md says what a scheduled run delivers.
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
 
-Confirm in one or two sentences: how often, the goal and the store. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
+
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked.
+
+For each destination picked:
+
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- **Email** goes through Outlook only. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+- **Teams**: ask which channel or chat if it wasn't given.
+- **Notion**: ask which page if it wasn't given.
+- Add to the scheduled prompt, once per destination: *Then send the digest to <destination>.*
+
+A run that can't send still gives its report in Cowork; the Output section of SKILL.md says how.
+
+Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* Apart from a send line, write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
+
+**The digest:**
+
+- A title: "A/B test ideas: <store>, <date>", then the goal in one line.
+- The tests on the card, and no others. Each one: its title, what to change in one sentence and its weekly traffic.
+- End with the script's scheduled lines exactly as given: "Dive deeper by asking Cowork:" and one request per test on the card. Nothing else for the reader to copy, and no request under an individual test.
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each test as a heading and a paragraph.
+
+Confirm in one or two sentences: how often, the goal, the store and where each report is sent. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.

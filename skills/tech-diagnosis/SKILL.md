@@ -67,7 +67,7 @@ Then:
 2. The first thing the user sees is the finding, never narration.
 3. End with the closing question that file defines.
 
-**After a scan or a diagnosis**: the user picks a priority, or asks to see the fix, draft a pull request, open a ticket, share findings, share with a vendor, ignore an issue, or schedule. Open `references/follow-ups.md`.
+**After a scan or a diagnosis**: the user picks a priority or the schedule option, or asks to see the fix, draft a pull request, open a ticket, share findings, share with a vendor, ignore an issue, or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
@@ -81,10 +81,12 @@ Finding titles name the metric and the move in 60 characters or fewer. Each find
 
 A focused question gets prose with the number, its window and its base; a card only if it helps.
 
-Download, save and schedule run only when the user asks. Never offer them.
+Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
-In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
+
+If the scheduled prompt names somewhere to send the report (email through Outlook, Teams or Notion), send it after those lines, in the form this skill's schedule reference gives. If it can't be sent because the connector is missing or not connected, the report above still stands: add one line saying which connector to install so the next report can be sent, e.g. "Couldn't send this to Teams. Install the Teams connector in Cowork and the next report will be sent."
 
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
-- With fewer than two priorities, add: "Diagnose a specific error", "Check speed on a specific page".
+- With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Diagnose a specific error", "Check speed on a specific page".
 - Schedule preset: Weekly on Mondays · 9 am · errors from the last 7 days, page speed from the last 30.

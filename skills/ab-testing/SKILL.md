@@ -91,7 +91,7 @@ If readiness stopped the run, its one sentence is the answer. If the finder foun
 3. With none left, say why in one line and ask the opening question again with its other two options.
 4. Build the picked test: `references/build.md`.
 
-**After the tests are shown**: the user picks an option from the next-step question, skips it, or asks to open its report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
+**After the tests are shown**: the user picks an option from the next-step question, skips it, or asks to open a test's report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
 
 **Checking a test that is running** ("check the quick add test"): `references/build.md`, "Checking a running test is healthy".
 
@@ -109,9 +109,11 @@ Finding titles name the metric and the move in 60 characters or fewer. Each find
 
 A focused question gets prose with the number, its window and its base; a card only if it helps.
 
-Download, save and schedule run only when the user asks. Never offer them.
+Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
-In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
+
+If the scheduled prompt names somewhere to send the report (email through Outlook, Teams or Notion), send it after those lines, in the form this skill's schedule reference gives. If it can't be sent because the connector is missing or not connected, the report above still stands: add one line saying which connector to install so the next report can be sent, e.g. "Couldn't send this to Teams. Install the Teams connector in Cowork and the next report will be sent."
 
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file. If the question is skipped, add the "Full reports" line under the recovery line (`references/follow-ups.md`).
 - With fewer than two priorities, add nothing: the script returns every option for this skill, and `references/follow-ups.md` says what each one does.

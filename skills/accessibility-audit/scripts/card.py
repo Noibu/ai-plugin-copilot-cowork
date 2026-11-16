@@ -19,7 +19,9 @@ MAX_TABLES = 2              # two side-by-side half tables count as one
 PREVIEW_ROWS = 5
 COMPACT_ROWS = 3
 MAX_PRIORITIES = 3          # drawn on the card
-MAX_OPTIONS = 5             # offered in the next-step question
+MAX_OPTIONS = 5             # offered in the next-step question, the schedule option included
+DIVE_DEEPER = 'Dive deeper by asking Cowork'   # opens the lines that end a scheduled run, which asks no question
+SCHEDULE_NOTE = 'Run it automatically, weekly or on your own timing'
 MAX_LINK_BUTTONS = 2
 TITLE_CHARS, SHORT_WORDS, EVIDENCE_CHARS, CELL_CHARS, TAG_CHARS = 60, 5, 160, 40, 32
 NOT_MEASURED = 'Not measured'
@@ -52,7 +54,7 @@ _RANKED_COLUMNS = [('sessions', 'Sessions', 'count'), ('conversionRate', 'Conver
 
 SKILLS = {
     'checkout-analysis': {
-        'title': 'Overview', 'unit': 'sessions',
+        'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report',
         'context': [('sessions', 'count', '{} sessions'), ('addedToCartRate', 'rate', '{} added to cart')],
         'tiles': [_kpi('checkoutCompletion', 'Checkout completion', 'rate'), _kpi('mobileConversion', 'Mobile conversion', 'rate'),
                   _kpi('desktopConversion', 'Desktop conversion', 'rate'), _kpi('checkoutErrors', 'Checkout errors', 'count', good='down')],
@@ -64,7 +66,7 @@ SKILLS = {
                    _table('deliveryMethods', [('method', 'Delivery methods', 'text'), ('orders', 'Orders', 'count')], half=True)],
     },
     'product-analysis': {
-        'title': 'Overview', 'unit': 'sessions',
+        'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report',
         'context': [('sessions', 'count', '{} sessions'), ('conversionRate', 'rate', '{} conversion rate'), ('medianOrder', 'money', 'Median order {}')],
         'funnel': {'stages': [('viewedProduct', 'Viewed product'), ('addedToCart', 'Added to cart'), ('completedOrder', 'Completed order')],
                    'axis': '% of sessions that viewed a product', 'first': '{}', 'pill': True},
@@ -74,7 +76,7 @@ SKILLS = {
         'signals': ['Low add-to-cart rate', 'Cart abandonment', 'Low collection conversion', 'Underperforming product type', 'High bounce rate'],
     },
     'segment-analysis': {
-        'title': 'Overview', 'unit': 'sessions', 'tilesTitle': 'Conversion rate',
+        'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report', 'tilesTitle': 'Conversion rate',
         'tiles': [_kpi('siteWideConversion', 'Site wide', 'rate', sub='siteWideSessions'), _kpi('mobileConversion', 'Mobile', 'rate', sub='mobileSessions'),
                   _kpi('desktopConversion', 'Desktop', 'rate', sub='desktopSessions')],
         'tables': [_table('countries', [('country', 'Country', 'country')] + _CHANNEL_COLUMNS, top=('Top country', ['sessions', 'conversionRate'])),
@@ -83,7 +85,7 @@ SKILLS = {
         'signals': ['Low mobile conversion', 'High-traffic underperformer', 'Campaign drag', 'Localization gap', 'High-value channel', 'Device gap'],
     },
     'store-pulse': {
-        'title': 'Store Pulse', 'unit': 'sessions',
+        'title': 'Store Pulse', 'unit': 'sessions', 'schedule': 'Schedule Store Pulse',
         'tiles': [_kpi('sessions', 'Sessions', 'count'), _kpi('engagement', 'Engagement', 'rate'), _kpi('conversion', 'Conversion', 'rate'),
                   _kpi('aov', 'AOV', 'money'), _kpi('rps', 'RPS', 'money')],
         'funnel': {'stages': [('enterStore', 'Enter store'), ('viewProduct', 'View product'), ('addToCart', 'Add to cart'), ('startCheckout', 'Start checkout'), ('checkoutComplete', 'Checkout complete')],
@@ -93,14 +95,16 @@ SKILLS = {
                    _table('topProducts', [('name', 'Top Products by Traffic', 'text'), ('sessions', 'Sessions', 'count'), ('addToCartRate', 'Add to Cart', 'rate')])],
     },
     'tech-diagnosis': {
-        'title': 'Tech findings', 'unit': 'sessions',
+        'title': 'Tech findings', 'unit': 'sessions', 'schedule': 'Schedule this scan',
     },
     'ab-testing': {
         'title': 'A/B test opportunities', 'unit': 'sessions', 'items': 'tests', 'itemLabel': 'Test',
         'drawn': 5, 'emptyLabel': 'No test opportunities', 'ask': 'show test {n}',
+        'schedule': 'Schedule this report', 'scheduleNote': 'Look for new tests automatically, weekly or on your own timing',
     },
     'accessibility-audit': {
         'title': 'Accessibility audit', 'unit': 'pageviews',
+        'schedule': 'Schedule the audit', 'scheduleNote': 'Start the page scans automatically, weekly or on your own timing',
         'context': [('pagesScanned', 'count', '{} pages scanned'), ('pageviews', 'count', '{} pageviews'), ('violationInstances', 'count', '{} violation instances'), ('uniqueFixes', 'count', '{} unique fixes')],
         'tiles': [_kpi('critical', 'Critical', 'count', good='down'), _kpi('serious', 'Serious', 'count', good='down'),
                   _kpi('moderate', 'Moderate', 'count', good='down'), _kpi('minor', 'Minor', 'count', good='down')],
@@ -907,9 +911,15 @@ def build(report, compact=False, limit=CARD_LIMIT):
 
 
 def next_step(model):
-    """The next-step question's options (the priorities in card order; fixed routes for A/B testing) and the line to use if it is skipped."""
+    """The next-step question's options and the line to use if it is skipped.
+
+    The options are the priorities the card draws, in card order (fixed routes for A/B testing), then the schedule option.
+    Also the lines that end a scheduled run in place of the question: one lead-in, then one request per priority on the card.
+    Neither ever names a priority the card does not show.
+    """
     spec = model['spec']
-    unit, options, seen = spec['unit'], [], set()
+    schedule = spec.get('schedule')
+    unit, options, seen = spec['unit'], [], {schedule.casefold()} if schedule else set()
     if spec.get('items') == 'tests':    # a fixed set of routes; the test itself is picked in a second question
         count = len(model['priorities'])
         if count and model.get('report_pages'):
@@ -919,20 +929,24 @@ def next_step(model):
                            else {'label': 'Implement this test', 'description': 'Create the test in Noibu and build it.'})
         options += [{'label': 'Look for tests on a different goal', 'description': 'Run the analysis again for another goal.'},
                     {'label': 'Create a specific A/B test', 'description': 'Describe the change you want to test and I\'ll build it.'}]
-        return options, f'To go deeper, ask: "{spec["ask"].format(n=1)} for {model["store"]}".' if count else f'To go deeper, ask about any part of this report for {model["store"]}.'
-    for n, p in enumerate(model['priorities'][:MAX_OPTIONS], 1):
-        label = p['short']
-        if label.casefold() in seen:
-            label = ' '.join(label.split()[:SHORT_WORDS - 1]) + f' #{n}'
-        seen.add(label.casefold())
-        options.append({'label': label, 'description': f'{spec.get("itemLabel", "Priority")} {n}' + (f' · ~{p["affected"]:,} {unit}' if p['affected'] is not None else '')})
-    if options and spec.get('ask'):
-        recovery = f'To go deeper, ask: "{spec["ask"].format(n=1)} for {model["store"]}".'
-    elif options:
-        recovery = f'To go deeper, ask: "investigate {options[0]["label"]} for {model["store"]}".'
+        asks = [spec['ask'].format(n=n) for n in range(1, min(count, spec['drawn']) + 1)]
+    else:
+        for n, p in enumerate(model['priorities'][:MAX_PRIORITIES], 1):    # only what the card draws
+            label = p['short']
+            if label.casefold() in seen:
+                label = ' '.join(label.split()[:SHORT_WORDS - 1]) + f' #{n}'
+            seen.add(label.casefold())
+            options.append({'label': label, 'description': f'{spec.get("itemLabel", "Priority")} {n}' + (f' · ~{p["affected"]:,} {unit}' if p['affected'] is not None else '')})
+        asks = [spec['ask'].format(n=n) if spec.get('ask') else f'investigate {o["label"]}' for n, o in enumerate(options, 1)]
+    if asks:
+        recovery = f'To go deeper, ask: "{asks[0]} for {model["store"]}".'
+        scheduled = '\n'.join([f'{DIVE_DEEPER}:', ''] + [f'- "{ask} for {model["store"]}"' for ask in asks])
     else:
         recovery = f'To go deeper, ask about any part of this report for {model["store"]}.'
-    return options, recovery
+        scheduled = f'{DIVE_DEEPER} about any part of this report for {model["store"]}.'
+    if schedule:
+        options.append({'label': schedule, 'description': spec.get('scheduleNote', SCHEDULE_NOTE)})
+    return options, recovery, scheduled
 
 
 # ---------------------------------------------------------------------------------------------
@@ -982,7 +996,7 @@ def run_in_cowork():
     """Build the card, show it with exactly one render call, and return one small result."""
     from aether_tools import ToolDenied, ToolError, ToolRefused, args, set_result, tools
     given = args() or {}
-    result = {'shown': False, 'options': [], 'recovery': ''}
+    result = {'shown': False, 'options': [], 'recovery': '', 'scheduled': ''}
     try:
         if given.get('report') is None:
             raise ReportError('args.report must be the path to the report data file')
@@ -991,12 +1005,12 @@ def run_in_cowork():
         reason = 'the report data could not be used: ' if isinstance(exc, ReportError) else ''
         result['error'] = f'The card could not be built because {reason}{_why(exc)}.'
         try:
-            result['options'], result['recovery'] = next_step(read_report(_load(given.get('report'))))
+            result['options'], result['recovery'], result['scheduled'] = next_step(read_report(_load(given.get('report'))))
         except Exception:
             pass
         set_result(result)
         return
-    result['options'], result['recovery'] = next_step(model)
+    result['options'], result['recovery'], result['scheduled'] = next_step(model)
     result['variant'] = variant
     try:
         reply = tools.core.render_ui(type=card['type'], version=card['version'], body=card['body'])
@@ -1031,9 +1045,10 @@ def _help():
         'In Cowork (shows the card):',
         f'  {RUN_COMMAND}',
         '  Optional arg "compact": true draws the compact card.',
-        '  Returns {"shown", "variant", "options", "recovery"} and, on failure, "error":',
-        '    options   the next-step question, in order: [{"label", "description"}]',
+        '  Returns {"shown", "variant", "options", "recovery", "scheduled"} and, on failure, "error":',
+        '    options   the next-step question, in order: [{"label", "description"}]; the schedule option is last',
         '    recovery  the line to reply with if the question is skipped',
+        '    scheduled the lines that end a scheduled run, in place of the question',
         '    error     one sentence saying why the card was not built or shown',
         '',
         'On the command line (builds only):',
@@ -1050,12 +1065,12 @@ def _help():
         '  kpis         {key: value}, keys per skill below',
         '  funnel       {stage: value}, stages per skill below, as distinct session counts',
         '  tables       {table: [row, …]}, a row is an object keyed by column',
-        '  priorities   ranked list, most affected first; the card draws 3, the question offers 5',
+        '  priorities   ranked list, most affected first; the card draws 3, and the question offers those 3',
         '  tests        ab-testing only, in place of priorities: ranked list of tests; the card draws 5',
         '  noPrioritiesReason   one sentence, used only when priorities is empty',
         '  reportPages  ab-testing only: true when the tests\' report pages were published; the question then',
         '               starts with an option that opens the pages. For ab-testing the question offers',
-        '               routes (view the reports, implement a test, another goal, a specific test), not tests',
+        '               routes (view the reports, implement a test, another goal, a specific test, schedule), not tests',
         '  links        up to 2 console.noibu.com URLs returned by a Noibu tool',
         '',
         'Values',
@@ -1238,8 +1253,8 @@ def run_command_line(argv):
     if out:
         with open(out, 'w', encoding='utf-8') as handle:
             json.dump(card, handle, ensure_ascii=False, indent=1)
-    options, recovery = next_step(model)
-    print(json.dumps({'built': True, 'variant': variant, 'bytes': card_bytes(card), 'options': options, 'recovery': recovery}, ensure_ascii=False, indent=1))
+    options, recovery, scheduled = next_step(model)
+    print(json.dumps({'built': True, 'variant': variant, 'bytes': card_bytes(card), 'options': options, 'recovery': recovery, 'scheduled': scheduled}, ensure_ascii=False, indent=1))
     return 0
 
 
