@@ -1,8 +1,9 @@
 # The tests file and the report data
 
-Read this when synthesis is done and the tests are about to be written, and again whenever a later step needs a field's rules. A finder run writes two files in the working folder:
+Read this when synthesis is done and the tests are about to be written, and again whenever a later step needs a field's rules. A finder run writes two files in the working folder, and publishes one report page per test to the Cowork output folder:
 
-- **`candidates.json`**: the full record of the run's tests. Every later step works from it: a test's detail, the draft, the code, QA, the PDF. Nothing in it is typed twice.
+- **`candidates.json`**: the full record of the run's tests. Every later step works from it: a test's report page, its detail, the draft, the code, QA, the PDF. Nothing in it is typed twice.
+- **The report pages**: one page per test with its full record, built from `candidates.json` by `scripts/report.py`. The user opens a page from its link in the chat.
 - **The report data**: the few fields the report card shows, taken from `candidates.json`.
 
 Tests live in the conversation that found them. Later steps read only the `candidates.json` in this conversation's working folder, never one from another conversation.
@@ -85,7 +86,7 @@ Tests live in the conversation that found them. Later steps read only the `candi
 | `variationName` | B's short noun phrase ("Add to cart button on cards") |
 | `what` | one or two plain sentences: the change a shopper would notice |
 | `why` | one or two sentences: the measured problem, at most 3 numbers; correlational evidence labelled in one clause. It is shown on the report card, so it must stand alone and lead with the customer's own numbers |
-| `evidence` | the figures behind `why`, as `[{claim, numbers, source, correlational}]`, with the battery query each came from in `source`. A hypothesis or pull request quotes these, never the prose |
+| `evidence` | the figures behind `why`, as `[{claim, numbers, source, correlational}]`, with the battery query each came from in `source`. A hypothesis or pull request quotes these, never the prose. `claim` is shown on the test's report page without `numbers` or `source`, so it states its own figures in plain words ("Collection pages reach 29% of sessions"), with no ids, field names or query names |
 | `siteFacts` | what the data showed is on the surface: the labels shoppers clicked there (query #9) and the click labels configured for it, as returned, not a summary |
 | `unconfirmed` | what the test assumes about its page that the data could not show, one short line each. The build checks these against the store's code before a draft is created. Leave out when there is nothing |
 | `variations[].selectors` | CSS selectors from the domain's click labels for the elements the variation touches, as returned. Leave out when no label covers them; the build finds them in the store's code |
@@ -181,6 +182,15 @@ The metric rows below are the **last-known catalogue (October 2026)**: primary A
 
 The control is always the current experience: `isControl: true` goes on "Original" and nowhere else. Splits must sum to 100. Variation names become the flag values the SDK serves, so keep the names in `setup` and in `createInput` identical.
 
+## The report pages
+
+Once `candidates.json` is written, build the pages: copy `scripts/report.py` to `.aether/scripts/report.py`, then RunScript `report.py` with the arg `candidates` set to the path of `candidates.json`. Pass nothing else.
+
+- It writes one page per test, named after its test's title (`quick-add-on-collection-cards.html`), into a `pages` folder beside `candidates.json`, and returns `pages`: each test's rank, title and file path, in rank order.
+- A script can't write to the Cowork output folder. Once the script returns, publish each returned page to the Cowork output folder yourself, unchanged and under the same file name. The published files are the ones the summary links.
+- The script writes every heading and label on a page. Never write a page's HTML yourself, and never edit a page after it is built. To change a page, correct `candidates.json` and run the script again.
+- If it returns `error`, or can't be run at all, or a page can't be published, don't retry. Carry on without the pages, set `reportPages` to `false`, and add one sentence to the summary saying the full report pages couldn't be built and why, using the reason the script or RunScript gave.
+
 ## The report data
 
 Write a second JSON file in the working folder for the report card, from `candidates.json`:
@@ -193,7 +203,8 @@ Write a second JSON file in the working folder for the report card, from `candid
   "tests": [
     {"title": "", "shortTitle": "", "change": "", "why": ""}
   ],
-  "noPrioritiesReason": ""
+  "noPrioritiesReason": "",
+  "reportPages": true
 }
 ```
 
@@ -205,7 +216,10 @@ Write a second JSON file in the working folder for the report card, from `candid
 | `change` | the first sentence of `what` |
 | `why` | the test's `why` |
 | `noPrioritiesReason` | only when no test cleared the bar: one sentence saying why |
+| `reportPages` | `true` when the report pages were built and published, otherwise `false`. The next-step question then starts with "View full reports" |
 
 Timestamps carry their timezone. Then follow the Output section of SKILL.md.
 
 **The summary** for this report says, in 2–3 sentences: the goal the tests serve, the strongest measured problem behind them, that the tests rest on Noibu data and the live store was not read, and any other caveat that changes how the tests should be read (traffic is thin; the goal was switched). It never recaps the tests.
+
+**The links to the report pages** are never written before the next-step question, because text written there is often not shown. The user gets them from the question's first option, or by skipping it (`references/follow-ups.md`). A scheduled run asks nothing, so it ends with the "Full reports" line that file describes. The tests' records never go in the chat.

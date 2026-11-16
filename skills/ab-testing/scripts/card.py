@@ -118,7 +118,7 @@ PRIORITY_EXTRA = {
     'tech-diagnosis': {'kind', 'status', 'errorType', 'vendor', 'occurrences', 'lastSeen', 'where', 'vital'},
     'accessibility-audit': {'severity', 'wcag', 'pages'},
 }
-REPORT_FIELDS = {'skill', 'store', 'window', 'currency', 'kpis', 'funnel', 'tables', 'priorities', 'tests', 'noPrioritiesReason', 'links'}
+REPORT_FIELDS = {'skill', 'store', 'window', 'currency', 'kpis', 'funnel', 'tables', 'priorities', 'tests', 'noPrioritiesReason', 'links', 'reportPages'}
 
 
 class ReportError(ValueError):
@@ -478,6 +478,11 @@ def read_report(report):
 
     reason = _text(report.get('noPrioritiesReason'), 'noPrioritiesReason')
     model['reason'] = _sentence(reason, EVIDENCE_CHARS) if reason else None
+
+    pages = report.get('reportPages')
+    if pages is not None and (not isinstance(pages, bool) or skill != 'ab-testing'):
+        _bad('reportPages', 'true or false, for ab-testing only', pages)
+    model['report_pages'] = bool(pages)
 
     links = report.get('links') or []
     if isinstance(links, str):
@@ -902,9 +907,19 @@ def build(report, compact=False, limit=CARD_LIMIT):
 
 
 def next_step(model):
-    """The next-step question's options (the priorities in card order) and the line to use if it is skipped."""
+    """The next-step question's options (the priorities in card order; fixed routes for A/B testing) and the line to use if it is skipped."""
     spec = model['spec']
     unit, options, seen = spec['unit'], [], set()
+    if spec.get('items') == 'tests':    # a fixed set of routes; the test itself is picked in a second question
+        count = len(model['priorities'])
+        if count and model.get('report_pages'):
+            options.append({'label': 'View full reports', 'description': 'Open the full report page for each test.' if count > 1 else 'Open the test\'s full report page.'})
+        if count:
+            options.append({'label': 'Implement one of the tests', 'description': 'Pick a test to create in Noibu and build.'} if count > 1
+                           else {'label': 'Implement this test', 'description': 'Create the test in Noibu and build it.'})
+        options += [{'label': 'Look for tests on a different goal', 'description': 'Run the analysis again for another goal.'},
+                    {'label': 'Create a specific A/B test', 'description': 'Describe the change you want to test and I\'ll build it.'}]
+        return options, f'To go deeper, ask: "{spec["ask"].format(n=1)} for {model["store"]}".' if count else f'To go deeper, ask about any part of this report for {model["store"]}.'
     for n, p in enumerate(model['priorities'][:MAX_OPTIONS], 1):
         label = p['short']
         if label.casefold() in seen:
@@ -1038,6 +1053,9 @@ def _help():
         '  priorities   ranked list, most affected first; the card draws 3, the question offers 5',
         '  tests        ab-testing only, in place of priorities: ranked list of tests; the card draws 5',
         '  noPrioritiesReason   one sentence, used only when priorities is empty',
+        '  reportPages  ab-testing only: true when the tests\' report pages were published; the question then',
+        '               starts with an option that opens the pages. For ab-testing the question offers',
+        '               routes (view the reports, implement a test, another goal, a specific test), not tests',
         '  links        up to 2 console.noibu.com URLs returned by a Noibu tool',
         '',
         'Values',
@@ -1162,7 +1180,7 @@ EXAMPLES = {
         'links': [_ISSUES],
     },
     'ab-testing': {
-        'skill': 'ab-testing', 'store': _STORE, 'window': _MONTH,
+        'skill': 'ab-testing', 'store': _STORE, 'window': _MONTH, 'reportPages': True,
         'tests': [
             {'title': 'Quick add on collection cards', 'shortTitle': 'Quick add on cards',
              'change': 'Add an Add to cart button to each product card on collection pages.',
