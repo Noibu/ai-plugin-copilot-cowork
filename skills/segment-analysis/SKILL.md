@@ -69,7 +69,7 @@ A focused question gets prose with the number, its window and its base; a card o
 
 Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
-A scheduled run asks nothing. Deliver the summary and the card, then reply with the script's scheduled line in place of the next-step question, and stop. When the user replies asking for next steps, ask the next-step question then.
+A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
 
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
 - With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Mobile against desktop", "Which countries underperform", "Which channel converts best", "Where traffic comes from".

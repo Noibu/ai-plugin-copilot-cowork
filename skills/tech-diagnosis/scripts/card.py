@@ -20,7 +20,7 @@ PREVIEW_ROWS = 5
 COMPACT_ROWS = 3
 MAX_PRIORITIES = 3          # drawn on the card
 MAX_OPTIONS = 5             # offered in the next-step question, the schedule option included
-SCHEDULED_LINE = 'To choose a next step, reply "next steps".'   # ends a scheduled run, which asks no question
+DIVE_DEEPER = 'Dive deeper by asking Cowork'   # opens the lines that end a scheduled run, which asks no question
 SCHEDULE_NOTE = 'Run it automatically, weekly or on your own timing'
 MAX_LINK_BUTTONS = 2
 TITLE_CHARS, SHORT_WORDS, EVIDENCE_CHARS, CELL_CHARS, TAG_CHARS = 60, 5, 160, 40, 32
@@ -927,6 +927,7 @@ def next_step(model):
     """The next-step question's options and the line to use if it is skipped.
 
     The options are the priorities in card order, then the schedule option for a skill that has one.
+    Also the lines that end a scheduled run in place of the question: one lead-in, then one request per priority.
     """
     spec = model['spec']
     schedule = spec.get('schedule')
@@ -943,9 +944,14 @@ def next_step(model):
         recovery = f'To go deeper, ask: "investigate {options[0]["label"]} for {model["store"]}".'
     else:
         recovery = f'To go deeper, ask about any part of this report for {model["store"]}.'
+    if options:
+        asks = [spec['ask'].format(n=n) if spec.get('ask') else f'investigate {o["label"]}' for n, o in enumerate(options, 1)]
+        scheduled = '\n'.join([f'{DIVE_DEEPER}:', ''] + [f'- "{ask} for {model["store"]}"' for ask in asks])
+    else:
+        scheduled = f'{DIVE_DEEPER} about any part of this report for {model["store"]}.'
     if schedule:
         options.append({'label': schedule, 'description': spec.get('scheduleNote', SCHEDULE_NOTE)})
-    return options, recovery
+    return options, recovery, scheduled
 
 
 # ---------------------------------------------------------------------------------------------
@@ -995,7 +1001,7 @@ def run_in_cowork():
     """Build the card, show it with exactly one render call, and return one small result."""
     from aether_tools import ToolDenied, ToolError, ToolRefused, args, set_result, tools
     given = args() or {}
-    result = {'shown': False, 'options': [], 'recovery': '', 'scheduled': SCHEDULED_LINE}
+    result = {'shown': False, 'options': [], 'recovery': '', 'scheduled': ''}
     try:
         if given.get('report') is None:
             raise ReportError('args.report must be the path to the report data file')
@@ -1004,12 +1010,12 @@ def run_in_cowork():
         reason = 'the report data could not be used: ' if isinstance(exc, ReportError) else ''
         result['error'] = f'The card could not be built because {reason}{_why(exc)}.'
         try:
-            result['options'], result['recovery'] = next_step(read_report(_load(given.get('report'))))
+            result['options'], result['recovery'], result['scheduled'] = next_step(read_report(_load(given.get('report'))))
         except Exception:
             pass
         set_result(result)
         return
-    result['options'], result['recovery'] = next_step(model)
+    result['options'], result['recovery'], result['scheduled'] = next_step(model)
     result['variant'] = variant
     try:
         reply = tools.core.render_ui(type=card['type'], version=card['version'], body=card['body'])
@@ -1048,7 +1054,7 @@ def _help():
         '    options   the next-step question, in order: [{"label", "description"}]; the schedule option,',
         '              for every skill but ab-testing, is last',
         '    recovery  the line to reply with if the question is skipped',
-        '    scheduled the line that ends a scheduled run, in place of the question',
+        '    scheduled the lines that end a scheduled run, in place of the question',
         '    error     one sentence saying why the card was not built or shown',
         '',
         'On the command line (builds only):',
@@ -1253,8 +1259,8 @@ def run_command_line(argv):
     if out:
         with open(out, 'w', encoding='utf-8') as handle:
             json.dump(card, handle, ensure_ascii=False, indent=1)
-    options, recovery = next_step(model)
-    print(json.dumps({'built': True, 'variant': variant, 'bytes': card_bytes(card), 'options': options, 'recovery': recovery, 'scheduled': SCHEDULED_LINE}, ensure_ascii=False, indent=1))
+    options, recovery, scheduled = next_step(model)
+    print(json.dumps({'built': True, 'variant': variant, 'bytes': card_bytes(card), 'options': options, 'recovery': recovery, 'scheduled': scheduled}, ensure_ascii=False, indent=1))
     return 0
 
 
