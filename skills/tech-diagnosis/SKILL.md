@@ -85,6 +85,8 @@ Download and save run only when the user asks. Never offer them. Schedule is off
 
 A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
 
+If the scheduled prompt names somewhere to send the report (email through Outlook, Teams or Notion), send it after those lines, in the form this skill's schedule reference gives. If it can't be sent because the connector is missing or not connected, the report above still stands: add one line saying which connector to install so the next report can be sent, e.g. "Couldn't send this to Teams. Install the Teams connector in Cowork and the next report will be sent."
+
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
 - With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Diagnose a specific error", "Check speed on a specific page".
 - Schedule preset: Weekly on Mondays · 9 am · errors from the last 7 days, page speed from the last 30.

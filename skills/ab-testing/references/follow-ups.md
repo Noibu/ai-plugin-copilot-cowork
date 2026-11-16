@@ -91,6 +91,30 @@ Only when the user asks ("run this every Monday", "look for new tests each month
   4. "Something else": the user names the day and time
 - The goal: if this conversation already ran the finder for the store, use that run's goal. Otherwise ask the goal question from `references/finder.md` once. "All goals" is a valid answer.
 
-Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
 
-Confirm in one or two sentences: how often, the goal and the store. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
+
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked.
+
+For each destination picked:
+
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- **Email** goes through Outlook only. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+- **Teams**: ask which channel or chat if it wasn't given.
+- **Notion**: ask which page if it wasn't given.
+- Add to the scheduled prompt, once per destination: *Then send the digest to <destination>.*
+
+A run that can't send still gives its report in Cowork; the Output section of SKILL.md says how.
+
+Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* Apart from a send line, write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
+
+**The digest:**
+
+- A title: "A/B test ideas: <store>, <date>", then the goal in one line.
+- The top 3 tests only. Each one: its title, what to change in one sentence, its weekly traffic, and a line the reader can copy: *Ask Cowork: "create an A/B test for <store>: <test title>"*.
+
+Confirm in one or two sentences: how often, the goal, the store and where each report is sent. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.

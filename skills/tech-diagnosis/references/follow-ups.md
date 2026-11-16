@@ -82,14 +82,14 @@ A ticket always carries the full content: Summary, Technical details, Cause and 
 
 Ask two clickable questions, in this order:
 
-1. "Where should these findings go?", header "Destination": PDF, Email, Slack, Notion. More than one may be chosen.
+1. "Where should these findings go?", header "Destination": PDF, Email, Teams, Notion. More than one may be chosen.
 2. "What should be included? (Summary is always included.)", header "Include": Cause (Recommended), Fix (Recommended), Technical details. More than one may be chosen.
 
 Then collect what each destination needs before sending anything:
 
 - PDF: nothing more. Save it in the Cowork output folder as `tech-diagnosis-<domain>-<date>.pdf` and say where it is.
-- Email: if it isn't connected, say in one plain line which connection unlocks it. Confirm the exact recipient addresses in chat, even if the user already gave them.
-- Slack: if it isn't connected, say which connection unlocks it. Ask which channel.
+- Email, through Outlook: if it isn't connected, say in one plain line which connection unlocks it. Confirm the exact recipient addresses in chat, even if the user already gave them.
+- Teams: if it isn't connected, say which connection unlocks it. Ask which channel or chat.
 - Notion: if it isn't connected, say which connection unlocks it. Ask which page or database.
 
 **The content,** in order: Summary → Technical details (if chosen) → Cause (if chosen) → Fix (if chosen). Rewrite it as a standing document:
@@ -102,7 +102,7 @@ Then collect what each destination needs before sending anything:
 **Per destination:**
 
 - **Email**: subject "Tech findings for <domain>: <N> items to investigate". A scannable body.
-- **Slack**: lead-in "Tech findings for <domain>: <N> items, last <window>." One section per finding.
+- **Teams**: lead-in "Tech findings for <domain>: <N> items, last <window>." One section per finding.
 - **Notion**: title "Tech findings for <domain>, <date>". One section per finding.
 
 ## Share with a vendor
@@ -111,7 +111,7 @@ Arrives as a picked vendor priority, or typed ("share issue #512 with the vendor
 
 Fetch the error detail. Write a vendor-facing summary the user can copy: what is happening, which pages, the occurrence count, and the browser and OS breakdown.
 
-Don't ask where to send it. Present the summary as copyable text. Then, only if email or Slack is already connected, ask in one line: "Want me to send this via email or Slack?" If neither is connected, give the summary only.
+Don't ask where to send it. Present the summary as copyable text. Then, only if Outlook or Teams is already connected, ask in one line: "Want me to send this via email or Teams?" If neither is connected, give the summary only.
 
 ## Ignore an issue
 
@@ -131,13 +131,31 @@ When the user picks the schedule option in the next-step question, or asks ("sch
   3. "Monthly": 9 am on the 1st
   4. "Something else": the user names the day and time
 
-Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prompt: *Run a tech diagnosis scan for <store>.* Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs. Confirm in one sentence once the schedule exists.
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
 
-**Automations** are added only when the user names them in the request. Never suggest them. For each one named, check its connection first; if it isn't set up, say in one plain line which connection unlocks it, and leave that automation out.
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
+
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked.
+
+For each destination picked:
+
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- **Email** goes through Outlook only. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+- **Teams**: ask which channel or chat if it wasn't given.
+- **Notion**: ask which page if it wasn't given.
+- Add to the scheduled prompt, once per destination: *Then send the digest to <destination>.*
+
+A run that can't send still gives its report in Cowork; the Output section of SKILL.md says how.
+
+Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prompt: *Run a tech diagnosis scan for <store>.* Apart from a send line, write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs. Confirm in one sentence once the schedule exists, saying when it runs and where each report is sent.
+
+**Automations** (pull requests and tickets) are added only when the user names them in the request. Never suggest them. For each one named, check its connection first; if it isn't set up, say in one plain line which connection unlocks it, and leave that automation out.
 
 - **Draft pull requests** (GitHub, with the repository named): add to the prompt: *For each fixable error and fixable page-speed finding, determine the fix, create a branch named `fix/<plain-description>` in <repo>, commit the change and open a draft pull request titled with a plain-English summary. Collect each link.*
 - **Create tickets** (Linear, Jira, GitHub Issues or Notion, with the team or project named): add: *For each fixable error and page-speed finding, not vendor issues, create a ticket in <platform> / <team>. Title: `<severity> <summary> (affecting <segment>)`. Body: Summary → Technical details → Cause → Fix, with any alternative. Priority: critical → high; standard → medium. Collect each link.*
-- **Send a digest** (email, Slack or Notion, with the destination named; for email, confirm the exact recipient addresses in chat first): add: *Then send the digest to <destination>.*
 
 **The digest:**
 

@@ -52,14 +52,29 @@ When the user picks the schedule option in the next-step question, or asks ("sch
   3. "Monthly": 9 am on the 1st
   4. "Something else": the user names the day and time
 
-Set it up as a Cowork scheduled prompt named `checkout-analysis-<store>`, with this prompt: *Run the full checkout analysis for <store>.* Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs. Confirm in one sentence once the schedule exists.
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
 
-**Sending the result elsewhere** happens only if the user names a destination: email, Slack or Notion.
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
 
-- If that connection isn't set up, say in one plain line which connection unlocks it, and stop there.
-- Email: confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
-- Slack or Notion: ask for the channel or page if it wasn't given.
-- Add to the scheduled prompt: *Then send a digest to <destination>.* The digest is:
-  - A heading: "Checkout analysis: <store>, <date>".
-  - The overview: the funnel as one line ("Added to cart 22,866 → Started checkout 42% → Payment 24% → Completed 23%"), then checkout completion, mobile and desktop conversion, checkout errors, median order and discounted share. Populated stats only.
-  - Each priority: its title, its one-sentence evidence, "~N sessions affected", and a line the reader can copy: *Ask Cowork: "investigate <priority title> for <store>"*. One line per priority; never a single generic line at the end.
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked.
+
+For each destination picked:
+
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- **Email** goes through Outlook only. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+- **Teams**: ask which channel or chat if it wasn't given.
+- **Notion**: ask which page if it wasn't given.
+- Add to the scheduled prompt, once per destination: *Then send the digest to <destination>.*
+
+A run that can't send still gives its report in Cowork; the Output section of SKILL.md says how.
+
+Set it up as a Cowork scheduled prompt named `checkout-analysis-<store>`, with this prompt: *Run the full checkout analysis for <store>.* Apart from a send line, write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs. Confirm in one sentence once the schedule exists, saying when it runs and where each report is sent.
+
+**The digest:**
+
+- A heading: "Checkout analysis: <store>, <date>".
+- The overview: the funnel as one line ("Added to cart 22,866 → Started checkout 42% → Payment 24% → Completed 23%"), then checkout completion, mobile and desktop conversion, checkout errors, median order and discounted share. Populated stats only.
+- Each priority: its title, its one-sentence evidence, "~N sessions affected", and a line the reader can copy: *Ask Cowork: "investigate <priority title> for <store>"*. One line per priority; never a single generic line at the end.

@@ -52,14 +52,27 @@ When the user picks the schedule option in the next-step question, or asks ("sch
   3. "Monthly": 9 am on the 1st
   4. "Something else": the user names the day and time
 
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
+
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
+
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked.
+
+For each destination picked:
+
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- **Email** goes through Outlook only. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+- **Teams**: ask which channel or chat if it wasn't given.
+- **Notion**: ask which page if it wasn't given.
+- Add to the scheduled prompt, once per destination: *Send the list of pages and results links to <destination>.*
+
+A run that can't send still gives its report in Cowork; the Output section of SKILL.md says how.
+
 Set it up as a Cowork scheduled prompt named `accessibility-scan-<store>`, with this prompt: *Run an accessibility audit for <store>: start a scan on each of the top 10 pages by 30-day pageviews and list each page with its pageviews and its results link. Ask nothing.*
 
 A scheduled run delivers the same reply as section 3. It never reports findings and never creates a pull request or ticket, because it has no findings to work from.
 
-**A digest** is sent only if the user names a destination: email, Slack or Notion.
-
-- If that connection isn't set up, say in one plain line which connection unlocks it, and leave that destination out.
-- Email: confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
-- Add to the prompt, once per destination: *Send the list of pages and results links to <destination>.*
-
-Confirm in one or two sentences once the schedule exists: how often, and any digest destinations. Then offer to run it once now. Run it only if the user says yes.
+Confirm in one or two sentences once the schedule exists: how often, and where each list is sent. Then offer to run it once now. Run it only if the user says yes.
