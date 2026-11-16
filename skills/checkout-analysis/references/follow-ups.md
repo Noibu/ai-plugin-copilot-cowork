@@ -78,3 +78,7 @@ Set it up as a Cowork scheduled prompt named `checkout-analysis-<store>`, with t
 - A heading: "Checkout analysis: <store>, <date>".
 - The overview: the funnel as one line ("Added to cart 22,866 → Started checkout 42% → Payment 24% → Completed 23%"), then checkout completion, mobile and desktop conversion, checkout errors, median order and discounted share. Populated stats only.
 - Each priority: its title, its one-sentence evidence, "~N sessions affected", and a line the reader can copy: *Ask Cowork: "investigate <priority title> for <store>"*. One line per priority; never a single generic line at the end.
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each priority as a heading and a paragraph.

@@ -64,3 +64,7 @@ Set it up as a Cowork scheduled prompt named `segment-analysis-<store>`, with th
 - A title: "Segment analysis: <store>, <date>".
 - The overview: site-wide conversion, then the top and bottom converting segment for each of device, country and channel.
 - The top 3 priorities only. Each one: its signal type, its one-sentence evidence, "~N sessions affected", and a line the reader can copy: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each priority as a heading and a paragraph.

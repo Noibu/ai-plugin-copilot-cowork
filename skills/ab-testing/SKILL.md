@@ -91,7 +91,7 @@ If readiness stopped the run, its one sentence is the answer. If the finder foun
 3. With none left, say why in one line and ask the opening question again with its other two options.
 4. Build the picked test: `references/build.md`.
 
-**After the tests are shown**: the user picks an option from the next-step question, skips it, or asks to open its report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
+**After the tests are shown**: the user picks an option from the next-step question, skips it, or asks to open a test's report, create it in Noibu, automate it, download its report or schedule the finder. Open `references/follow-ups.md`.
 
 **Checking a test that is running** ("check the quick add test"): `references/build.md`, "Checking a running test is healthy".
 

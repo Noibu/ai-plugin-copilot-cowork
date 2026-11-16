@@ -166,3 +166,7 @@ Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prom
   - Fixable error: *Ask Cowork: "use tech-diagnosis to fix issue #<number> on <store>"*
   - Vendor error: *Ask Cowork: "use tech-diagnosis to share issue #<number> on <store> with the vendor"*
   - Page speed: *Ask Cowork: "use tech-diagnosis to fix <LCP, INP or CLS> on <page URL> for <store>"*
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each finding as a heading and a paragraph.

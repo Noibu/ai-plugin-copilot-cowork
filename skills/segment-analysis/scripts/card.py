@@ -100,6 +100,7 @@ SKILLS = {
     'ab-testing': {
         'title': 'A/B test opportunities', 'unit': 'sessions', 'items': 'tests', 'itemLabel': 'Test',
         'drawn': 5, 'emptyLabel': 'No test opportunities', 'ask': 'show test {n}',
+        'schedule': 'Schedule this report', 'scheduleNote': 'Look for new tests automatically, weekly or on your own timing',
     },
     'accessibility-audit': {
         'title': 'Accessibility audit', 'unit': 'pageviews',
@@ -1044,8 +1045,7 @@ def _help():
         f'  {RUN_COMMAND}',
         '  Optional arg "compact": true draws the compact card.',
         '  Returns {"shown", "variant", "options", "recovery", "scheduled"} and, on failure, "error":',
-        '    options   the next-step question, in order: [{"label", "description"}]; the schedule option,',
-        '              for every skill but ab-testing, is last',
+        '    options   the next-step question, in order: [{"label", "description"}]; the schedule option is last',
         '    recovery  the line to reply with if the question is skipped',
         '    scheduled the lines that end a scheduled run, in place of the question',
         '    error     one sentence saying why the card was not built or shown',
@@ -1069,7 +1069,7 @@ def _help():
         '  noPrioritiesReason   one sentence, used only when priorities is empty',
         '  reportPages  ab-testing only: true when the tests\' report pages were published; the question then',
         '               starts with an option that opens the pages. For ab-testing the question offers',
-        '               routes (view the reports, implement a test, another goal, a specific test), not tests',
+        '               routes (view the reports, implement a test, another goal, a specific test, schedule), not tests',
         '  links        up to 2 console.noibu.com URLs returned by a Noibu tool',
         '',
         'Values',

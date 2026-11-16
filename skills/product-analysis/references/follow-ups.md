@@ -65,3 +65,7 @@ Set it up as a Cowork scheduled prompt named `product-analysis-<store>`, with th
 - A title: "Product analysis: <store>, <date>".
 - The overview: the funnel as one line ("Viewed product 38,100 → Added to cart 24% → Completed order 3.4%"), then the key stats.
 - The top 3 priorities only. Each one: its signal type, its one-sentence evidence, "~N sessions affected", and a line the reader can copy: *Ask Cowork: "investigate <priority title> for <store>"*.
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each priority as a heading and a paragraph.

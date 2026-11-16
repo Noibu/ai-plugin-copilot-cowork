@@ -14,6 +14,7 @@ The card script returns them; ask them exactly as given. Each one arrives as a p
 - **"Implement one of the tests"**: write no text. Ask one clickable question, "Which test should I implement?", with one option per test in rank order: the label is the test's title, the description "Test <rank>". A question takes five options; with more tests, say in the question how many more there are and that a typed title works. The picked test goes to "A test is picked". "Implement this test" is the same option when the run has one test: skip the question and go straight to "A test is picked" with it.
 - **"Look for tests on a different goal"**: run the finder again from the goal question (`references/finder.md`), leaving out the goal this run used.
 - **"Create a specific A/B test"**: that route in SKILL.md.
+- **"Schedule this report"**: go to "Schedule".
 
 When the question is skipped, reply with the recovery line the card script returned, then the "Full reports" line.
 
@@ -80,7 +81,7 @@ Reply with one line saying where the file is.
 
 ## Schedule
 
-Only when the user asks ("run this every Monday", "look for new tests each month"). What is scheduled is the finder only: looking for new opportunities with the goal fixed in the prompt, ending at the report. A scheduled run never creates a draft, a branch or a pull request.
+When the user picks the schedule option in the next-step question, or asks ("run this every Monday", "look for new tests each month"). What is scheduled is the finder only: looking for new opportunities with the goal fixed in the prompt, ending at the report. A scheduled run never creates a draft, a branch or a pull request.
 
 - If a scheduled prompt for this store's A/B test finder already exists, change that one; don't add a second.
 - If the request already names how often and when, ask nothing more about timing.
@@ -116,5 +117,9 @@ Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this pro
 
 - A title: "A/B test ideas: <store>, <date>", then the goal in one line.
 - The top 3 tests only. Each one: its title, what to change in one sentence, its weekly traffic, and a line the reader can copy: *Ask Cowork: "create an A/B test for <store>: <test title>"*.
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each test as a heading and a paragraph.
 
 Confirm in one or two sentences: how often, the goal, the store and where each report is sent. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.
