@@ -91,6 +91,6 @@ Only when the user asks ("run this every Monday", "look for new tests each month
   4. "Something else": the user names the day and time
 - The goal: if this conversation already ran the finder for the store, use that run's goal. Otherwise ask the goal question from `references/finder.md` once. "All goals" is a valid answer.
 
-Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* The Output section of SKILL.md says what a scheduled run delivers.
+Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
 
 Confirm in one or two sentences: how often, the goal and the store. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.

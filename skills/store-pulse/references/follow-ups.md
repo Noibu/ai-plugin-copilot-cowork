@@ -41,7 +41,7 @@ The send time is 9 am unless the user names another.
 
 If the scheduler has no every-other-week option, schedule it weekly and have the prompt stop without sending on the off weeks, by comparing the week number's parity with the week it was set up.
 
-**The scheduled prompt** runs with no conversation behind it, so it carries everything: *Run Store Pulse for <store> over <window rule> in <timezone>, compared to the period of the same length before.* Add the blocks to include if the user named any (top products, channel performance, paid ad performance), and any delivery below. The Output section of SKILL.md says what a scheduled run delivers in Cowork.
+**The scheduled prompt** runs with no conversation behind it, so it carries everything: *Run Store Pulse for <store> over <window rule> in <timezone>, compared to the period of the same length before.* Add the blocks to include if the user named any (top products, channel performance, paid ad performance), and any delivery below. Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
 
 Confirm in one sentence once the schedule exists, saying when it will run. If a delivery was set up, add that the first run's send needs approving once, after which later runs deliver without asking.
 

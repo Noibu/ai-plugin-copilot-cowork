@@ -39,7 +39,7 @@ When the user picks the schedule option in the next-step question, or asks ("sch
   3. "Monthly": 9 am on the 1st
   4. "Something else": the user names the day and time
 
-Set it up as a Cowork scheduled prompt named `product-analysis-<store>`, with this prompt: *Run the full product analysis for <store>.* The Output section of SKILL.md says what a scheduled run delivers. Confirm in one sentence once the schedule exists.
+Set it up as a Cowork scheduled prompt named `product-analysis-<store>`, with this prompt: *Run the full product analysis for <store>.* Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs. Confirm in one sentence once the schedule exists.
 
 **Sending the result elsewhere** happens only if the user names a destination: email, Slack or Notion.
 

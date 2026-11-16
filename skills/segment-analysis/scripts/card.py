@@ -20,6 +20,7 @@ PREVIEW_ROWS = 5
 COMPACT_ROWS = 3
 MAX_PRIORITIES = 3          # drawn on the card
 MAX_OPTIONS = 5             # offered in the next-step question, the schedule option included
+SCHEDULED_LINE = 'To choose a next step, reply "next steps".'   # ends a scheduled run, which asks no question
 SCHEDULE_NOTE = 'Run it automatically, weekly or on your own timing'
 MAX_LINK_BUTTONS = 2
 TITLE_CHARS, SHORT_WORDS, EVIDENCE_CHARS, CELL_CHARS, TAG_CHARS = 60, 5, 160, 40, 32
@@ -994,7 +995,7 @@ def run_in_cowork():
     """Build the card, show it with exactly one render call, and return one small result."""
     from aether_tools import ToolDenied, ToolError, ToolRefused, args, set_result, tools
     given = args() or {}
-    result = {'shown': False, 'options': [], 'recovery': ''}
+    result = {'shown': False, 'options': [], 'recovery': '', 'scheduled': SCHEDULED_LINE}
     try:
         if given.get('report') is None:
             raise ReportError('args.report must be the path to the report data file')
@@ -1043,10 +1044,11 @@ def _help():
         'In Cowork (shows the card):',
         f'  {RUN_COMMAND}',
         '  Optional arg "compact": true draws the compact card.',
-        '  Returns {"shown", "variant", "options", "recovery"} and, on failure, "error":',
+        '  Returns {"shown", "variant", "options", "recovery", "scheduled"} and, on failure, "error":',
         '    options   the next-step question, in order: [{"label", "description"}]; the schedule option,',
         '              for every skill but ab-testing, is last',
         '    recovery  the line to reply with if the question is skipped',
+        '    scheduled the line that ends a scheduled run, in place of the question',
         '    error     one sentence saying why the card was not built or shown',
         '',
         'On the command line (builds only):',
@@ -1252,7 +1254,7 @@ def run_command_line(argv):
         with open(out, 'w', encoding='utf-8') as handle:
             json.dump(card, handle, ensure_ascii=False, indent=1)
     options, recovery = next_step(model)
-    print(json.dumps({'built': True, 'variant': variant, 'bytes': card_bytes(card), 'options': options, 'recovery': recovery}, ensure_ascii=False, indent=1))
+    print(json.dumps({'built': True, 'variant': variant, 'bytes': card_bytes(card), 'options': options, 'recovery': recovery, 'scheduled': SCHEDULED_LINE}, ensure_ascii=False, indent=1))
     return 0
 
 

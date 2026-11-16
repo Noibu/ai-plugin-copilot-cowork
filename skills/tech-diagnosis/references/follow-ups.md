@@ -131,7 +131,7 @@ When the user picks the schedule option in the next-step question, or asks ("sch
   3. "Monthly": 9 am on the 1st
   4. "Something else": the user names the day and time
 
-Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prompt: *Run a tech diagnosis scan for <store>.* The Output section of SKILL.md says what a scheduled run delivers. Confirm in one sentence once the schedule exists.
+Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prompt: *Run a tech diagnosis scan for <store>.* Write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs. Confirm in one sentence once the schedule exists.
 
 **Automations** are added only when the user names them in the request. Never suggest them. For each one named, check its connection first; if it isn't set up, say in one plain line which connection unlocks it, and leave that automation out.
 

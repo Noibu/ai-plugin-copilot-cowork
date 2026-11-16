@@ -111,7 +111,7 @@ A focused question gets prose with the number, its window and its base; a card o
 
 Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
-In a scheduled run, ask nothing. Deliver the summary and the card, then one line per priority: *Ask Cowork: "investigate <priority title> for <store>"*.
+A scheduled run asks nothing. Deliver the summary and the card, then reply with the script's scheduled line in place of the next-step question, and stop. When the user replies asking for next steps, ask the next-step question then.
 
 - Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file. If the question is skipped, add the "Full reports" line under the recovery line (`references/follow-ups.md`).
 - With fewer than two priorities, add nothing: the script returns every option for this skill, and `references/follow-ups.md` says what each one does.
