@@ -116,7 +116,8 @@ Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this pro
 **The digest:**
 
 - A title: "A/B test ideas: <store>, <date>", then the goal in one line.
-- The top 3 tests only. Each one: its title, what to change in one sentence, its weekly traffic, and a line the reader can copy: *Ask Cowork: "create an A/B test for <store>: <test title>"*.
+- The tests on the card, and no others. Each one: its title, what to change in one sentence and its weekly traffic.
+- End with the script's scheduled lines exactly as given: "Dive deeper by asking Cowork:" and one request per test on the card. Nothing else for the reader to copy, and no request under an individual test.
 
 - **Email**: the title is the subject.
 - **Teams**: the title in bold.

@@ -63,7 +63,8 @@ Set it up as a Cowork scheduled prompt named `segment-analysis-<store>`, with th
 
 - A title: "Segment analysis: <store>, <date>".
 - The overview: site-wide conversion, then the top and bottom converting segment for each of device, country and channel.
-- The top 3 priorities only. Each one: its signal type, its one-sentence evidence, "~N sessions affected", and a line the reader can copy: *Ask Cowork: "investigate <priority title> for <store>"*.
+- The priorities on the card, and no others. Each one: its signal type, its one-sentence evidence and "~N sessions affected".
+- End with the script's scheduled lines exactly as given: "Dive deeper by asking Cowork:" and one request per priority on the card. Nothing else for the reader to copy, and no request under an individual priority.
 
 - **Email**: the title is the subject.
 - **Teams**: the title in bold.

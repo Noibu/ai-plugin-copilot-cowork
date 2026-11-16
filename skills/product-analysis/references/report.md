@@ -61,7 +61,7 @@ Supply values only. Leave a key out when its data isn't populated for this store
 
 ## Priorities
 
-List every signal picked in Step 3 (2–4), ranked by sessions affected, descending. The card draws the first three; the next-step question offers all of them.
+List every signal picked in Step 3 (2–4), ranked by sessions affected, descending. The card draws the first three, and the next-step question offers those three.
 
 | Field | What to write |
 | --- | --- |

@@ -913,8 +913,9 @@ def build(report, compact=False, limit=CARD_LIMIT):
 def next_step(model):
     """The next-step question's options and the line to use if it is skipped.
 
-    The options are the priorities in card order (fixed routes for A/B testing), then the schedule option for a skill that has one.
-    Also the lines that end a scheduled run in place of the question: one lead-in, then one request per priority.
+    The options are the priorities the card draws, in card order (fixed routes for A/B testing), then the schedule option.
+    Also the lines that end a scheduled run in place of the question: one lead-in, then one request per priority on the card.
+    Neither ever names a priority the card does not show.
     """
     spec = model['spec']
     schedule = spec.get('schedule')
@@ -928,9 +929,9 @@ def next_step(model):
                            else {'label': 'Implement this test', 'description': 'Create the test in Noibu and build it.'})
         options += [{'label': 'Look for tests on a different goal', 'description': 'Run the analysis again for another goal.'},
                     {'label': 'Create a specific A/B test', 'description': 'Describe the change you want to test and I\'ll build it.'}]
-        asks = [spec['ask'].format(n=n) for n in range(1, min(count, MAX_OPTIONS) + 1)]
+        asks = [spec['ask'].format(n=n) for n in range(1, min(count, spec['drawn']) + 1)]
     else:
-        for n, p in enumerate(model['priorities'][:MAX_OPTIONS - (1 if schedule else 0)], 1):
+        for n, p in enumerate(model['priorities'][:MAX_PRIORITIES], 1):    # only what the card draws
             label = p['short']
             if label.casefold() in seen:
                 label = ' '.join(label.split()[:SHORT_WORDS - 1]) + f' #{n}'
@@ -1064,7 +1065,7 @@ def _help():
         '  kpis         {key: value}, keys per skill below',
         '  funnel       {stage: value}, stages per skill below, as distinct session counts',
         '  tables       {table: [row, …]}, a row is an object keyed by column',
-        '  priorities   ranked list, most affected first; the card draws 3, the question offers 4',
+        '  priorities   ranked list, most affected first; the card draws 3, and the question offers those 3',
         '  tests        ab-testing only, in place of priorities: ranked list of tests; the card draws 5',
         '  noPrioritiesReason   one sentence, used only when priorities is empty',
         '  reportPages  ab-testing only: true when the tests\' report pages were published; the question then',

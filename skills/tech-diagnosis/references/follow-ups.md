@@ -160,12 +160,10 @@ Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prom
 **The digest:**
 
 - Title: "Tech scan: <store>, <date>".
-- Findings in a fixed order: fixable errors, page-speed findings, vendor issues. Up to 2 of each.
+- The findings on the card, and no others, in a fixed order: fixable errors, page-speed findings, vendor issues.
 - Each finding: its kind, a one-line description, its occurrence or session count, then one line per completed automation with its link ("Draft PR: <link>", "Ticket: <link>").
-- For anything that could not run (a connection unavailable, a fix that isn't a code change), give a line the reader can copy:
-  - Fixable error: *Ask Cowork: "use tech-diagnosis to fix issue #<number> on <store>"*
-  - Vendor error: *Ask Cowork: "use tech-diagnosis to share issue #<number> on <store> with the vendor"*
-  - Page speed: *Ask Cowork: "use tech-diagnosis to fix <LCP, INP or CLS> on <page URL> for <store>"*
+- For an automation that could not run (a connection unavailable, a fix that isn't a code change), say why in one plain sentence.
+- End with the script's scheduled lines exactly as given: "Dive deeper by asking Cowork:" and one request per finding on the card. Nothing else for the reader to copy, and no request under an individual finding.
 
 - **Email**: the title is the subject.
 - **Teams**: the title in bold.
