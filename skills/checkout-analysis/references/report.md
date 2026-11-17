@@ -82,7 +82,7 @@ Up to 3, ranked strictly by sessions affected, descending. Fewer is fine. Rank b
 | `shortTitle` | The same signal in 5 words or fewer ("Mobile checkout completion drop") |
 | `evidence` | One sentence. For a change: the segment, the current value and the previous value with its window ("Mobile completion dropped to 1.4% from 1.9% against the previous 30 days"). For an error: occurrences, when it was last seen, and where it fires. No cause, no recommended action |
 | `affected` | Sessions affected, from the table below |
-| `link` | For a qualified error only: the issue URL the Noibu tool returned. Leave out otherwise |
+| `link` | For a qualified error only: the issue URL the Noibu tool returned; the card draws it as a "View issue in Noibu" button on that priority. Leave out otherwise: a funnel, device, market or payment regression has no Noibu page of its own |
 
 **Sessions affected.** For a change it is the **incremental** sessions lost to the regression, `(previous rate − current rate) × current volume at that stage`, not the absolute volume at the step:
 
@@ -112,4 +112,4 @@ Rules:
 
 ## Links
 
-`links` takes up to two `console.noibu.com` URLs that a Noibu tool returned in this run, such as the issue URL of a qualified error. Never build a URL. No URL, no link.
+`links` takes up to two `console.noibu.com` URLs that a Noibu tool returned in this run, for the whole card. Don't repeat a priority's own `link` here; the card already draws it on that priority. Never build a URL. No URL, no link.

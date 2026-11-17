@@ -64,6 +64,12 @@ SKILLS = {
         'tables': [_table('abandonment', [('source', 'Top source of abandonment', 'text'), ('sessions', 'Abandoned sessions', 'count'), ('cartValue', 'Cart value', 'money')]),
                    _table('paymentMethods', [('method', 'Payment methods', 'text'), ('orders', 'Orders', 'count')], half=True),
                    _table('deliveryMethods', [('method', 'Delivery methods', 'text'), ('orders', 'Orders', 'count')], half=True)],
+        # Asked with the next-step question, in the same prompt, so a priority and what to do with it are one pick.
+        'actions': {'header': 'Action', 'question': 'What should I do with it?', 'options': [
+            {'label': 'Get the fix', 'description': 'Find the cause and what to change'},
+            {'label': 'Draft a pull request', 'description': 'When the cause is in your code, via GitHub'},
+            {'label': 'Open a ticket', 'description': 'Linear, Jira, GitHub Issues or Notion'},
+            {'label': 'Investigate first', 'description': 'The breakdown and likely cause before acting'}]},
     },
     'product-analysis': {
         'title': 'Overview', 'unit': 'sessions', 'schedule': 'Schedule this report',
@@ -1086,7 +1092,7 @@ def _help():
         '    options   the next-step question, in order: [{"label", "description"}]; the schedule option is last',
         '    recovery  the line to reply with if the question is skipped',
         '    scheduled the lines that end a scheduled run, in place of the question',
-        '    actions   tech-diagnosis only, when there are priorities: a second question for the same prompt,',
+        '    actions   tech-diagnosis and checkout-analysis, when there are priorities: a second question for the same prompt,',
         '              {"header", "question", "options"}; it applies to the priority picked',
         '    error     one sentence saying why the card was not built or shown',
         '',
