@@ -1,10 +1,20 @@
 # After a report
 
-Read this when the user picks a priority or the schedule option from the next-step question, or types a request about a report already in this conversation. Each section is one request. Act on the report the request refers to: the same store, window and evidence. If more than one recent report could be meant, ask which.
+Read this when the user picks a priority and an action, or the schedule option, from the next-step prompt, or types a request about a report already in this conversation. Each section is one request. Act on the report the request refers to: the same store, window and evidence. If more than one recent report could be meant, ask which.
+
+## A priority is picked
+
+Arrives from the next-step prompt as two answers, a priority and an action, or typed ("fix the mobile checkout drop", "open a ticket for the payment error").
+
+- **The schedule option** was picked: go to "Schedule" below and ignore the action.
+- **Investigate first**, a priority with no action, or a typed "investigate": "Investigate a priority" below.
+- **Get the fix**, **Draft a pull request** or **Open a ticket**: the section of that name below. Each starts by finding the cause the way "Investigate a priority" does, without writing the investigation out.
+
+An error priority is a Noibu issue, so its cause, fix, pull request and ticket belong to `tech-diagnosis`. Use that skill for the issue, with the same action (Get the fix, Draft a pull request or Open a ticket), and continue in this conversation; don't make the user ask again. If `tech-diagnosis` isn't available, handle it inline as "Investigate a priority" says.
 
 ## Investigate a priority
 
-Arrives as a picked option, or typed ("investigate the mobile checkout drop").
+Arrives as Investigate first, or typed ("investigate the mobile checkout drop").
 
 - **Don't re-run the breakdown that ranked the priority.** Its Step 4 follow-up already ran; reuse that evidence and query again only for data that wasn't pulled.
 - **Go one level deeper** for root cause: error detail on the affected page, example sessions from the affected bucket, or a deeper breakdown of the same segment. One investigation may surface more than one cause, of mixed type (a form issue plus two priority errors, or a slow page).
@@ -17,6 +27,34 @@ Arrives as a picked option, or typed ("investigate the mobile checkout drop").
     - If `tech-diagnosis` isn't available, handle the cause inline: name the issue or page, give a one-line likely root cause and a concrete next step. Don't mention adding another skill.
 - **Offer to run the next step yourself when Noibu can answer it.** Before handing a step to a human team, check whether Noibu tools can answer it now: page-speed numbers (LCP, INP, CLS) for the affected URL, session replays or session detail for this bucket, a click map for the page, or a deeper breakdown of the same segment. When they can, end with a one-line offer naming the action ("Want me to pull LCP and INP for the checkout page on mobile?"). Don't offer this for steps that are genuinely external (the payment processor checking gateway logs, the theme team reviewing code).
 - **Answer in chat with:** the why (the breakdown already gathered, 8 rows at most, plus any deeper root-cause finding), then per cause either the inline next step or the `tech-diagnosis` line, and where it applies the one-line offer. Keep it tight. Don't show the report again.
+
+## Get the fix
+
+Find the cause first, as in "Investigate a priority", without writing the breakdown out. Then, per cause:
+
+- **Priority error or page-speed cause:** use `tech-diagnosis` for that issue or page with the action Get the fix.
+- **UX, funnel, market, discount or operations cause:** write the finding's title as a `##` heading, the cause in one or two sentences under `### What's likely causing it` (a hypothesis unless the data proves it), then `### What to change`: the one concrete change, who owns it, and the check that confirms it worked.
+
+End with one clickable question, header "Next step": "Draft a pull request" (only when a cause is in the store's code), "Open a ticket", "Investigate further". Write nothing after it.
+
+## Draft a pull request
+
+Find the cause first, as in "Investigate a priority", without writing it out.
+
+- **Priority error or page-speed cause:** use `tech-diagnosis` for that issue or page with the action Draft a pull request. It handles GitHub, the repository and the case where GitHub isn't connected.
+- **Any other cause:** the fix isn't a change to one file in the store's code. Say so in one line, then give the fix as in "Get the fix".
+
+## Open a ticket
+
+Find the cause first, as in "Investigate a priority", without writing it out.
+
+- **Priority error or page-speed cause:** use `tech-diagnosis` for that issue or page with the action Open a ticket.
+- **Any other cause:**
+  1. Ask where the ticket should go: one clickable question, header "Destination", with four options: Linear, Jira, GitHub Issues, Notion.
+  2. If the chosen destination isn't connected, say in one plain line which connection unlocks it, and stop.
+  3. Ask for the details the destination needs (team, project or page), all in one message, before creating anything.
+  4. Create one ticket. Title: the priority's title. Body in Markdown: Summary (the regression with its numbers and window) → Evidence (the breakdown, 8 rows at most) → Likely cause → What to change (the change, its owner and the check that confirms it worked). Labels, only if they already exist: `checkout-analysis`, `noibu`. Assignee: unset unless the user names one.
+  5. Give the ticket link the tool returned. Never report a ticket as created without it.
 
 ## Ignore an issue
 

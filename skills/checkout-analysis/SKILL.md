@@ -58,7 +58,7 @@ Pick the route from the request.
 5. Write the report data: `references/report.md`.
 6. Deliver the report: the Output section below.
 
-**After a report**: the user picks a priority or the schedule option, or types a request to investigate, ignore an issue, download or schedule. Open `references/follow-ups.md`.
+**After a report**: the user picks a priority and what to do with it, or the schedule option, or types a request to investigate, get the fix, draft a pull request, open a ticket, ignore an issue, download or schedule. Open `references/follow-ups.md`.
 
 ## Output
 
