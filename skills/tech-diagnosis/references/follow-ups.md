@@ -4,10 +4,16 @@ Read this when the user picks an option from a next-step question, or types one 
 
 ## A priority is picked from a scan
 
-Arrives as a picked option, or typed ("fix issue #445", "fix LCP on the collection pages").
+Arrives from the scan's prompt as two answers, a priority and an action, or typed ("fix issue #445", "open a ticket for the add to cart error"). The store, platform and window are already known.
 
-- A fixable error or a page-speed finding: run the diagnosis in `references/diagnosis.md` from Step 2. The store, platform and window are already known.
-- A vendor error: go to "Share with a vendor" below.
+- **The schedule option** was picked: go to "Schedule" below and ignore the action.
+- **A vendor error**, whatever the action: go to "Share with a vendor" below. Say first, in one line, that the fix sits in the vendor's code, so the way to fix it is to send them the details.
+- **A fixable error or a page-speed finding**, by action:
+  - **Investigate first**, or a priority with no action: run the diagnosis in `references/diagnosis.md` from Step 2.
+  - **Get the fix**: run `references/diagnosis.md` Steps 2 and 4 without writing the summary. Write the finding's title as a `##` heading, the cause in one or two sentences under `### What's likely causing it` (still a hypothesis unless the data proves it), then "Show me the fix" below. End with the closing question from `references/diagnosis.md`, without "Show me the fix".
+  - **Draft a pull request**: run Steps 2 and 4 without writing anything, then "Draft a pull request" below.
+  - **Open a ticket**: run Steps 2 and 4 without writing anything, then "Open a ticket" below. The ticket carries the summary, cause and fix you worked out.
+- **A typed request** with no action named ("look at issue #445"): treat it as Investigate first.
 
 ## Show me the fix
 
@@ -47,11 +53,12 @@ Only when the user asks, or picks them when sharing. Write exactly these fields 
 
 ## Draft a pull request
 
-Needs both: GitHub connected with the store's repository named, and a specific file and line identified from the repository.
+Needs both: GitHub connected with the store's repository named, and a specific file and line identified from the repository. GitHub is the only code host Cowork connects to.
 
-- GitHub isn't connected: say in one plain line that connecting GitHub unlocks drafting the pull request, and stop.
-- No repository named: ask "What's the repo? (e.g. `mycompany/my-store`)".
-- No file and line identified: say so, and show the fix so it can be applied by hand.
+- **GitHub isn't connected:** the user still gets the fix now. Write it as in "Show me the fix", then one line: "To open this as a pull request, connect GitHub in Cowork, then say **continue**." Stop there. When they say continue, check the connection again and pick up from the repository step below, with the same fix.
+- **No repository named:** ask "What's the repo? (e.g. `mycompany/my-store`)".
+- **No file and line identified:** say so, and show the fix so it can be applied by hand.
+- **Checking the connection:** open the named repository. Don't look up the user's GitHub profile; the connector shows it as a card mid-flow.
 
 When both hold:
 

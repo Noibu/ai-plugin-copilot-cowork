@@ -90,7 +90,8 @@ Write one JSON file in the working folder in this shape, then follow the Output 
       "shortTitle": "",
       "evidence": "",
       "vital": {"metric": "LCP", "value": 0},
-      "where": ""
+      "where": "",
+      "link": "https://console.noibu.com/<domain UUID>/performance/LCP"
     },
     {
       "kind": "vendor",
@@ -100,11 +101,11 @@ Write one JSON file in the working folder in this shape, then follow the Output 
       "vendor": "",
       "errorType": "",
       "occurrences": 0,
-      "where": ""
+      "where": "",
+      "link": "<issue URL>"
     }
   ],
-  "noPrioritiesReason": "",
-  "links": ["<console URL>"]
+  "noPrioritiesReason": ""
 }
 ```
 
@@ -122,12 +123,12 @@ Write one JSON file in the working folder in this shape, then follow the Output 
 | `where` | Error: the pages, then the browser or OS where it concentrates. Page speed: the page group, the device and the traffic volume ("Collection pages · mobile · 12,000 page views") |
 | `vital` | Page speed only: the worst metric and its p75. LCP and INP in milliseconds (4.2 s is 4200), CLS as its score |
 | `affected` | The number of sessions the issue was present in, when the tool returns it. Leave out otherwise |
-| `link` | For an error: the issue URL the Noibu tool returned. Never build one |
+| `link` | Every priority gets one; the card draws it as a "View … in Noibu" button on that priority. A fixable or vendor error: the issue URL the Noibu tool returned; never build one, and leave it out if the tool returned none. Page speed: `https://console.noibu.com/<domain UUID>/performance/<metric>`, with the store's domain UUID and the `vital` metric (LCP, INP or CLS) |
 
 - The window is the scan's window. Error counts cover the last 7 days; say so in the evidence sentence when a count appears in it.
 - A page-speed value that wasn't measured is `null`.
 - Text contains no ids, field names, tool names or formulas. An issue is referred to by its number only in the summary, never in a title.
-- `links` takes up to two `console.noibu.com` URLs that a Noibu tool returned in this run.
+- Leave out `links`. Each priority carries its own button, so the card needs no others.
 
 **Empty kinds.** When one kind has nothing, say so in the summary: "No active errors found that you can fix directly", "No significant performance issues found", or "No third-party app errors detected". When all three are empty, send an empty `priorities` list and put the three facts in one sentence in `noPrioritiesReason`.
 

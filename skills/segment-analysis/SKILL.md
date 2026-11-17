@@ -61,7 +61,7 @@ A full report is three separate steps, in this order:
 
 1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
 2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
-3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. If the script also returned `actions`, ask it in the same prompt as a second question, with its header, question and options exactly as given; if the host shows only one question at a time, ask "Next step" first. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
 Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
