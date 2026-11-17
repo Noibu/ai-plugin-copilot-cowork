@@ -12,7 +12,7 @@ Everything is done through Noibu's tools and data, plus the store's code host or
 It has two halves, joined at the point where a test is picked:
 
 - **The finder** finds the test opportunities from Noibu data alone: readiness checks, two batches of queries, a check of each idea against what the data shows is already on the store, synthesis, and one report card listing the tests.
-- **The build** takes one picked test through a check of the store's code, a Noibu draft, the variation code, a pull request or a Shopify preview theme, a check the user does, a merge or publish the user makes, proof from data that the code is live, and the start.
+- **The build** takes one picked test through a check of the store's code, a Noibu draft, the variation code, a pull request or a Shopify preview theme, a check the user does, a merge the user makes, proof from data that the code is live, and the start.
 
 ## When to use it
 
@@ -29,13 +29,13 @@ Don't use it for:
 - If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
 - Reading data never permits a write. Never report a write as done without the tool's result.
 - If a file this skill needs is missing, say which in one line and stop.
-- **Three gates, never skipped.** The user picks the test. The user picks what to automate. The user merges the pull request or publishes the theme. Never merge, publish, deploy or start a test before its gate.
+- **Three gates, never skipped.** The user picks the test. The user picks what to automate. The user merges the pull request. Never merge, deploy or start a test before its gate.
 - **The finder writes nothing in Noibu.** A draft is created only when the user asks for one, or by the build once a test and a mode are picked.
 - **Do only what the chosen mode promised.** More happens only when the user picks it.
 - **Only recommend or build what the merchant can ship, built so it can't break the store** (`references/platforms.md`). A recommendation the merchant can't action wastes their time, and a variation is production code that goes live for every visitor.
 - **Never create a draft, branch or pull request for a checkout-metric or checkout-page test on a split-checkout store.**
 - **Never start a test whose code isn't live.** Proof comes from Noibu data or the user's own confirmation, never from an assumption.
-- **Theme changes go to an unpublished copy, built through the Shopify plugin.** Never write to the live theme, never publish a theme and never delete one. If the Shopify plugin isn't connected, ask the user to install and connect it; never build a preview another way.
+- **Theme changes go to an unpublished copy, built through the Shopify plugin.** A preview theme is for looking only: never write to the live theme, never publish a theme or ask the user to publish one, and never delete one. After a preview is checked, recommend a pull request; it is the only way a test's code goes live. If the Shopify plugin isn't connected, ask the user to install and connect it; never build a preview another way.
 - **Tests live in the conversation that found them.** The `candidates.json` in this conversation's working folder is the only place tests are read from. A test proposed in another conversation was ranked against data and a site that have since moved on; a fresh run beats offering it again.
 - **Every number comes from this run's queries or pages.**
 - **Say what the data can't show.** The finder never saw the page. A claim about what a page contains comes from click data, a click label, the business context or the store's code, or it is marked unconfirmed.
