@@ -15,7 +15,7 @@
   },
   "description": {
     "short": "Ecommerce conversion, checkout, error and experiment insights from Noibu",
-    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to work from your store's session, error and conversion data. Check the store's health, analyze checkout, products and traffic segments, diagnose errors and slow pages, find and build A/B tests, and run accessibility audits. Reports appear as a card in the chat, followed by clickable next steps. Every write, send or schedule needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
+    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to work from your store's session, error and conversion data. Check the store's health, analyze checkout, products and traffic segments, diagnose errors and slow pages, and find and build A/B tests. Reports appear as a card in the chat, followed by clickable next steps. Every write, send or schedule needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
   },
   "icons": {
     "color": "color.png",
@@ -43,9 +43,6 @@
     },
     {
       "folder": "./skills/tech-diagnosis"
-    },
-    {
-      "folder": "./skills/accessibility-audit"
     },
     {
       "folder": "./skills/build-business-context"

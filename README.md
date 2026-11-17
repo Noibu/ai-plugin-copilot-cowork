@@ -10,7 +10,6 @@ Official Noibu AI plugin for Microsoft 365 Copilot Cowork. It connects Cowork to
 | `segment-analysis` | How devices, countries and channels convert |
 | `tech-diagnosis` | The highest-value errors and slow pages, and how to fix one |
 | `ab-testing` | Finds test ideas from Noibu data, then builds and starts a picked test |
-| `accessibility-audit` | Starts Noibu's WCAG scan on the busiest pages and ranks the findings you bring back |
 | `build-business-context` | Interviews you and saves a business-context file to Noibu |
 | `querying-noibu-data` | The reference the other skills use for calling Noibu's tools |
 
