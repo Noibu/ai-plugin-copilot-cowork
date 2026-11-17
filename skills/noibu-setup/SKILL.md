@@ -56,7 +56,7 @@ Give each one as **available**, **not available** or **not checked**.
 - **Store pages.** Cowork can't open a store's pages or run code in them. Every skill works from Noibu's data; where a page has to be looked at, the skill gives the link and what to check. Always not available.
 - **Downloads.** A report can be saved as a PDF when the user asks for it.
 - **Scheduling.** A report can run as a Cowork scheduled prompt when the user asks for one. Each run can also be sent by email (through Outlook), to Teams or to Notion, which needs that connector installed; without it the report still runs in Cowork. Email recipients are always confirmed in chat first.
-- **A/B testing.** Test ideas and Noibu drafts need only Noibu. Building a test also needs a connection to the store's code host (GitHub, GitLab, Bitbucket or Azure DevOps), or on a Shopify theme store Noibu's theme preview. Nothing is merged, published or started without the user.
+- **A/B testing.** Test ideas and Noibu drafts need only Noibu. Building a test also needs a connection to the store's code host (GitHub, GitLab, Bitbucket or Azure DevOps), or on a Shopify store the Shopify plugin, which builds the test on an unpublished preview theme. Nothing is merged, published or started without the user.
 - **Code and tickets.** Drafting a pull request needs GitHub connected. Tickets need Linear, Azure Boards, GitHub or Notion connected.
 
 ## Output

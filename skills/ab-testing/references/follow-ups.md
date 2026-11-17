@@ -46,7 +46,7 @@ Arrives as that option, or typed ("create test 2 in Noibu"). This is the only wa
 3. Call `noibu_create_ab_test` with the test's `createInput` exactly as the file has it, plus `domainId`, `rationale` ("User asked to create the A/B test \"<title>\""), `skill` and `skillStep: "create-test"`.
 4. After the tool returns the draft, reply with one sentence: "Draft <id> · flag key <key>. It serves no traffic until it's started, and its variation code has to be live first." Link "Draft <id>" to `https://console.noibu.com/<domainId>/ab-tests/<id>`, built only from the ids the tools returned. If the test has `consoleFollowUps`, add them as one line.
 5. Then ask one clickable question, "Automate the implementation of “<title>”?":
-   - "Automate the implementation (Recommended)": "I'll write the variation code with Noibu's snippet, then you choose what to automate: just the code, a pull request, or an end-to-end test."
+   - "Automate the implementation (Recommended)": "I'll write the variation code with Noibu's snippet, then you choose what to automate: just the code, a pull request, an end-to-end test, or on a Shopify store a preview theme."
    - "Not now": "Keep the draft; build it yourself or come back to it later."
 
 If the create call fails, say what failed in one line and ask nothing. A second request to create a test that is already drafted gets the same sentence and question, with "Already in Noibu" in place of a new draft.
