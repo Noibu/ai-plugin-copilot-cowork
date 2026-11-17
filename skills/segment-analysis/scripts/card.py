@@ -22,7 +22,7 @@ MAX_PRIORITIES = 3          # drawn on the card
 MAX_OPTIONS = 5             # offered in the next-step question, the schedule option included
 DIVE_DEEPER = 'Dive deeper by asking Cowork'   # opens the lines that end a scheduled run, which asks no question
 SCHEDULE_NOTE = 'Run it automatically, weekly or on your own timing'
-MAX_LINK_BUTTONS = 2
+MAX_LINK_BUTTONS = 2        # for the whole card; each priority drawn may also carry its own
 TITLE_CHARS, SHORT_WORDS, EVIDENCE_CHARS, CELL_CHARS, TAG_CHARS = 60, 5, 160, 40, 32
 NOT_MEASURED = 'Not measured'
 
@@ -96,6 +96,12 @@ SKILLS = {
     },
     'tech-diagnosis': {
         'title': 'Tech findings', 'unit': 'sessions', 'schedule': 'Schedule this scan',
+        # Asked with the next-step question, in the same prompt, so a priority and what to do with it are one pick.
+        'actions': {'header': 'Action', 'question': 'What should I do with it?', 'options': [
+            {'label': 'Get the fix', 'description': 'Find the cause and show the fix'},
+            {'label': 'Draft a pull request', 'description': 'Open the fix as a pull request in GitHub'},
+            {'label': 'Open a ticket', 'description': 'Linear, Jira, GitHub Issues or Notion'},
+            {'label': 'Investigate first', 'description': 'Impact and likely cause before acting'}]},
     },
     'ab-testing': {
         'title': 'A/B test opportunities', 'unit': 'sessions', 'items': 'tests', 'itemLabel': 'Test',
@@ -781,18 +787,34 @@ def _priorities(model):
         if p['facts']:
             out.append(_quiet(' · '.join(p['facts']), spacing='Small'))
         if p['link']:
-            out.append(_rich(_run(_link_label(p['link']) + ' ↗', size='Small', color='Accent', selectAction={'type': 'Action.OpenUrl', 'url': p['link']}), spacing='Small'))
+            out.append(_buttons([p['link']], spacing='Small'))
     return out
 
 
+def _buttons(urls, spacing=None):
+    """Link buttons, one look everywhere on the card. Body elements with selectAction: the host receives
+    the card body, not top-level actions."""
+    columns = [{'type': 'Column', 'width': 'auto', 'style': 'emphasis', 'selectAction': {'type': 'Action.OpenUrl', 'url': url},
+                'items': [_rich(_run(_link_label(url) + ' ↗', size='Small', weight='Bolder', color='Accent'))]} for url in urls]
+    row = {'type': 'ColumnSet', 'columns': columns}
+    if spacing:
+        row['spacing'] = spacing
+    return row
+
+
 def _link_buttons(model):
-    links = model['links'][:MAX_LINK_BUTTONS]
+    on_priorities = {p['link'].rstrip('/') for p in _drawn(model) if p['link']}
+    links = [url for url in model['links'] if url.rstrip('/') not in on_priorities][:MAX_LINK_BUTTONS]
     if not links:
         return []
-    # Body elements with selectAction: the host receives the card body, not top-level actions.
-    columns = [{'type': 'Column', 'width': 'auto', 'style': 'emphasis', 'selectAction': {'type': 'Action.OpenUrl', 'url': url},
-                'items': [_rich(_run(_link_label(url) + ' ↗', size='Small', weight='Bolder', color='Accent'))]} for url in links]
-    return [_section({'type': 'ColumnSet', 'columns': columns})]
+    return [_section(_buttons(links))]
+
+
+def _drawn(model):
+    """The priorities the card draws (tests are drawn without links)."""
+    if model['spec'].get('items') == 'tests':
+        return []
+    return model['priorities'][:MAX_PRIORITIES]
 
 
 def draw(model, compact=False):
@@ -825,7 +847,8 @@ _HEX = re.compile(r'#[0-9a-fA-F]{3,8}\b')
 
 def check(card):
     """Problems that would stop the host showing this card: Adaptive Card 1.6, allowed elements only,
-    link actions only, at most two link buttons, host colour names, console.noibu.com links only."""
+    link actions only, at most two card link buttons plus one per priority, host colour names,
+    console.noibu.com links only."""
     errors = []
     err = lambda path, message: errors.append(f'{path}: {message}')
     buttons = []
@@ -887,8 +910,8 @@ def check(card):
 
     for i, el in enumerate(card.get('body') or []):
         element(el, f'body[{i}]')
-    if len(buttons) > MAX_LINK_BUTTONS:
-        err('body', f'{len(buttons)} link buttons; at most {MAX_LINK_BUTTONS}')
+    if len(buttons) > MAX_LINK_BUTTONS + MAX_PRIORITIES:
+        err('body', f'{len(buttons)} link buttons; at most {MAX_LINK_BUTTONS + MAX_PRIORITIES}')
     return errors
 
 
@@ -949,6 +972,15 @@ def next_step(model):
     return options, recovery, scheduled
 
 
+def action_question(model):
+    """The second question asked with the next-step question, for skills that have one, or None.
+    It applies to the priority picked; it is left out when the card has no priorities."""
+    actions = model['spec'].get('actions')
+    if not actions or not model['priorities']:
+        return None
+    return {'header': actions['header'], 'question': actions['question'], 'options': [dict(o) for o in actions['options']]}
+
+
 # ---------------------------------------------------------------------------------------------
 # Showing the card in Cowork, and the command line.
 # ---------------------------------------------------------------------------------------------
@@ -1005,12 +1037,17 @@ def run_in_cowork():
         reason = 'the report data could not be used: ' if isinstance(exc, ReportError) else ''
         result['error'] = f'The card could not be built because {reason}{_why(exc)}.'
         try:
-            result['options'], result['recovery'], result['scheduled'] = next_step(read_report(_load(given.get('report'))))
+            failed_model = read_report(_load(given.get('report')))
+            result['options'], result['recovery'], result['scheduled'] = next_step(failed_model)
+            if action_question(failed_model):
+                result['actions'] = action_question(failed_model)
         except Exception:
             pass
         set_result(result)
         return
     result['options'], result['recovery'], result['scheduled'] = next_step(model)
+    if action_question(model):
+        result['actions'] = action_question(model)
     result['variant'] = variant
     try:
         reply = tools.core.render_ui(type=card['type'], version=card['version'], body=card['body'])
@@ -1049,6 +1086,8 @@ def _help():
         '    options   the next-step question, in order: [{"label", "description"}]; the schedule option is last',
         '    recovery  the line to reply with if the question is skipped',
         '    scheduled the lines that end a scheduled run, in place of the question',
+        '    actions   tech-diagnosis only, when there are priorities: a second question for the same prompt,',
+        '              {"header", "question", "options"}; it applies to the priority picked',
         '    error     one sentence saying why the card was not built or shown',
         '',
         'On the command line (builds only):',
@@ -1071,7 +1110,8 @@ def _help():
         '  reportPages  ab-testing only: true when the tests\' report pages were published; the question then',
         '               starts with an option that opens the pages. For ab-testing the question offers',
         '               routes (view the reports, implement a test, another goal, a specific test, schedule), not tests',
-        '  links        up to 2 console.noibu.com URLs returned by a Noibu tool',
+        '  links        up to 2 console.noibu.com URLs returned by a Noibu tool, for the whole card; a URL',
+        '               already on a priority is not repeated',
         '',
         'Values',
         '  A kpi or funnel value is a number, null, or {"current": n, "prior": n}. The builder writes the',
@@ -1086,7 +1126,7 @@ def _help():
         '  shortTitle  5 words or fewer; the option label in the next-step question',
         '  evidence    one sentence with its number and comparison, 160 characters or fewer',
         '  affected    how many were affected (sessions; pageviews for accessibility-audit), or null',
-        '  link        a console.noibu.com URL for this priority, optional',
+        '  link        a console.noibu.com URL for this priority, drawn as a button on it; optional',
     ]
     for skill, spec in SKILLS.items():
         lines += ['', skill]
@@ -1189,10 +1229,11 @@ EXAMPLES = {
              'evidence': 'A script error stops the add-to-cart button responding on product pages.', 'errorType': 'JavaScript error',
              'occurrences': 1840, 'lastSeen': '2026-11-01T17:44:00Z', 'where': 'Product pages · Safari on iOS', 'link': _ISSUES + '/11111111-1111-4111-8111-111111111111'},
             {'kind': 'performance', 'status': 'Active', 'title': 'Collection pages load slowly on mobile', 'shortTitle': 'Slow collection pages', 'affected': 12000,
-             'evidence': 'The largest element takes 4.2 seconds to appear for three in four visits.', 'vital': {'metric': 'LCP', 'value': 4200}, 'where': 'Collection pages · mobile'},
+             'evidence': 'The largest element takes 4.2 seconds to appear for three in four visits.', 'vital': {'metric': 'LCP', 'value': 4200}, 'where': 'Collection pages · mobile',
+             'link': 'https://console.noibu.com/00000000-0000-4000-8000-000000000000/performance/LCP'},
             {'kind': 'vendor', 'title': 'Reviews app fails to load', 'shortTitle': 'Reviews app error', 'affected': 240,
-             'evidence': 'The reviews app returns an error on product pages.', 'vendor': 'Reviews app', 'errorType': 'HTTP error', 'occurrences': 310}],
-        'links': [_ISSUES],
+             'evidence': 'The reviews app returns an error on product pages.', 'vendor': 'Reviews app', 'errorType': 'HTTP error', 'occurrences': 310,
+             'link': _ISSUES + '/22222222-2222-4222-8222-222222222222'}],
     },
     'ab-testing': {
         'skill': 'ab-testing', 'store': _STORE, 'window': _MONTH, 'reportPages': True,
