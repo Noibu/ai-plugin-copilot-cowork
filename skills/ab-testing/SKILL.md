@@ -7,12 +7,12 @@ description: "Find, build and launch A/B tests on a Noibu-monitored store: ranke
 
 Takes a Noibu-monitored store from "what should we test?" as far as the user wants: a list of ranked test ideas, a draft test in Noibu, the variation code, a pull request or a Shopify theme preview, or a running experiment.
 
-Everything is done through Noibu's tools and data. Nothing here opens the store's pages or runs code in them; where a page has to be looked at, a person looks, with the link and the checklist this skill gives them.
+Everything is done through Noibu's tools and data, plus the store's code host or, for a Shopify preview theme, the Shopify plugin. Nothing here opens the store's pages or runs code in them; where a page has to be looked at, a person looks, with the link and the checklist this skill gives them.
 
 It has two halves, joined at the point where a test is picked:
 
 - **The finder** finds the test opportunities from Noibu data alone: readiness checks, two batches of queries, a check of each idea against what the data shows is already on the store, synthesis, and one report card listing the tests.
-- **The build** takes one picked test through a check of the store's code, a Noibu draft, the variation code, a pull request or theme preview, a check the user does, a merge or publish the user makes, proof from data that the code is live, and the start.
+- **The build** takes one picked test through a check of the store's code, a Noibu draft, the variation code, a pull request or a Shopify preview theme, a check the user does, a merge or publish the user makes, proof from data that the code is live, and the start.
 
 ## When to use it
 
@@ -35,15 +35,15 @@ Don't use it for:
 - **Only recommend or build what the merchant can ship, built so it can't break the store** (`references/platforms.md`). A recommendation the merchant can't action wastes their time, and a variation is production code that goes live for every visitor.
 - **Never create a draft, branch or pull request for a checkout-metric or checkout-page test on a split-checkout store.**
 - **Never start a test whose code isn't live.** Proof comes from Noibu data or the user's own confirmation, never from an assumption.
-- **Theme changes go to a copy.** Never discard a theme change or delete a preview theme without the user's go-ahead for that exact one.
+- **Theme changes go to an unpublished copy, built through the Shopify plugin.** Never write to the live theme, never publish a theme and never delete one. If the Shopify plugin isn't connected, ask the user to install and connect it; never build a preview another way.
 - **Tests live in the conversation that found them.** The `candidates.json` in this conversation's working folder is the only place tests are read from. A test proposed in another conversation was ranked against data and a site that have since moved on; a fresh run beats offering it again.
 - **Every number comes from this run's queries or pages.**
 - **Say what the data can't show.** The finder never saw the page. A claim about what a page contains comes from click data, a click label, the business context or the store's code, or it is marked unconfirmed.
 - **Never sign in to the Noibu console for the user**, and never build a console link from anything but ids a Noibu tool returned.
 - **Be explicit about what was verified and what wasn't.**
-- **Don't narrate.** No "I'm now checking…", no summaries between tool calls, no description of what a question already shows. The chat carries the gates, a blocker, the report, a test's summary before the automation question, the links and checklist for the user's check, and the hand-off.
+- **Don't narrate.** No "I'm now checking…", no summaries between tool calls, no description of what a question already shows. The chat carries the gates, a blocker, the report, a test's summary before the automation question, the preview links and checklist for the user's check (always the last message of their turn, never followed by a clickable question), and the hand-off.
 - **Nothing after a question.** After any clickable question, write nothing and wait. With no answer, don't pick for the user: send one short line listing the options, and wait.
-- Platform- and host-specific steps run only when that platform or host was detected. Never assume Shopify or GitHub.
+- Platform- and host-specific steps run only when that platform or host was detected. Never assume Shopify or GitHub. "Preview test on Shopify theme" is offered only when the domain's `siteType` from Noibu says Shopify.
 - On every `noibu_*` call, pass `skill: "ab-testing"` and a short `skillStep`.
 
 ## Before you start
@@ -52,7 +52,7 @@ Run once: `ls scripts/card.py scripts/report.py references/finder.md references/
 
 Then:
 
-1. **Resolve the store**, one call: `noibu_get_domain` (fall back to `noibu_list_domains`). Keep its UUID, its `numId` and its `siteType` for everything that follows. Nothing else is looked up before the opening question: the repository, the platform's details and the preview method are detected after a test is picked, because the picked test often answers them.
+1. **Resolve the store**, one call: `noibu_get_domain` (fall back to `noibu_list_domains`). Keep its UUID, its `numId` and its `siteType` for everything that follows. The `siteType` is what later tells whether this is a Shopify store (`Shopify` or `Shopify Plus`), which adds "Preview test on Shopify theme" to the automation options. Nothing else is looked up before the opening question: the repository, the platform's details and the preview method are detected after a test is picked, because the picked test often answers them.
 2. **A run already in progress.** If this conversation already has a run of this skill past the opening question and not yet ended, and the skill is asked for again with no new instruction, ask once: "You've started this again for <domain>. Should I start over or continue where we left off?"
    - "Start over (Recommended)": begin again from the opening question; anything in progress is dropped. Recommend "Continue" in its place only when a draft, branch or pull request already exists.
    - "Continue where we left off": name the step in plain words ("the goal question", "the pull request").

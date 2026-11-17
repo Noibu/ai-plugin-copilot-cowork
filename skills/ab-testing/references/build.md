@@ -13,9 +13,9 @@ Nothing here can open the store's pages, run code in them, or look at a screen. 
 | Path | When | How the code is written | How it is seen first | Who puts it live |
 |---|---|---|---|---|
 | **Repository** | A git host is connected and the store's repository can be read through it | A branch and a pull request | The pull request's preview deployment, or a staging URL | The user merges |
-| **Theme** | The store runs on a Shopify Online Store theme and no repository was found | Noibu's theme tools edit a copy of the live theme | `noibu_preview_theme_change` builds an unpublished copy and returns its link | The merchant publishes it in Shopify admin |
+| **Theme** | The store is a Shopify theme store and no repository was found | The Shopify plugin copies the live theme into an unpublished preview theme and writes the change there | The preview theme's link | The merchant publishes it in Shopify admin |
 
-A store whose theme is deployed from a repository uses the repository path, because a direct theme edit would be overwritten by the next deploy. With neither path, the run can create the draft and describe the change, but it can't write code against real files; say so and stop after the draft.
+A store whose theme is deployed from a repository uses the repository path, because a direct theme edit would be overwritten by the next deploy. On a Shopify theme store that path still offers a preview theme ("Preview test on Shopify theme") as a way to see the test; there the preview theme is for looking only, and the code goes live through the pull request. With neither path, the run can create the draft and describe the change, but it can't write code against real files; say so and stop after the draft.
 
 "Pull request" means the host's equivalent (GitLab's merge request). Questions always say "pull request" and never name a host.
 
@@ -32,17 +32,19 @@ Call `noibu_list_ab_tests` for the domain (all statuses).
 
 ### 2. Detect the environment, silently
 
-Record an **environment profile**: platform, path, repository and default branch (repository path), how the change is seen first, how it is proven live.
+Record an **environment profile**: platform, whether it is a Shopify theme store, path, repository and default branch (repository path), how the change is seen first, how it is proven live.
 
 **Platform.** Identify it as `references/platforms.md` says ("Which platform"). Then check the picked test is actionable and safe on that platform (`references/platforms.md`, "Where the rules are applied"). A test that fails stops here.
 
 **Repository.** In order: a repository URL the user gave; a "Variation code: <pull request link>" line in the picked test's Noibu draft or in a sibling test's hypothesis; then, on each connected git host, a search for the store's name or domain and for code mentioning `NoibuFeatureFlag`. Earlier A/B pull requests that mention flag keys are the strongest signal. Confirm access with one read. Classify the host from the remote URL (`github.com` → GitHub; `gitlab.com` → GitLab; `bitbucket.org` → Bitbucket; `dev.azure.com` → Azure DevOps). Bitbucket connects through the Atlassian connection, and it counts only when the read shows Bitbucket access for the workspace that holds the repository.
 
-**Path.** A readable repository: the repository path. Otherwise, a Shopify Online Store theme (`siteType` Shopify or Shopify Plus, not headless): the theme path. Otherwise neither.
+**Shopify theme store.** Yes when the `siteType` from `noibu_get_domain` is `Shopify` or `Shopify Plus` and the store is not headless (no Hydrogen/Remix tree in the repository, no business context saying the storefront is headless). Any other `siteType`, or a missing one: no. This one fact decides whether "Preview test on Shopify theme" is offered; never infer it from the domain name or from anything else.
 
-**How the change is seen first.** Theme path: the preview link. Repository path: the pull request's preview deployment when the repository's CI posts one (decide from `.github/workflows/`, `.gitlab-ci.yml`, `bitbucket-pipelines.yml`, `azure-pipelines.yml`, `vercel.json`, `netlify.toml` and the like; don't guess), else a staging URL the merchant provides (ask for it), else nothing before merge: the check happens on the live store after merge and before the start, which is safe because the flag returns the control for everyone until the test starts. Say that plainly at the merge gate.
+**Path.** A readable repository: the repository path. Otherwise, a Shopify theme store: the theme path. Otherwise neither.
 
-**Existing work.** Repository path: list branches and open pull requests for A/B work on the picked test's idea (titles or branches with `ab-`, its flag key, the element). A new pull request says which one it supersedes. Theme path: an open theme change is found in step 3.
+**How the change is seen first.** Theme path: the preview theme's link. Repository path: the pull request's preview deployment when the repository's CI posts one (decide from `.github/workflows/`, `.gitlab-ci.yml`, `bitbucket-pipelines.yml`, `azure-pipelines.yml`, `vercel.json`, `netlify.toml` and the like; don't guess), else a staging URL the merchant provides (ask for it), else nothing before merge: the check happens on the live store after merge and before the start, which is safe because the flag returns the control for everyone until the test starts. Say that plainly at the merge gate.
+
+**Existing work.** Repository path: list branches and open pull requests for A/B work on the picked test's idea (titles or branches with `ab-`, its flag key, the element). A new pull request says which one it supersedes. Shopify theme store: an earlier preview theme for this test is looked for only once a preview theme is being built ("The Shopify preview theme"). On the repository path, make no Shopify call before the user picks "Preview test on Shopify theme".
 
 **Split checkout.** Only when the picked test touches checkout: its `createInput.successMetric` is a checkout metric (`CHECKOUT_CONVERSION_RATE`, or `PAGE_VIEW_TO_URL_RATE` on the Checkout page group or a checkout URL), or its `surfaceTemplate` is `checkout`.
 
@@ -56,12 +58,12 @@ Record an **environment profile**: platform, path, repository and default branch
 
 The finder worked from data and could not see the page. This is where the test is checked against what the store actually renders, before a draft exists.
 
-- **Theme path.** Open a theme change with `noibu_start_theme_change` (the domain's `numId`, title "A/B test: <test title>"). It returns a `changeId` and every file path in the theme; edits go to a copy, never the live theme. One change can be open per store: if the error names one already open, ask one question: continue that change, discard it and start again (`noibu_discard_theme_change`), or stop. Never discard a change the user didn't open in this run without their go-ahead.
+- **Theme path.** Read the live theme through the Shopify plugin ("The Shopify preview theme", steps 1–3). Nothing is written at this point. If the plugin isn't connected, that section's connect line is the reply; wait for it.
 - **Repository path.** Use the host's connection to search the repository.
 
-Then search the code (`noibu_search_theme_files` with a regular expression, or the repository search) for:
+Then search the code (the live theme's files, or the repository search) for:
 
-1. **The thing the variation would add or move.** If it is already there (an add-to-cart control in the card snippet, a shipping line by the buy box, a progress bar in the cart drawer), the test is dead: say what was found and in which file, record it in `killed`, discard the change if this run opened it, and offer the other tests in this conversation's `candidates.json`.
+1. **The thing the variation would add or move.** If it is already there (an add-to-cart control in the card snippet, a shipping line by the buy box, a progress bar in the cart drawer), the test is dead: say what was found and in which file, record it in `killed`, and offer the other tests in this conversation's `candidates.json`.
 2. **Each line in the test's `unconfirmed` list.** Settle each one from the code.
 3. **The elements the variation touches.** Note the file and lines that render them. When the code disagrees with a selector in the tests file, the code wins.
 4. **An existing Noibu gating helper** (`NoibuFeatureFlag`, `noibuFeatureFlagReady`), its conventions, and other tests' flag files.
@@ -72,7 +74,7 @@ If nothing renders the element where the test says it is, say so and ask whether
 
 The user has said *which* test; this asks *how much* of the rest to automate.
 
-**The summary** is one two-column table, with nothing above or below it. Every value comes from the picked test's `candidates.json` entry, the environment profile and the Noibu draft. Drop a row marked "only when present" when it has nothing to show. Keep every cell to one line.
+**The summary** is a chat message of its own, sent before the question: one two-column table, with nothing above or below it. It never goes inside the question. Every value comes from the picked test's `candidates.json` entry, the environment profile and the Noibu draft. Drop a row marked "only when present" when it has nothing to show. Keep every cell to one line.
 
 ```markdown
 | | [Test title] |
@@ -92,28 +94,34 @@ The user has said *which* test; this asks *how much* of the rest to automate.
 
 The console link is built only from the `domainId` and the test id a Noibu tool returned.
 
-**Then one clickable question**, "What would you like to automate?", with the options for the path, in this order. Labels and descriptions are fixed; they never name a git host, repository, branch or tool.
+**Then one clickable question** whose text is exactly "What would you like to automate?" and nothing else: no summary, no table, no note, no caveat. Anything the user needs to know before choosing is already in the summary table; a limit that only matters for one option (the store's theme count, a missing connection) is raised when that option is picked, not here. It has the options for the path, in this order. Labels and descriptions are fixed; they never name a git host, repository, branch or tool.
 
 | Mode | Path | Label | Description |
 |---|---|---|---|
 | `full` | Repository | Launch an end-to-end test | Open a pull request on my code repository, check preview. Once merged, confirm it's live and start test. |
 | `full` | Theme | Launch an end-to-end test | Build an unpublished copy of my live theme with the change and check it. Once published, confirm it's live and start test. |
-| `pr` | Repository | Prepare a pull request | Open a pull request on my code repository. |
-| `theme` | Theme | Preview on a Shopify theme | Build an unpublished copy of my live theme with the change and check it. Shoppers never see it. |
+| `pr` | Repository; Theme too | Prepare a pull request | Open a pull request on my code repository. |
 | `preview` | Both | Just show me the code | Nothing is pushed or published, I show the code here. |
+| `theme` | Both, Shopify theme store only | Preview test on Shopify theme | Build the test on an unpublished copy of my live Shopify theme and check it. Shoppers never see it. |
+
+"Preview test on Shopify theme" is offered exactly when the environment profile says the store is a Shopify theme store, whether or not the Shopify plugin is connected yet: it is always the fourth option. On any other store it is never shown.
+
+"Prepare a pull request" is offered on the theme path as well, so a Shopify theme store always gets all four options: no repository was found, but the store may still have one. When it is picked there, find the repository before anything else ("When a pull request is wanted and none can be opened"); once one is readable, the run is on the repository path from then on, and "Check the store's code" is repeated against the repository.
 
 | Mode | Runs | Stops at | Creates |
 |---|---|---|---|
 | `full` | Stage 2 → 3 → 4 → 5 | The merge or publish gate (the user does it), then the start | Draft, pull request or preview theme, running test |
 | `pr` | Stage 2a–2d | Right after the pull request is open | Draft, branch, pull request |
-| `theme` | Stage 2a–2c, 2f → 3 | After the preview has been checked | Draft, theme change, preview theme |
+| `theme` | Stage 2a–2c, 2f → 3 | After the preview has been checked | Draft, preview theme |
 | `preview` | Stage 2a–2c, 2e | After the code is shown | Draft, a patch file |
 
 Write nothing after the question. The draft is created in every mode, because the flag key and variation keys come from it and the code can't be exact without them; a draft is invisible to shoppers.
 
-**Reading the reply.** "End to end", "run it", "all the way" → `full`. "Pull request only", "just the PR" → `pr`. "Theme preview", "preview theme" → `theme`. "Show me the code", "just the diff" → `preview`. A reply that changes the test is an edit to `createInput` and `devNotes`: apply it, say which fields changed, and show the summary and the question again. A reply that names another test goes back to picking.
+**Reading the reply.** "End to end", "run it", "all the way" → `full`. "Pull request only", "just the PR" → `pr`. "Theme preview", "preview theme", "preview it on Shopify" → `theme`. "Show me the code", "just the diff" → `preview`. A reply that changes the test is an edit to `createInput` and `devNotes`: apply it, say which fields changed, and show the summary and the question again. A reply that names another test goes back to picking.
 
-**When a pull request is wanted and none can be opened:** if the host isn't known, ask where the code is hosted (GitHub, GitLab, Bitbucket, Azure DevOps). Say in one plain line which connection unlocks it (GitHub; Bitbucket through the Atlassian connection), or that there is no connection for GitLab or Azure DevOps, and that nothing was pushed. Once connected, detect the repository again and continue. Otherwise continue on the theme path when the store allows it, or with "Just show me the code". Ask once; don't raise a declined connection again in this run.
+**When a preview theme is wanted and the Shopify plugin isn't connected:** "The Shopify preview theme", step 1. Nothing is built until it is.
+
+**When a pull request is wanted and none can be opened:** if no repository was found, ask for the repository's URL; if the host isn't known, ask where the code is hosted (GitHub, GitLab, Bitbucket, Azure DevOps). Say in one plain line which connection unlocks it (GitHub; Bitbucket through the Atlassian connection), or that there is no connection for GitLab or Azure DevOps, and that nothing was pushed. Once connected, detect the repository again and continue. Otherwise continue with "Preview test on Shopify theme" on a Shopify theme store, or with "Just show me the code". Ask once; don't raise a declined connection again in this run.
 
 **In a scheduled run:** never `full`. Take `pr` when a pull request can be opened, otherwise `preview`, and say which at the top of the result.
 
@@ -143,12 +151,13 @@ If the user would rather not, use the documented gating helper from `references/
 - Use the site's own components and design tokens so B looks native.
 - Write and review it under the blast-radius rules (`references/platforms.md`, "Before variation code is committed or shown").
 
-**On the theme path:**
+**When the code goes into a Shopify theme** (the theme path, and `theme` mode on the repository path):
 
-- Read a file with `noibu_read_theme_file` before editing it (200 lines or 64 KiB a call; read on from where it stopped).
-- Change part of a file with `noibu_edit_theme_file`: exact string replacement, each `oldString` copied from what the read returned and occurring exactly once. Add a new file with `noibu_write_theme_file`. Prefer new files (a snippet, a section, an asset) included behind the gate.
+- Write every changed file starting from the **live theme's** copy of it, read through the Shopify plugin ("The Shopify preview theme", step 3), never from the repository's copy: a repository is often ahead of or behind the live theme, and uploading its copy would add or roll back other work in the preview. On the repository path the repository still supplies the conventions and the helper found in "Check the store's code".
+- Hold the result as full file contents in the working folder, one file per theme file, ready to upload. Prefer new files (a snippet, a section, an asset) included behind the gate.
+- Check each one before it is uploaded: JavaScript parses, JSON parses, every Liquid tag opened is closed.
 - Never touch `checkout.liquid` or anything under `checkout/`. Never edit `config/settings_data.json` for a merchant-managed value; describe the setting to change.
-- In `preview` mode, read the files but write nothing to the change.
+- In `preview` mode, read the files but upload nothing.
 
 ### 2d. Open the pull request (repository path: `full` and `pr`)
 
@@ -164,17 +173,79 @@ If the user would rather not, use the documented gating helper from `references/
 - In the chat: a short table of files changed and why; the diff in a code block when it is under about 150 lines, otherwise the part that renders variation B plus a pointer to the patch; the "Blast radius" section; the links that would show each arm; the Noibu draft's console link with its flag key and variation keys; the `consoleFollowUps`; and one line saying nothing was pushed or published.
 - Then Stage 4.
 
-### 2f. Build the theme preview (theme path: `full` and `theme`)
+### 2f. Build the preview theme (`theme` on either path; `full` on the theme path)
 
-Call `noibu_preview_theme_change`. It writes the change into an unpublished copy of the live theme and returns `previewUrl`. The live theme stays untouched.
+Follow "The Shopify preview theme", steps 4–6: copy the live theme, upload the changed files to the copy, verify it, and take its preview link. The live theme stays untouched.
 
-- **`previewUrl` is null and `conflicts` lists files:** the live theme changed those files. They now hold the live copy: read them again, redo their edits, and preview again.
-- **No room for another theme** (Shopify allows 20): call `noibu_list_store_themes`, show the themes named "Noibu preview: …" with their dates, and ask which to delete. Delete only with `noibu_delete_preview_theme`, only the one the user named, and only after they confirm; deleting cannot be undone. Never the live theme, never a theme Noibu did not build.
-- Each preview replaces the change's last one, so a fix after checking needs no new theme.
+On the repository path, say in one line with the link that this preview theme is for looking only: the store's theme is deployed from the repository, so publishing the preview would be overwritten by the next deploy, and the test goes live through a pull request.
+
+## The Shopify preview theme
+
+How a test is built on an unpublished copy of the store's live Shopify theme. It is done through the Shopify plugin for Cowork, which gives access to the store's Shopify Admin API. Used by "Check the store's code" on the theme path (steps 1–3, read only), by Stage 2f (steps 4–6) and by Stage 5.
+
+Use the plugin's own GraphQL workflow on every call: look up the schema (`graphql_schema`), validate the query or mutation (`validate_graphql_codeblocks`), then execute it. Never write a query from memory without those two steps.
+
+**The only store write this skill makes through Shopify is an unpublished preview theme.** Never write a file to the live theme, never publish a theme, never delete a theme, and never change products, orders, settings or anything else in the store.
+
+1. **The plugin is connected, to this store.** If no Shopify tool is available in this session, reply with one plain line and wait: "To preview this test on a Shopify theme, install and connect the Shopify plugin in Cowork (Customize → Plugins → Shopify), then tell me it's connected." Nothing is built, and the Noibu draft and the code written so far are kept. Once the user says it is connected, check again and carry on from here; if the tools still aren't there, suggest a new chat (tools load at the start of a turn) and say `continue the <title> test` picks it up. Ask once; if the user declines, offer the question's other options and don't raise it again in this run.
+
+   Then confirm the connected store is this one:
+
+   ```graphql
+   query { shop { name myshopifyDomain primaryDomain { host } } }
+   ```
+
+   The primary domain or the `myshopify.com` domain must match the Noibu domain (ignoring `www.`). If it doesn't, stop and say which store the plugin is connected to; never build a preview on another store.
+
+2. **Find the live theme and count the themes.**
+
+   ```graphql
+   query { themes(first: 50) { nodes { id name role processing updatedAt } } }
+   ```
+
+   The theme with role `MAIN` is the live one. Note any theme named "Noibu A/B preview: <test title> …": it is an earlier preview of this test. Shopify allows 20 themes.
+
+3. **Read the live theme's files.** List the filenames (page through `files(first: 250)`, filenames only), then read the ones the test touches, plus the files `references/platforms.md` names for the surface:
+
+   ```graphql
+   query($id: ID!, $f: [String!]) { theme(id: $id) { files(filenames: $f, first: 50) { nodes { filename checksumMd5 body { ... on OnlineStoreThemeFileBodyText { content } } } } } }
+   ```
+
+   The Admin API has no text search across a theme, so search by reading: the surface's section and its snippets first, then `layout/theme.liquid` and the assets it loads for an existing Noibu helper. Keep each file's `checksumMd5` as read.
+
+4. **Create or reuse the preview theme.**
+   - An earlier preview of this test exists and is unpublished: reuse it. Compare its files' `checksumMd5` with the live theme's; only the files this test changes may differ. If anything else differs, the live theme has moved on since: don't reuse it.
+   - Otherwise, with room for another theme: `themeDuplicate` on the live theme, named `Noibu A/B preview: <test title> (<Mon D>)`. This copies the live code and the live settings. Wait until the new theme's `processing` is false.
+   - At 20 themes with nothing to reuse: stop, list the unpublished "Noibu A/B preview: …" themes with their dates, and ask the user to delete one in Shopify admin (Online Store → Themes), then say so. Never delete one for them.
+
+5. **Upload the changed files to the preview theme only.** Just before uploading, read each changed file's `checksumMd5` on the live theme again. If one moved since step 3, the live theme changed under the run: read that file again, redo its edit on the new copy, then upload.
+
+   ```graphql
+   mutation($themeId: ID!, $files: [OnlineStoreThemeFilesUpsertFileInput!]!) { themeFilesUpsert(themeId: $themeId, files: $files) { upsertedThemeFiles { filename } job { id done } userErrors { field message code filename } } }
+   ```
+
+   Pass each file whole: `body: { type: TEXT, value: <full file> }`. The `themeId` is the preview theme's, checked against the live theme's id before every call. Any `userErrors`: stop and show them; never report the preview as built.
+
+6. **Verify, then give the link.** Read `checksumMd5` for every uploaded file on the preview theme and match it to the md5 of what was sent. Confirm that no other file differs from the live theme. The preview link is `https://<domain>/?preview_theme_id=<the preview theme's numeric id>`. A fix after checking is uploaded to the same preview theme and verified the same way; it needs no new theme.
+
+The preview theme stays in the store's theme library, unpublished, until the merchant publishes or deletes it in Shopify admin.
 
 ## Stage 3: checking the change
 
 Runs in `full` and `theme`, and after a later "check it, then start the test". A person does the looking; the run gives them exactly what to open and what to look for.
+
+**The links are the reply, unprompted.** As soon as the preview exists, end the turn with one chat message holding the links (step 1) and the checklist (step 2), closing with the line in step 3. This message is the last thing in the turn: no clickable question, no tool call and no text after it. Text written before a clickable question can end up folded into the work log where the user never sees it, and a question's own text doesn't show links, so the links are never put in a question, in a question's description, or in a message followed by a question. The user can't judge variation B without the links, and should never have to ask for them.
+
+Write each link out in full as a clickable link on its own line, labelled with its arm:
+
+```markdown
+Here are the preview links.
+
+- **<Variation B name> (B):** <full B link>
+- **Original (control), for comparison:** <full control link>
+```
+
+If the storefront is password-protected, add one line saying so.
 
 1. **The links.** From the place the change is seen first (the preview link, the pull request's preview deployment, or the staging URL), build one link per arm on the test's surface page (the top page for that surface in the run-level `surfaces`):
    - Control: the page as it is.
@@ -186,7 +257,7 @@ Runs in `full` and `theme`, and after a later "check it, then start the test". A
    - Add to cart, the cart count and the cart page still work on both links.
    - Product options still change the price and image.
    - No error messages, broken images or sideways scrolling.
-3. **Ask one question:** "Does variation B look right?": "It looks right" / "Something is off". On "Something is off", ask what, fix it in the same branch or theme change, rebuild the preview, and give the links again. Repeat until it looks right.
+3. **Close the message with one line**, and wait: "Once you've looked, tell me whether it looks right or what you'd change." This is the one gate that is asked in plain text instead of a clickable question, so that the links stay visible. Read the reply: "looks right", "looks good", "yes" → it looks right. Anything that names a problem → fix it in the same branch or preview theme, rebuild the preview, and end the turn with the links message again. Repeat until it looks right.
 4. Record what the user confirmed. Be explicit about what was verified and by whom: the user looked at B through the QA link, not through a real assignment; nothing was checked on a real phone unless they said so.
 
 With no place to see the change before merge, say so, go to Stage 4, and run this check in Stage 5 on the live store. In a scheduled run there is no one to look: skip this stage and say so.
@@ -198,7 +269,7 @@ Send one short summary of what exists now, as plain text, with only the lines th
 - the A/B test in Noibu, linked to its console page
 - the links for the control and for B, what the user confirmed, and any warnings; or that the check will happen on the live store before the start
 - the pull request link, and any older pull request to close
-- the preview theme's name and link (theme path)
+- the preview theme's name and link (when one was built)
 - the patch file and the files changed (`preview`)
 - the test's `consoleFollowUps`, as steps to do in the Noibu console before starting
 - overlap risks with running tests, and anything that is the user's call
@@ -206,16 +277,19 @@ Send one short summary of what exists now, as plain text, with only the lines th
 Then the gate for the mode:
 
 - **`full`, repository path:** one question to confirm the merge: "I've merged it" / "Hold, I want changes". Never merge yourself.
-- **`full`, theme path:** say how to publish (Shopify admin → Online Store → Themes → the theme named "Noibu preview: …" → Publish), and that publishing makes the code live while every shopper still sees the control. Then one question: "I've published it" / "Hold, I want changes". Never publish for them.
+- **`full`, theme path:** say how to publish (Shopify admin → Online Store → Themes → the theme named "Noibu A/B preview: …" → Publish), and that publishing makes the code live while every shopper still sees the control. Then one question: "I've published it" / "Hold, I want changes". Never publish for them.
 - **`pr`, `theme` and `preview`:** one question, "What would you like to automate next?". What already exists is reused, never recreated.
 
 | After | Options |
 |---|---|
-| `preview` | "Launch an end-to-end test" · "Prepare a pull request" (repository path) or "Preview on a Shopify theme" (theme path) · "Stop here" |
-| `pr` | "Check it, then merge and start the test" (continues at Stage 3 with this pull request) · "Stop here — I'll merge later" |
-| `theme` | "Launch an end-to-end test" (the check is done, so it goes to the publish gate) · "Stop here" |
+| `preview` | "Launch an end-to-end test" · "Prepare a pull request" · "Preview test on Shopify theme" (Shopify theme store) · "Stop here" |
+| `pr` | "Check it, then merge and start the test" (continues at Stage 3 with this pull request) · "Preview test on Shopify theme" (Shopify theme store) · "Stop here — I'll merge later" |
+| `theme`, theme path | "Launch an end-to-end test" (the check is done, so it goes to the publish gate) · "Prepare a pull request" · "Stop here" |
+| `theme`, repository path | "Launch an end-to-end test" (opens the pull request with the checked code; the check is done, so it goes to the merge gate) · "Prepare a pull request" · "Stop here" |
 
-Each option's description says, in plain words, what it reuses and what it creates. On "Stop here", reply with one line saying how to pick it up later ("Say `continue the <title> test` and I'll pick up from the pull request."). On the theme path, add that the theme change stays open and that asking to discard it removes its preview theme; discard it (`noibu_discard_theme_change`) only when the user asks.
+Each option's description says, in plain words, what it reuses and what it creates. On "Stop here", reply with one line saying how to pick it up later ("Say `continue the <title> test` and I'll pick up from the pull request."). When a preview theme was built, add that it stays in the store's themes, unpublished, and can be deleted in Shopify admin (Online Store → Themes) once it is no longer needed.
+
+A pull request opened after a preview theme carries the same change the user checked, applied to the repository's copy of each file. If the repository's copy differs from the live theme's in the lines the change touches, say so in the pull request body.
 
 ## Stage 5: confirm it is live, then start
 
@@ -223,7 +297,7 @@ Runs only in `full`, or after the user chose an option that ends in a started te
 
 1. **The code was shipped.**
    - Repository path: confirm through the host's connection that the pull request is merged.
-   - Theme path: call `noibu_list_store_themes`. The live theme, listed first, must be the preview this run built. If it isn't, the publish didn't happen: say so and stop.
+   - Theme path: list the store's themes through the Shopify plugin ("The Shopify preview theme", step 2). The theme with role `MAIN` must be the preview theme this run built, by id. If it isn't, the publish didn't happen: say so and stop.
 2. **The code is running on real pages.** Query `noibu_search_sessions` from the time of the merge or publish to now, counting sessions that carry the helper's rendered attribute:
 
    ```json
@@ -249,6 +323,6 @@ When the user asks to check a test this skill started ("check the quick add test
 
 ## Picking a build up later
 
-A request like "continue the Quick add test" resolves the domain, finds the draft by title in `noibu_list_ab_tests`, and finds the work: the branch or pull request by name, or the open theme change (starting a change for a store that has one open returns its `changeId`). Confirm the flag key in the code matches the draft, then continue from the first stage not yet done. Ask the "What would you like to automate next?" question for the mode that stopped; don't show the summary and the first question again.
+A request like "continue the Quick add test" resolves the domain, finds the draft by title in `noibu_list_ab_tests`, and finds the work: the branch or pull request by name, or the preview theme named "Noibu A/B preview: <title> …" in the store's themes ("The Shopify preview theme", step 2). Confirm the flag key in the code matches the draft, then continue from the first stage not yet done. Ask the "What would you like to automate next?" question for the mode that stopped; don't show the summary and the first question again.
 
 A second request to build a test that is already being built gets one line pointing at the build under way, not a second build.
