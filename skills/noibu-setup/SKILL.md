@@ -57,7 +57,7 @@ Give each one as **available**, **not available** or **not checked**.
 - **Downloads.** A report can be saved as a PDF when the user asks for it.
 - **Scheduling.** A report can run as a Cowork scheduled prompt when the user asks for one. Each run can also be sent by email (through Outlook), to Teams or to Notion, which needs that connector installed; without it the report still runs in Cowork. Email recipients are always confirmed in chat first.
 - **A/B testing.** Test ideas and Noibu drafts need only Noibu. Building a test also needs a connection to the store's code host (GitHub, GitLab, Bitbucket or Azure DevOps), or on a Shopify theme store Noibu's theme preview. Nothing is merged, published or started without the user.
-- **Code and tickets.** Drafting a pull request needs GitHub connected. Tickets need Linear, Jira, GitHub or Notion connected.
+- **Code and tickets.** Drafting a pull request needs GitHub connected. Tickets need Linear, Azure Boards, GitHub or Notion connected.
 
 ## Output
 

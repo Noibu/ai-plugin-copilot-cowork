@@ -50,7 +50,7 @@ Find the cause first, as in "Investigate a priority", without writing it out.
 
 - **Priority error or page-speed cause:** use `tech-diagnosis` for that issue or page with the action Open a ticket.
 - **Any other cause:**
-  1. Ask where the ticket should go: one clickable question, header "Destination", with four options: Linear, Jira, GitHub Issues, Notion.
+  1. Ask where the ticket should go: one clickable question, header "Destination", with four options: Linear, Azure Boards, GitHub Issues, Notion.
   2. If the chosen destination isn't connected, say in one plain line which connection unlocks it, and stop.
   3. Ask for the details the destination needs (team, project or page), all in one message, before creating anything.
   4. Create one ticket. Title: the priority's title. Body in Markdown: Summary (the regression with its numbers and window) → Evidence (the breakdown, 8 rows at most) → Likely cause → What to change (the change, its owner and the check that confirms it worked). Labels, only if they already exist: `checkout-analysis`, `noibu`. Assignee: unset unless the user names one.

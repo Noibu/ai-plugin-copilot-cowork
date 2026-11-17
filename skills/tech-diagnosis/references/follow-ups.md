@@ -74,7 +74,7 @@ Only for **fixable errors** and **page-speed findings**. Never for vendor issues
 
 A ticket always carries the full content: Summary, Technical details, Cause and Fix.
 
-1. **Ask where the ticket should go**: one clickable question, header "Destination", with four options: Linear, Jira, GitHub Issues, Notion.
+1. **Ask where the ticket should go**: one clickable question, header "Destination", with four options: Linear, Azure Boards, GitHub Issues, Notion.
 2. If the chosen destination isn't connected, say in one plain line which connection unlocks it, and stop.
 3. **Ask for the destination details** the platform needs (team, project or page), all in one message, before creating anything.
 4. **Create the tickets**, one per eligible finding:
@@ -162,7 +162,7 @@ Set it up as a Cowork scheduled prompt named `tech-scan-<store>`, with this prom
 **Automations** (pull requests and tickets) are added only when the user names them in the request. Never suggest them. For each one named, check its connection first; if it isn't set up, say in one plain line which connection unlocks it, and leave that automation out.
 
 - **Draft pull requests** (GitHub, with the repository named): add to the prompt: *For each fixable error and fixable page-speed finding, determine the fix, create a branch named `fix/<plain-description>` in <repo>, commit the change and open a draft pull request titled with a plain-English summary. Collect each link.*
-- **Create tickets** (Linear, Jira, GitHub Issues or Notion, with the team or project named): add: *For each fixable error and page-speed finding, not vendor issues, create a ticket in <platform> / <team>. Title: `<severity> <summary> (affecting <segment>)`. Body: Summary → Technical details → Cause → Fix, with any alternative. Priority: critical → high; standard → medium. Collect each link.*
+- **Create tickets** (Linear, Azure Boards, GitHub Issues or Notion, with the team or project named): add: *For each fixable error and page-speed finding, not vendor issues, create a ticket in <platform> / <team>. Title: `<severity> <summary> (affecting <segment>)`. Body: Summary → Technical details → Cause → Fix, with any alternative. Priority: critical → high; standard → medium. Collect each link.*
 
 **The digest:**
 

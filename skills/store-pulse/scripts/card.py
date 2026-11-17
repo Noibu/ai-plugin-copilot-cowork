@@ -67,7 +67,7 @@ SKILLS = {
         'actions': {'header': 'Action', 'question': 'What should I do with it?', 'options': [
             {'label': 'Get the fix', 'description': 'Find the cause and what to change'},
             {'label': 'Draft a pull request', 'description': 'When the cause is in your code, via GitHub'},
-            {'label': 'Open a ticket', 'description': 'Linear, Jira, GitHub Issues or Notion'},
+            {'label': 'Open a ticket', 'description': 'Linear, Azure Boards, GitHub Issues or Notion'},
             {'label': 'Investigate first', 'description': 'The breakdown and likely cause before acting'}]},
     },
     'product-analysis': {
@@ -105,7 +105,7 @@ SKILLS = {
         'actions': {'header': 'Action', 'question': 'What should I do with it?', 'options': [
             {'label': 'Get the fix', 'description': 'Find the cause and show the fix'},
             {'label': 'Draft a pull request', 'description': 'Open the fix as a pull request in GitHub'},
-            {'label': 'Open a ticket', 'description': 'Linear, Jira, GitHub Issues or Notion'},
+            {'label': 'Open a ticket', 'description': 'Linear, Azure Boards, GitHub Issues or Notion'},
             {'label': 'Investigate first', 'description': 'Impact and likely cause before acting'}]},
     },
     'ab-testing': {
