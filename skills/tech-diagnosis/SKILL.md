@@ -19,7 +19,6 @@ Don't use it for:
 - Where shoppers drop off in checkout: `checkout-analysis`.
 - Product or collection performance: `product-analysis`.
 - Channel, device or country conversion: `segment-analysis`.
-- Accessibility violations: `accessibility-audit`.
 
 ## Guardrails
 

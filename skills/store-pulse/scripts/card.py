@@ -27,7 +27,6 @@ TITLE_CHARS, SHORT_WORDS, EVIDENCE_CHARS, CELL_CHARS, TAG_CHARS = 60, 5, 160, 40
 NOT_MEASURED = 'Not measured'
 
 VITALS = {'LCP': (2500, 4000), 'INP': (200, 500), 'CLS': (0.1, 0.25)}   # good / poor cut-offs (ms, ms, score)
-SEVERITIES = {'critical': 'Critical', 'serious': 'Serious', 'moderate': 'Moderate', 'minor': 'Minor'}
 STATUSES = {'active': ('Active', 'Attention'), 're-emerging': ('Re-emerging', 'Warning'), 'improving': ('Improving', 'Good')}
 KINDS = {'fixable': 'Issues you can fix', 'performance': 'Performance', 'vendor': 'Vendor issues'}
 CURRENCY_SYMBOLS = {'USD': '$', 'CAD': 'CA$', 'AUD': 'A$', 'NZD': 'NZ$', 'EUR': '€', 'GBP': '£', 'JPY': '¥'}
@@ -114,15 +113,6 @@ SKILLS = {
         'drawn': 5, 'emptyLabel': 'No test opportunities', 'ask': 'show test {n}',
         'schedule': 'Schedule this report', 'scheduleNote': 'Look for new tests automatically, weekly or on your own timing',
     },
-    'accessibility-audit': {
-        'title': 'Accessibility audit', 'unit': 'pageviews',
-        'schedule': 'Schedule the audit', 'scheduleNote': 'Start the page scans automatically, weekly or on your own timing',
-        'context': [('pagesScanned', 'count', '{} pages scanned'), ('pageviews', 'count', '{} pageviews'), ('violationInstances', 'count', '{} violation instances'), ('uniqueFixes', 'count', '{} unique fixes')],
-        'tiles': [_kpi('critical', 'Critical', 'count', good='down'), _kpi('serious', 'Serious', 'count', good='down'),
-                  _kpi('moderate', 'Moderate', 'count', good='down'), _kpi('minor', 'Minor', 'count', good='down')],
-        'tables': [_table('pagesScanned', [('page', 'Pages scanned', 'text'), ('pageviews', '30-day pageviews', 'count'), ('instances', 'Violation instances', 'count')]),
-                   _table('keyFindings', [('finding', 'Key findings', 'text'), ('wcag', 'WCAG', 'text'), ('severity', 'Severity', 'text')])],
-    },
 }
 
 TOP_SUFFIX = {'sessions': '{} sessions', 'conversionRate': '{} CVR'}
@@ -132,7 +122,6 @@ PRIORITY_FIELDS = {'title', 'shortTitle', 'evidence', 'affected', 'link'}
 PRIORITY_EXTRA = {
     'product-analysis': {'signal'}, 'segment-analysis': {'signal'},
     'tech-diagnosis': {'kind', 'status', 'errorType', 'vendor', 'occurrences', 'lastSeen', 'where', 'vital'},
-    'accessibility-audit': {'severity', 'wcag', 'pages'},
 }
 REPORT_FIELDS = {'skill', 'store', 'window', 'currency', 'kpis', 'funnel', 'tables', 'priorities', 'tests', 'noPrioritiesReason', 'links', 'reportPages'}
 
@@ -460,13 +449,6 @@ def read_report(report):
             if item.get('signal') is None:
                 _bad(f'{path}.signal', 'one of: ' + ', '.join(spec['signals']))
             entry['tag'] = _match(item['signal'], spec['signals'], f'{path}.signal')
-        if skill == 'accessibility-audit':
-            if item.get('severity') is None:
-                _bad(f'{path}.severity', 'one of: ' + ', '.join(SEVERITIES))
-            entry['tag'] = SEVERITIES[_match(item['severity'], list(SEVERITIES), f'{path}.severity')]
-            wcag = _trim(_text(item.get('wcag'), f'{path}.wcag'), CELL_CHARS)
-            pages = _number(item.get('pages'), f'{path}.pages', 'count')
-            entry['facts'] = [x for x in [f'WCAG {wcag}' if wcag else None, f'{pages:,} {"page" if pages == 1 else "pages"} affected' if pages is not None else None] if x]
         if skill == 'tech-diagnosis':
             if item.get('kind') is None:
                 _bad(f'{path}.kind', 'one of: ' + ', '.join(KINDS))
@@ -1131,7 +1113,7 @@ def _help():
         '  title       names the metric and the move, 60 characters or fewer',
         '  shortTitle  5 words or fewer; the option label in the next-step question',
         '  evidence    one sentence with its number and comparison, 160 characters or fewer',
-        '  affected    how many were affected (sessions; pageviews for accessibility-audit), or null',
+        '  affected    how many were affected (sessions), or null',
         '  link        a console.noibu.com URL for this priority, drawn as a button on it; optional',
     ]
     for skill, spec in SKILLS.items():
@@ -1154,8 +1136,6 @@ def _help():
             lines += ['  tests     title (the change in a few words, 60 characters or fewer); shortTitle (5 words or fewer)',
                       '            change (one sentence on the proposed change, 160 characters or fewer)',
                       '            why (the measured problem behind it, 240 characters or fewer)']
-        if skill == 'accessibility-audit':
-            lines.append('  priority  severity: ' + ' | '.join(SEVERITIES) + '; wcag (text); pages (count)')
     return '\n'.join(lines)
 
 
@@ -1250,18 +1230,6 @@ EXAMPLES = {
             {'title': 'Shipping reassurance in the cart drawer', 'shortTitle': 'Cart shipping reassurance',
              'change': 'Show the free-shipping threshold and delivery estimate above the checkout button in the cart drawer.',
              'why': '42% of sessions that open the cart leave without starting checkout, and the shipping cost first appears on the shipping step.'}],
-    },
-    'accessibility-audit': {
-        'skill': 'accessibility-audit', 'store': _STORE, 'window': _MONTH,
-        'kpis': {'pagesScanned': 10, 'pageviews': 95120, 'violationInstances': 271, 'uniqueFixes': 27, 'critical': 0, 'serious': 24, 'moderate': 2, 'minor': 1},
-        'tables': {'pagesScanned': [{'page': 'Homepage', 'pageviews': 31200, 'instances': 42}, {'page': 'Bracelets collection', 'pageviews': 12800, 'instances': 37}],
-                   'keyFindings': [{'finding': 'Text contrast is too low', 'wcag': '1.4.3 Contrast (Minimum)', 'severity': 'Serious'},
-                                   {'finding': 'Images are missing alt text', 'wcag': '1.1.1 Non-text Content', 'severity': 'Serious'}]},
-        'priorities': [
-            {'severity': 'serious', 'title': 'Text contrast is too low', 'shortTitle': 'Low text contrast', 'affected': 95120,
-             'evidence': 'Body text fails the 4.5:1 contrast ratio on all 10 scanned pages.', 'wcag': '1.4.3 Contrast (Minimum)', 'pages': 10},
-            {'severity': 'serious', 'title': 'Images are missing alt text', 'shortTitle': 'Missing alt text', 'affected': 44000,
-             'evidence': 'Product images have no text alternative on 4 scanned pages.', 'wcag': '1.1.1 Non-text Content', 'pages': 4}],
     },
 }
 
