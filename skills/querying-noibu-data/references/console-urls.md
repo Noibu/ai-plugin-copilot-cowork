@@ -1,5 +1,3 @@
-<!-- overlay: replace — render honesty — cannot claim an inline replay or heatmap rendered; states the console link plainly instead — upstream @ a8e6f58893f0 -->
-
 # Console URLs
 
 Read this reference when the user pastes a `console.noibu.com` link, or asks anything that requires parsing a console URL to extract a domain ID, issue ID, session path, or filter set.
@@ -27,6 +25,6 @@ The Noibu console lives at `https://console.noibu.com`. When the user pastes a c
 ## Console link policy
 
 - **Issue links** — always use `issueUrl` from `noibu_list_priority_errors`, `noibu_search_errors`, or `noibu_get_error`. Never construct manually. If `issueUrl` is absent, do not link — surface the data without one.
-- **Session replay** — always use `replayUrl` from `noibu_show_session_replay`, and always state it plainly in your reply — never assume the inline player rendered. Never construct manually. If `replayUrl` is absent, do not link.
-- **Click heatmaps** — always use `consoleUrl` from `noibu_visualize_page_visits`, and always state it plainly — never assume the inline heatmap rendered. It opens the general heat-maps section, not the exact url/device/date-range queried; say so.
-- **Other console pages** (site health, performance, etc.) — do not construct, suggest, or mention any console.noibu.com link in any form. Use the path patterns in the table above only to parse URLs the user has pasted, never to generate new ones.
+- **Session replay** — always use `jazzUrl` from `noibu_show_session_replay`. Never construct manually. If `jazzUrl` is absent, do not link.
+- **Per-vital performance** — the one page you may build: `https://console.noibu.com/<domainId>/performance/<metric>`, for a page-speed finding. `<domainId>` is the store's domain UUID as resolved in this run, and `<metric>` is the finding's metric in capitals (LCP, INP, CLS, FCP or TTFB). It opens that metric for the whole store; the finding's page group and device filters are not carried over, so never describe it as showing only those pages.
+- **Other console pages** (site health, pages, etc.) — do not construct, suggest, or mention any console.noibu.com link in any form. Use the path patterns in the table above only to parse URLs the user has pasted, never to generate new ones.

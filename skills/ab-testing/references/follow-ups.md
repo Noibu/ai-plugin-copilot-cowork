@@ -1,0 +1,126 @@
+# After the tests are shown
+
+Read this when the user picks an option from the next-step question, skips that question, or types one of the requests below. Each section is one request. Work from this conversation's `candidates.json`; never re-run the finder, re-rank or re-validate to answer one of these.
+
+Find a test by its title (exact, then ignoring case), falling back to its rank ("test 2"). If neither matches, say which tests this run has and ask which one.
+
+## The next-step question's options
+
+The card script returns them; ask them exactly as given. Each one arrives as a picked option.
+
+- **"View full reports"**: reply with the two lines below and stop. Ask no question after them: text written before a question is often not shown.
+  - The "Full reports" line: "Full reports:" followed by a link to each published page file, in rank order, and nothing else.
+  - To take a test further, ask: "implement <the first test's title>".
+- **"Implement one of the tests"**: write no text. Ask one clickable question, "Which test should I implement?", with one option per test in rank order: the label is the test's title, the description "Test <rank>". A question takes five options; with more tests, say in the question how many more there are and that a typed title works. The picked test goes to "A test is picked". "Implement this test" is the same option when the run has one test: skip the question and go straight to "A test is picked" with it.
+- **"Look for tests on a different goal"**: run the finder again from the goal question (`references/finder.md`), leaving out the goal this run used.
+- **"Create a specific A/B test"**: that route in SKILL.md.
+- **"Schedule this report"**: go to "Schedule".
+
+When the question is skipped, reply with the recovery line the card script returned, then the "Full reports" line.
+
+## A test is picked
+
+Arrives from "Which test should I implement?", or typed ("implement the quick add test").
+
+Write no text: never write the test's record, or any part of it, in the chat. Ask one clickable question, header "Next step":
+
+- "Create A/B test in Noibu": "Creates a draft. It serves no traffic until it's started."
+- "Not now": "Keep the idea; nothing is created."
+
+Write nothing after the question. "Not now" ends the turn with no text.
+
+## Open a test's report
+
+Only when the user asks in their own words ("show test 2", "tell me more about the quick add test", "open the report for test 2").
+
+Reply with one line and nothing else: "Full report:" and the link to that test's report page file. If the request names no test, link every page of this run, in rank order. The page carries the test's whole record, so never write the record, or any part of it, in the chat.
+
+If the file is gone or the run built no pages, build them again from `candidates.json` as `references/tests-file.md` says ("The report pages"), then link. If they can't be built, say so and why in one sentence and stop. Never re-run the finder for this.
+
+## Create the test in Noibu
+
+Arrives as that option, or typed ("create test 2 in Noibu"). This is the only way a draft is created outside a build.
+
+1. Call `noibu_list_ab_tests` for the domain first. A test with that title that is RUNNING or STOPPED: stop and say so. A DRAFT: it already exists, so answer with its id and key; don't create a second one.
+2. Check every metric code in the test's `createInput` against the `noibu_create_ab_test` tool's current schema enums. A code the schema does not accept is a reason to stop and say which, never to substitute.
+3. Call `noibu_create_ab_test` with the test's `createInput` exactly as the file has it, plus `domainId`, `rationale` ("User asked to create the A/B test \"<title>\""), `skill` and `skillStep: "create-test"`.
+4. After the tool returns the draft, reply with one sentence: "Draft <id> · flag key <key>. It serves no traffic until it's started, and its variation code has to be live first." Link "Draft <id>" to `https://console.noibu.com/<domainId>/ab-tests/<id>`, built only from the ids the tools returned. If the test has `consoleFollowUps`, add them as one line.
+5. Then ask one clickable question, "Automate the implementation of “<title>”?":
+   - "Automate the implementation (Recommended)": "I'll write the variation code with Noibu's snippet, then you choose what to automate: just the code, a pull request, an end-to-end test, or on a Shopify store a preview theme."
+   - "Not now": "Keep the draft; build it yourself or come back to it later."
+
+If the create call fails, say what failed in one line and ask nothing. A second request to create a test that is already drafted gets the same sentence and question, with "Already in Noibu" in place of a new draft.
+
+Shoppers placed in a variation whose code is not live see the control while being counted against it, and that data cannot be repaired. That is why the reminder is in the sentence.
+
+## Automate the implementation
+
+Arrives as that option, or typed ("build test 2", "automate the quick add test").
+
+The test is picked; don't ask which again. Open `references/build.md` and start at "Before anything is created". The draft named in the request is adopted in Stage 2a.
+
+If this conversation has no finder run for that domain (the working folder is gone, or the request names a test from somewhere else), say in one line that the tests from that run aren't available here and that looking for new opportunities will produce a fresh set, then ask the opening question from SKILL.md.
+
+## Download a test's report
+
+Only when the user asks ("download this", "give me test 2 as a PDF"). The report page is not the download: a PDF is still made. One PDF per test, saved in the Cowork output folder under its report page's file name, ending `.pdf` (`quick-add-on-collection-cards.pdf`). If the run built no pages, make the name the same way: the test's title in lowercase words joined by hyphens.
+
+Use the figures in `candidates.json`; don't query again. The report is for a busy merchant: what the test is, why the data supports it, and the setup. It has no images of the page. In this order:
+
+1. Title: "Recommended test: <title>", with the store, the goal and the data line under it.
+2. **What to change:** `what`.
+3. **Why this test:** `why`.
+4. **Why this test, in numbers:** the test's `evidence[]`, one line each. Label correlational evidence.
+5. **Setup:** the six `setup` fields as a table, then `metricVolume`.
+6. **Overlap** and **Fix first**, each only when present.
+7. **Dev notes**, then the test's `unconfirmed` lines under "Not confirmed on the store", when there are any.
+8. **Outside your goal:** the run's `outsideGoal` lines, when there are any.
+9. The run's `caveats`, as closing lines.
+
+Reply with one line saying where the file is.
+
+## Schedule
+
+When the user picks the schedule option in the next-step question, or asks ("run this every Monday", "look for new tests each month"). What is scheduled is the finder only: looking for new opportunities with the goal fixed in the prompt, ending at the report. A scheduled run never creates a draft, a branch or a pull request.
+
+- If a scheduled prompt for this store's A/B test finder already exists, change that one; don't add a second.
+- If the request already names how often and when, ask nothing more about timing.
+- Otherwise ask one clickable question, header "Schedule", with these options:
+  1. "Weekly on Mondays (Recommended)": 9 am · last 30 days
+  2. "Every 2 weeks on Mondays": 9 am
+  3. "Monthly": 9 am on the 1st
+  4. "Something else": the user names the day and time
+- The goal: if this conversation already ran the finder for the store, use that run's goal. Otherwise ask the goal question from `references/finder.md` once. "All goals" is a valid answer.
+
+**Where to send it.** Once the timing is settled and before creating the schedule, ask one clickable question, header "Send to": "Where should each report be sent?" Skip it if the request already names where.
+
+1. "Email": through Outlook
+2. "Teams": a channel or chat
+3. "Notion": a page
+4. "Only in Cowork": nowhere else
+
+More than one of the first three may be chosen. Every run shows its report in Cowork, whatever is picked.
+
+For each destination picked:
+
+- **Check its connector first**: Outlook for email, Teams, or Notion. If it isn't installed or connected, recommend it in one plain line ("To get this by email, install the Outlook connector in Cowork, then ask me to add email to this schedule"), leave that destination out, and carry on. The schedule is still created.
+- **Email** goes through Outlook only. Confirm the exact recipient addresses in chat before creating the schedule, even if the user already gave them.
+- **Teams**: ask which channel or chat if it wasn't given.
+- **Notion**: ask which page if it wasn't given.
+- Add to the scheduled prompt, once per destination: *Then send the digest to <destination>.*
+
+A run that can't send still gives its report in Cowork; the Output section of SKILL.md says how.
+
+Set it up as a Cowork scheduled prompt named `ab-testing-<store>`, with this prompt: *Look for new A/B test opportunities for <store> for the goal <goal>. Ask nothing. Do not create any Noibu test, branch or pull request.* Apart from a send line, write nothing into the prompt about what the run delivers: the Output section of SKILL.md decides that when it runs.
+
+**The digest:**
+
+- A title: "A/B test ideas: <store>, <date>", then the goal in one line.
+- The tests on the card, and no others. Each one: its title, what to change in one sentence and its weekly traffic.
+- End with the script's scheduled lines exactly as given: "Dive deeper by asking Cowork:" and one request per test on the card. Nothing else for the reader to copy, and no request under an individual test.
+
+- **Email**: the title is the subject.
+- **Teams**: the title in bold.
+- **Notion**: a page named with the title; each test as a heading and a paragraph.
+
+Confirm in one or two sentences: how often, the goal, the store and where each report is sent. Then offer to run it once now, so a wrong store or goal shows up immediately. Run it only if the user says yes.

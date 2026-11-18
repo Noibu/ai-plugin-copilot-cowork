@@ -1,5 +1,3 @@
-<!-- overlay: replace — render honesty — cannot claim a replay is playing or visible; states the console link plainly instead — upstream @ 80f76ef194b4 -->
-
 # Journeys & session replay
 
 Read this reference when the user asks about the shape of multi-step journey patterns across many sessions, or when they explicitly want to watch / see / view a session replay.
@@ -14,9 +12,9 @@ Default to `noibu_get_page_visits` for journey-shaped questions. The vast majori
 
 If the user is asking for an aggregate (count, rate, percentage, ranking by URL) — route to `noibu_get_page_visits` and stop. A URL in the prompt is not by itself a redirect signal; it may be the anchor for the shape question below. Load `references/page-visits.md` for field-level detail.
 
-### Funnel-shaped *visualization* requests are different
+### Requests to see the funnel
 
-When the user explicitly asks to **see / chart / visualize / draw** the ecommerce conversion funnel (e.g. "show me the checkout funnel", "render the purchase funnel as a chart", "funnel chart for last 7 days vs previous"), do NOT stop at `noibu_get_page_visits`. Use it (or `noibu_search_sessions`) to fetch the per-step session counts, then hand the result to `references/funnel-visualization.md` — it presents the per-step counts as a markdown table. Analytical funnel prompts ("where do users drop off", "abandonment by step") still terminate at `noibu_get_page_visits`.
+When the user asks to **see** the ecommerce conversion funnel ("show me the checkout funnel", "funnel for the last 7 days against the previous 7"), fetch the per-step session counts and answer with the table described in `references/sessions.md`, "The conversion funnel". Analytical funnel questions ("where do users drop off", "abandonment by step") still end at `noibu_get_page_visits`.
 
 ## noibu_list_page_group_journeys (narrow)
 
@@ -60,7 +58,7 @@ Compare `totalMatchingSessions` to the sum of `sessionCount` across returned pat
 
 ## noibu_show_session_replay
 
-The tool call returns full page-visit metadata for the session (URLs, durations, key events per visit) — narrate the session using that data. Returns a `replayUrl` for the full session — state it plainly in your reply whenever present, and never claim the replay is playing or visible; you can't confirm this host rendered it. Never construct or mention a Noibu console link otherwise.
+Shows ONE page visit from a session as a video in the conversation, and returns the session's full page-visit metadata (URLs, durations, key events per visit). May return a `jazzUrl` for the full session — use it only if present; never construct or mention a Noibu console link otherwise.
 
 USE ONLY when the user **explicitly** asks to watch / see / view a session replay or video. Examples of when to call it:
 
@@ -80,4 +78,4 @@ Specifically:
 - Only specify `pageVisitIndex` when the user has expressed interest in a specific page visit (e.g., "show me page visit 3").
 
 **Multiple replays:**
-- When showing multiple replays from the same session, call the tool once per page visit and write the summary immediately after each call before calling the tool for the next. This produces: tool call → summary → tool call → summary, rather than batching all summaries at the end.
+- When showing multiple replays from the same session, call the tool once per page visit and write the summary immediately after each replay before calling the tool for the next. This produces: replay → summary → replay → summary, rather than batching all summaries at the end.

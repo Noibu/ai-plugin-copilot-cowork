@@ -1,94 +1,71 @@
 ---
 name: store-pulse
-description: An instant, at-a-glance read on your store's health — run on demand. Use to check on how the overall store is doing.
+description: An instant, at-a-glance read on your store's health from the last 24 hours, with the option to schedule a recurring report. Use to check on how the overall store is doing, or to schedule a recurring summary.
 ---
-<!-- overlay: replace — no saved-dashboard or scheduling surface on this host — stateless per-run markdown snapshot only — upstream @ eb6518bc30fd -->
 
 # Store Pulse
 
-A stateless health check. Every run resolves the domain, pulls fresh Core KPIs + Purchase Funnel data (plus any optional blocks requested), and prints a markdown report directly in the chat response. Nothing persists between runs — no saved state, no config file. Re-run any time for a fresh read.
+A daily snapshot of the store. Every run leads with a fresh answer for the last 24 hours against the 24 hours before: a short summary, the five headline numbers, the purchase funnel, and up to three threads worth pulling on.
 
-**Call metadata:** on every `noibu_*` call this skill drives, pass `skill: "store-pulse"`, `skillVersion: "cowork:fbf39d7"`, and a short `skillStep` (see the `querying-noibu-data` skill).
+## When to use it
 
-## Flow
+Use it for "how's my store doing", "check on example.com", a bare invocation, or a request to schedule a recurring store summary.
 
-### 1. Resolve the domain
+Don't use it for:
 
-- Always call `noibu_list_domains` first (unless the user already gave you a UUID — use it directly).
-- **User named a domain** → case-insensitive match (accept `www.` variants). If matched, use that UUID + name. If not, tell them the named domain isn't in their Noibu account, list what is, and stop. Never silently substitute a different domain.
-- **User didn't name a domain** → one result, use it. Multiple results → ask in plain text, e.g. "Which store should I check — [name 1], [name 2], or [name 3]?" and wait for their reply. Don't guess.
+- Where shoppers drop off in checkout: `checkout-analysis`.
+- Which products or collections underperform: `product-analysis`.
+- Which channels, devices or countries convert best: `segment-analysis`.
+- Why an error or slow page is happening: `tech-diagnosis`.
 
-### 2. Pick the window
+## Guardrails
 
-Default to the **last 24h vs. the prior 24h**. If the user asks for a different window ("this week", "last 30 days"), use that instead — same query shape, different `dateTimeRange`. State the window used in the report header.
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Always fresh.** Every run queries the last 24 hours again. Never answer from an earlier snapshot.
+- **Don't fake the math.** A measure that comes back null is not measured; it is never 0. If the window has no sessions, say there was no traffic in this window.
+- **One schedule per store.** Different stores can each have their own.
+- **Work quietly.** Don't narrate resolving the store, reading files or choosing tools. Narrate only what the data shows.
+- On every `noibu_*` call, pass `skill: "store-pulse"` and a short `skillStep`.
 
-### 3. Choose blocks
+## Before you start
 
-`core-kpis` and `purchase-funnel` are always included. Ask once, in plain conversational text (no special widget):
+Run once: `ls scripts/card.py references/snapshot.md references/blocks.md references/follow-ups.md`
 
-> "I'll pull Core KPIs and the Purchase Funnel by default. Want me to also include Top products, Channel performance, or Paid ad performance?"
+Then resolve the store. Use it without asking if it is already clear from the conversation. Otherwise call `noibu_list_domains`: with one result, use it; with several and none named, ask which store in one clickable question listing up to five.
 
-Read `references/blocks/<id>.md` for each block picked (default and optional) before querying — those files define the exact metrics, MCP query shapes, methodology tooltips, empty-state handling, and polarity. Don't rewrite or second-guess them; reuse the query shapes and table columns verbatim.
+## Workflow
 
-### 4. Fetch the data
+**Snapshot**: every invocation.
 
-Run the MCP queries from each included block's reference file for both the current and prior windows. Compute deltas vs. the prior period of equal length.
+1. Run the headline and funnel queries for the last 24 hours and the 24 hours before: `references/snapshot.md`.
+2. If the user asked for top products, channel performance or paid ad performance, run those too: `references/blocks.md`.
+3. Write the report data: `references/snapshot.md`, "Report data".
+4. Deliver the report: the Output section below.
 
-### 5. Report
+**A focused question** about one of the snapshot's numbers ("what's my conversion today?", "how are my channels doing?"): run only the query it needs from `references/snapshot.md` or `references/blocks.md` and answer in prose.
 
-Print a clean markdown report directly in the chat response — headers, tables, bullet points, nothing else:
+**After a snapshot**: the user picks a thread or the schedule option, or types a request to schedule or download. Open `references/follow-ups.md`.
 
-```markdown
-# Store Pulse — [domain] ([period label])
+## Output
 
-[1-2 sentence editorial summary — lead with the most notable thing, mix wins and concerns, use specific numbers]
+A full report is three separate steps, in this order:
 
-## Core KPIs
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. If the script also returned `actions`, ask it in the same prompt as a second question, with its header, question and options exactly as given; if the host shows only one question at a time, ask "Next step" first. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-| Metric | Value | vs prior |
-|---|---|---|
-| Sessions | ... | ... |
-| Engagement | ... | ... |
-| Conversion | ... | ... |
-| AOV | ... | ... |
-| RPS | ... | ... |
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-## Purchase funnel
+A focused question gets prose with the number, its window and its base; a card only if it helps.
 
-| Step | % of sessions | Sessions | Δ pp |
-|---|---|---|---|
-| Enter store | 100% | ... | ... |
-| View product | ... | ... | ... |
-| Add to cart | ... | ... | ... |
-| Start checkout | ... | ... | ... |
-| Checkout complete | ... | ... | ... |
+Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
-[+ one section per optional block picked, using that block's table shape from its reference file — Top products, Channel performance, Paid ad performance]
-```
+A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
 
-Use each block's own empty-state and polarity rules (e.g., "No traffic in this window") rather than blank cells or guessed numbers.
+If the scheduled prompt names somewhere to send the report (email through Outlook, Teams or Notion), send it after those lines, in the form this skill's schedule reference gives. If it can't be sent because the connector is missing or not connected, the report above still stands: add one line saying which connector to install so the next report can be sent, e.g. "Couldn't send this to Teams. Install the Teams connector in Cowork and the next report will be sent."
 
-See `references/inline-snapshot.md` for the full response-shape contract — the exact order of the editorial summary, this report, the recurring-cadence line, and the investigate-thread follow-up below.
-
-### 6. Suggest — don't set up — a recurring check
-
-One line, near the end, after the report:
-
-> "Want this on a recurring cadence? You can set that up yourself in Cowork's Customize → Automated tasks, with a prompt like: 'Run my store health check for [domain] and summarize any notable changes.'"
-
-This is something the user sets up themselves through Cowork's own automated-tasks feature — nothing here creates, schedules, or persists a recurring run on their behalf.
-
-### 7. Offer a next thread to pull on
-
-After the recurring-cadence line, offer a short plain-text follow-up drawn from the summary — see `references/inline-snapshot.md`'s "Where to next" for the exact options and routing.
-
-## File map
-
-```
-store-pulse/
-├── SKILL.md
-├── references/blocks/{core-kpis,purchase-funnel,top-products,channel-performance,paid-performance}.md
-└── references/inline-snapshot.md
-```
-
-Read `references/blocks/<id>.md` for block specs (metrics, MCP query shapes, methodology tooltips, empty states, polarity). Read `references/inline-snapshot.md` for the full response-shape contract.
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Where's the biggest revenue opportunity?", "What changed since yesterday?".
+- Schedule preset: Weekly on Mondays · 9 am · the preceding 7 days.

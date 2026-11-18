@@ -2,115 +2,77 @@
 name: segment-analysis
 description: "Analyze segment and traffic performance using Noibu data. Use when you want to know which channels, devices, or countries convert best, how mobile compares to desktop, where your traffic is coming from, which segments are underperforming, or where to find your best and worst converting customer segments."
 ---
-<!-- overlay: replace — no dashboard-rendering tool on this host — triage board becomes a markdown report; offers become conversational — upstream @ df2f03fcd2c7 -->
 
-# Noibu Segment Conversion Analysis
+# Segment analysis
 
-Surfaces which segments are winning or losing, and why — as a markdown report
-built from Noibu session data.
+Compares how devices, countries and channels convert, from Noibu session data. A full analysis ends in one report card with conversion by device, the top countries and channels, and three priorities ranked by sessions affected.
 
-**Call metadata:** on every `noibu_*` call this skill drives, pass `skill: "segment-analysis"`, `skillVersion: "cowork:fbf39d7"`, and a short `skillStep` (see the `querying-noibu-data` skill).
+## When to use it
 
-## How it works
+Use it for which channels, devices or countries convert best or worst, how mobile compares to desktop, and where traffic comes from.
 
-- **Quick answer** (focused question) → run 1–2 queries, answer directly, offer to go deeper.
-- **Full analysis** (broad request, bare invocation, or "yes" to the offer) → the workflow below.
+Don't use it for:
 
-## Setup — before any query
+- Where shoppers drop off inside checkout: `checkout-analysis`.
+- Product or collection performance: `product-analysis`.
+- The root cause and fix of one error or slow page: `tech-diagnosis`.
+- A quick read on the whole store's last 24 hours: `store-pulse`.
 
-**Work quietly.** The first thing the user sees is the report — no "let me…" commentary before it.
+## Guardrails
 
-- **Resolve the domain first.** Use what the user gave (name or UUID). If nothing, ask conversationally which one, listing their domains — don't ask about anything else. If exactly one domain, skip the question.
-- **Confirm every field name by role** before using it. Reference files name fields by role, never hard-coded column names.
-- **Default window:** last 30 days unless the user specifies otherwise.
-- **If the dataset is near-zero** (total sessions 0 or a handful), say plainly that the domain has no traffic in this window and offer to widen the range.
+- If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop. No partial numbers.
+- Reading data never permits a write. Never report a write as done without the tool's result.
+- If a file this skill needs is missing, say which in one line and stop.
+- **Bot filter first.** No segment becomes a priority before it has passed the bot filter in `references/queries.md`.
+- **An empty store.** If total sessions in the window are zero or a handful, say plainly that the store has no traffic in this window and offer a wider range.
+- **Work quietly.** Don't narrate resolving the store, reading files or confirming field names.
+- On every `noibu_*` call, pass `skill: "segment-analysis"` and a short `skillStep`.
 
----
+## Before you start
 
-## Quick answer
+Run once: `ls scripts/card.py references/queries.md references/report.md references/follow-ups.md`
 
-For focused questions ("which channel converts best?", "how does mobile compare to desktop?", "which countries are underperforming?"):
+Then, before any query:
 
-1. Run only the 1–2 queries needed and answer directly.
-2. Ask conversationally whether they'd like the full analysis: "Want me to run a full segment analysis — survey device, country, and channel, then dig into anomalies? Reply yes or no."
+- **Resolve the store.** Use the domain the user gave (name or UUID). If they gave none and the account has one domain, use it. Otherwise ask which store in one clickable question listing up to five of their domains. Ask nothing else.
+- **Confirm every field name by its role before using it.** The `querying-noibu-data` skill maps the role names used here to the real Noibu tools and columns. If it isn't available, read tool and field names from the live Noibu tool schema.
+- **Window:** the last 30 days unless the user names another.
 
-Don't run the full workflow or render the report for a quick answer.
+## Workflow
 
----
+Pick the route from the request.
 
-## Full analysis
+**Quick answer**: one focused question ("which channel converts best?", "how does mobile compare to desktop?", "which countries are underperforming?").
 
-**Loading reference files:** Use the `Read` tool. All files live in a `references/` subdirectory next to this SKILL.md — derive the base path from wherever this file was loaded from.
+1. Open `references/queries.md`, run only the one or two queries the question needs, and answer directly.
+2. Offer the full analysis in one clickable question with two options: "Yes: survey device, country and channel, then dig into anomalies" and "No thanks".
 
-1. Read `references/queries.md` now, before running any queries.
-2. Run the workflow from queries.md.
-3. Render the report as markdown — see "Rendering the report" below.
+**Full analysis**: a broad request, a bare invocation, or yes to that offer.
 
----
+1. Run the workflow: `references/queries.md`.
+2. Write the report data: `references/report.md`.
+3. Deliver the report: the Output section below.
 
-## Follow-up questions after a report
+**After a report**: the user picks a priority or the schedule option, or types a request to investigate, download or schedule. Open `references/follow-ups.md`.
 
-A user question naming a specific segment signal from a report already in this conversation ("why is Canada converting so low?", "dig into the campaign drag") — handle as a focused follow-up, not a re-run of the full analysis.
+## Output
 
-- Reuse evidence already gathered; only re-query if genuinely new depth is needed.
-- Diagnose root cause first, then route the action:
-  - UX / campaign / localization / tracking gap → one concrete owner-routed action + the check that confirms resolution.
-  - Priority error or CWV → invoke the `tech-diagnosis` skill inline if it's available; otherwise handle the cause inline — don't mention or recommend installing another skill.
-- **Respond in plain chat text.** Format: root cause in 1–2 sentences · evidence table (≤8 rows) · recommended action.
+A full report is three separate steps, in this order:
 
----
+1. **Summary.** 2–3 sentences. Lead with the biggest movement, with real numbers and their window. Don't repeat the card's numbers.
+2. **Card.** Write the report data, then run `scripts/card.py` once; it builds and shows the card. Never write card JSON yourself. If it fails, say so in one sentence and give the same report as Markdown.
+3. **Next step.** One clickable question with the header "Next step" and the options the script returned, exactly as given. If the script also returned `actions`, ask it in the same prompt as a second question, with its header, question and options exactly as given; if the host shows only one question at a time, ask "Next step" first. Write nothing after it. If it is skipped, reply with the script's recovery line and stop.
 
-## Rendering the report
+Finding titles name the metric and the move in 60 characters or fewer. Each finding has one evidence sentence with its number and comparison.
 
-**Guiding principle: insights first, data second.** The report must be scannable in 30 seconds. Every table that follows is supporting evidence, not the headline.
+A focused question gets prose with the number, its window and its base; a card only if it helps.
 
-**Structure:**
+Download and save run only when the user asks. Never offer them. Schedule is offered only as the option the script returns, and runs when the user picks it or asks.
 
-### Section 1 — Key findings & recommended actions
+A scheduled run asks nothing and has no summary. Run the card, then reply with the script's scheduled lines exactly as given, and stop. Write nothing else: no account of the results and no mention of the card.
 
-Write this section after both phases are complete — it should synthesize everything, including deeper analysis discoveries. Lead with up to 3 numbered finding + action pairs, ordered by impact. Every finding must name a specific segment and a concrete number. Every action must be specific enough to hand off. No tables in this section.
+If the scheduled prompt names somewhere to send the report (email through Outlook, Teams or Notion), send it after those lines, in the form this skill's schedule reference gives. If it can't be sent because the connector is missing or not connected, the report above still stands: add one line saying which connector to install so the next report can be sent, e.g. "Couldn't send this to Teams. Install the Teams connector in Cowork and the next report will be sent."
 
-### Section 2 — Segment overview
-
-One table per dimension, each with a specific insight callout:
-
-- **Devices** — table: Device | Sessions | Conversion rate | Revenue/session.
-- **Countries** (top segments) — table: Country | Sessions | Conversion rate | Revenue/session.
-- **Channels** (UTM source/medium) — table: Channel | Sessions | Conversion rate | Revenue/session.
-
-### Section 3 — Evidence from deeper analysis
-
-This section exists to show why the actions in Section 1 are warranted — not to restate them. Each entry is the evidence trail for a finding already summarized above. Do not repeat the finding or the action here. Cap tables at 8 rows.
-
-### No signals this run
-
-If nothing stands out above the site-wide benchmark and the bot-filter gate (see `references/queries.md`, Step 1.5), say so plainly instead of padding with weak signals.
-
----
-
-## Exporting the report
-
-Triggered by the user asking to export, download, or save the report as a document.
-
-Export-only — do not call any Noibu tools and do not re-query. Reuse the data already in this conversation. Read `references/export-pdf.md` and follow the instructions there.
-
-## Recurring reports
-
-If the user asks to put this on a schedule: this skill doesn't create or manage recurring runs itself. Point them at Cowork's own automation instead — e.g. "You can set that up yourself in Cowork's Customize → Automated tasks, pointing it at this same prompt." Nothing here creates, schedules, or persists a recurring run on their behalf.
-
----
-
-## Data quality notes
-
-- **Currency anomalies**: Very high revenue per session for a single country
-  usually means local currency, not USD. Flag it rather than presenting it
-  at face value.
-- **Untagged traffic**: A large share of sessions with no channel attribution
-  is a tracking gap worth noting explicitly.
-- **Awareness campaigns at zero conversion**: Expected — but still worth
-  calling out so the user can confirm the campaign objective is non-conversion.
-- **Express checkout on mobile**: More completed purchases than payment page
-  views is normal — Apple Pay and Shop Pay bypass the payment step. Explain
-  it rather than treating it as a data error.
-
-The report as rendered in the conversation is the deliverable — conclude here.
+- Run the card: copy `scripts/card.py` to `.aether/scripts/card.py`, then RunScript `card.py` with the arg `report` set to the path of the report data file.
+- With fewer than two priorities, add before the schedule option, keeping five options or fewer: "Mobile against desktop", "Which countries underperform", "Which channel converts best", "Where traffic comes from".
+- Schedule preset: Weekly on Mondays · 9 am · last 30 days.
