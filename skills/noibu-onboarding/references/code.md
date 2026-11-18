@@ -1,6 +1,6 @@
-# Steps 5–6: the code host and release reporting
+# Steps 4–5: the code host and release reporting
 
-Read this at step 5 and keep it open through step 6.
+Read this at step 4 and keep it open through step 5.
 
 What Cowork can reach:
 
@@ -11,23 +11,23 @@ What Cowork can reach:
 | Bitbucket | None | Hand-off |
 | GitLab, self-hosted, anything else | None | To-do only |
 
-## Step 5 · Code host
+## Step 4 · Code host
 
-1. **What is connected?** Check this session for GitHub tools and Azure DevOps tools. For each one present, run its proving read: on GitHub, the signed-in account; on Azure DevOps, the list of projects. A host counts as connected only when that read succeeds.
+1. **What is connected?** Find out by trying, for GitHub and for Azure DevOps: look for the host's tools and run its proving read (on GitHub, the signed-in account; on Azure DevOps, the list of projects). A host counts as connected when that read succeeds, and as missing only when the lookup and the read both fail.
 2. **Where does the code live?**
    - Exactly one host is connected and proven: name it in one line ("GitHub is connected as <login>.") and go on with it; the user can correct it.
    - Otherwise look in the business context saved in Noibu for a repository address. If it names a host, confirm it in one line.
-   - Otherwise ask one clickable question, header "Code": "Where does your store's code live?" Options "GitHub", "Azure DevOps", "Bitbucket", "GitLab or somewhere else", "I'm not sure". Typed replies: "ADO", "azure" → Azure DevOps; "self-hosted", "our agency has it", "no repo", "we edit it in Shopify" → somewhere else; "don't know", "ask my developer" → not sure.
+   - Otherwise ask one clickable question, header "Code": "Where does <store>'s code live?" Options "GitHub", "Azure DevOps", "Bitbucket", "GitLab or somewhere else", "I'm not sure". Typed replies: "ADO", "azure" → Azure DevOps; "self-hosted", "our agency has it", "no repo", "we edit it in Shopify" → somewhere else; "don't know", "ask my developer" → not sure.
 3. **By host:**
    - **GitHub or Azure DevOps, connected:** go to item 4.
-   - **GitHub or Azure DevOps, not connected:** ask one clickable question with the host as the header, naming the plugin and where it is connected: "Connect the GitHub plugin in Cowork (Customize → Plugins → GitHub). Let me know when it shows Connected." Options "It's connected" and "Skip for now". Connected and its tools are here: run the proving read and go to item 4. Connected but its tools still aren't here, or skipped: record "Connect <host> to Cowork" as a to-do for the user. Step 6 still runs, as a hand-off.
-   - **Bitbucket:** "Cowork has no Bitbucket connection, so I'll prepare the release step for your developer to add." Step 6 runs as a hand-off.
-   - **A Shopify store whose theme is edited in Shopify, with no repository:** "Your theme is edited directly in Shopify, so code changes go through the theme path from step 3." Record "Release reporting: no pipeline to report from yet" as a to-do for their developer, skip step 6, and go to step 7.
-   - **GitLab or anything else:** say in one line that Cowork can't connect that host. Record "Set up Noibu release reporting on <what they said>" as a to-do for their developer or agency, skip step 6, and go to step 7.
-   - **Not sure:** record "Find out where the store's code lives, then say *continue my Noibu setup*" as a to-do for the user, skip step 6, and go to step 7.
-4. **Pick the repository.** If the business context names it, confirm it in one line. Otherwise list the repositories the connection can see and ask one clickable question, header "Repository": "Which repository holds the storefront code for <store>?", with up to four likely ones; the user can type another as `owner/name`. With no connection (a hand-off), ask for the repository's name in one line; "not sure" is fine, and the file is prepared without it. Record the repository and, when it can be read, its default branch.
+   - **GitHub or Azure DevOps, not connected:** ask one clickable question with the host as the header, naming the plugin and where it is connected: "Connect the GitHub plugin under Customize → Plugins → GitHub. Is it connected?" Options "It's connected" and "Skip for now". On "It's connected", look for the tools and run the proving read again. It succeeds: go to item 4. It still fails, or the step was skipped: record "Connect <host> to Cowork" as a to-do for the user. Step 5 still runs, as a hand-off.
+   - **Bitbucket:** "Cowork has no Bitbucket connection, so I'll prepare the release step for your developer to add." Step 5 runs as a hand-off.
+   - **A Shopify store whose theme is edited in Shopify, with no repository:** "Your theme is edited directly in Shopify, so code changes go through the theme path from step 3." Record "Release reporting: no pipeline to report from yet" as a to-do for their developer, skip step 5, and go to step 6.
+   - **GitLab or anything else:** say in one line that Cowork can't connect that host. Record "Set up Noibu release reporting on <what they said>" as a to-do for their developer or agency, skip step 5, and go to step 6.
+   - **Not sure:** record "Find out where the store's code lives, then say *continue my Noibu setup*" as a to-do for the user, skip step 5, and go to step 6.
+4. **Pick the repository.** If the business context names it, confirm it in one line. Otherwise list the repositories the connection can see and ask one clickable question, header "Repository": "Which repository holds the storefront code for <store>?", with up to four likely ones; the user can type another as `owner/name`. With no connection (a hand-off), ask "Which repository holds the storefront code for <store>?" with no options, so the user types its name; "not sure" is fine, and the file is prepared without it. Record the repository and, when it can be read, its default branch.
 
-## Step 6 · Release reporting
+## Step 5 · Release reporting
 
 Release events tell Noibu when code shipped, so errors and conversion changes can be lined up against deploys. A small pipeline step posts one event to Noibu on every push to the release branch.
 
@@ -35,17 +35,19 @@ Release events tell Noibu when code shipped, so errors and conversion changes ca
 
 Read the store's releases from Noibu. Where the repository is readable, also look for a pipeline file that mentions `webhook.noibu.com` (`.github/workflows/` on GitHub; pipeline YAML files on Azure DevOps).
 
-- Releases are arriving: "Noibu is already receiving releases from <component> (latest <date>)." Go to step 7.
-- A Noibu pipeline file exists but no release has arrived: say so, don't add a second one, record "Check why the Noibu release step isn't reporting" as a to-do for their developer, and go to step 7.
+- Releases are arriving: "Noibu is already receiving releases from <component> (latest <date>)." Go to step 6.
+- A Noibu pipeline file exists but no release has arrived: say so, don't add a second one, record "Check why the Noibu release step isn't reporting" as a to-do for their developer, and go to step 6.
 
 ### 2. Confirm the details
 
-Work out defaults without asking: the repository from step 5; the branch is its default branch (`main` if it can't be read); the component is `frontend`, or what the business context or the repository's name suggests (for example `checkout`). Then one clickable question, header "Releases":
+Work out defaults without asking: the repository from step 4; the branch is its default branch (`main` if it can't be read); the component is `frontend`, or what the business context or the repository's name suggests (for example `checkout`). Then one clickable question, header "Releases":
 
-- GitHub, connected: "I'll open a pull request in <repository> that reports every push to <branch> to Noibu as a <component> release. Each push counts as a successful release, not a verified deploy."
-- A hand-off: "I'll prepare a pipeline file that reports every push to <branch> to Noibu as a <component> release, for your developer to add. Each push counts as a successful release, not a verified deploy."
+- GitHub, connected: "Open a pull request in <repository> that reports every push to <branch> to Noibu as a <component> release?"
+- A hand-off: "Prepare a pipeline file for your developer that reports every push to <branch> to Noibu as a <component> release?"
 
-Options "Sounds good", "Change something" and "Skip for now". On "Change something", ask only for what they want changed (branch or component), in one message, then go on. On "Skip for now", record "Set up Noibu release reporting" as a to-do for the user and go to step 7.
+The "Sounds good" option's description is "Each push counts as a release, not a verified deploy".
+
+Options "Sounds good", "Change something" and "Skip for now". On "Change something", ask only for what they want changed (branch or component), in one message, then go on. On "Skip for now", record "Set up Noibu release reporting" as a to-do for the user and go to step 6.
 
 ### 3. Fill the template
 
@@ -57,13 +59,13 @@ Take the host's template from the end of this file and replace exactly three thi
 2. Add the filled template as `.github/workflows/noibu-release.yml`, with the commit message "Add Noibu release event webhook".
 3. Read the file back from the branch and confirm it matches the filled template exactly. If it doesn't, fix it on the same branch before going on.
 4. Open a pull request against the default branch, titled "Add Noibu release event webhook", with one line saying every push to <branch> will be reported to Noibu as a <component> release. Leave it unmerged.
-5. Record the link, and end the turn here as plain text: the step's header, the pull request's link, "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu.", and "Say *continue* and I'll carry on." Step 7 starts on the user's next message.
+5. Record the link, and end the turn here as plain text: the step's header, the pull request's link, "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu.", and "Say *continue* and I'll carry on." Step 6 starts on the user's next message.
 
 If GitHub refuses the file (workflow files need a permission some connections don't have) or the account can't write to the repository, don't retry and don't try another route into the repository. Say in one line what was refused, delete nothing, and go to the hand-off.
 
 ### 5. Hand-off: every other case
 
-End the turn here as plain text, so the file is shown: the step's header, one line giving the file's name and where it goes, the filled file in one code block, the developer's actions from the list below, and "Say *continue* and I'll carry on." Step 7 starts on the user's next message.
+End the turn here as plain text, so the file is shown: the step's header, one line giving the file's name and where it goes, the filled file in one code block, the developer's actions from the list below, and "Say *continue* and I'll carry on." Step 6 starts on the user's next message.
 
 - **GitHub** (the pull request was refused, or GitHub isn't connected): the file is `.github/workflows/noibu-release.yml`. "Add it through a pull request; the first push to <branch> after it merges reports a release."
 - **Azure DevOps:** the file is `noibu-release.yml` at the repository's root. "Add it through a pull request. Then register it once: Pipelines → New pipeline → Azure Repos Git → <repository> → Existing Azure Pipelines YAML file → `/noibu-release.yml` → Save."
@@ -73,7 +75,7 @@ Record "Add the Noibu release step to <repository>" as a to-do for their develop
 
 ### 6. Checking a release arrived
 
-On "check my releases", and again in step 8: read the store's releases from Noibu. An entry with the confirmed component means it works: say so in one line with its title and date. Never say releases are being reported unless that list shows one.
+On "check my releases", and again in step 7: read the store's releases from Noibu. An entry with the confirmed component means it works: say so in one line with its title and date. Never say releases are being reported unless that list shows one.
 
 ## Templates
 
