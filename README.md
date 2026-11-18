@@ -4,7 +4,7 @@ Official Noibu AI plugin for Microsoft 365 Copilot Cowork. It connects Cowork to
 
 | Skill | What it does |
 | --- | --- |
-| `noibu-setup` | Confirms the Noibu sign-in, lists the stores you can see, and checks the chosen store |
+| `noibu-setup` | A guided setup checklist: the store, Shopify, the code host, release reporting, the business context and one scheduled report |
 | `store-pulse` | A read on the store's last 24 hours: headline numbers and the purchase funnel |
 | `checkout-analysis` | Where shoppers drop off in checkout, and what changed |
 | `product-analysis` | Which products and collections are winning or losing |
