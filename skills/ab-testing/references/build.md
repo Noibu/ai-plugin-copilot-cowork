@@ -17,7 +17,7 @@ Nothing here can open the store's pages, run code in them, or look at a screen. 
 
 **A preview theme is for looking only, on both paths.** This skill never publishes one and never asks the merchant to publish one. Once the user has checked the preview, the recommended next step is a pull request with the same change; the test starts only after that pull request is merged and its code is proven live. A Shopify theme store on the repository path gets the preview theme as an option too ("Preview test on Shopify theme"). With neither path, the run can create the draft and describe the change, but it can't write code against real files; say so and stop after the draft.
 
-"Pull request" means the host's equivalent (GitLab's merge request). Questions always say "pull request" and never name a host.
+Questions always say "pull request" and never name a host.
 
 ## Before anything is created
 
@@ -36,7 +36,7 @@ Record an **environment profile**: platform, whether it is a Shopify theme store
 
 **Platform.** Identify it as `references/platforms.md` says ("Which platform"). Then check the picked test is actionable and safe on that platform (`references/platforms.md`, "Where the rules are applied"). A test that fails stops here.
 
-**Repository.** In order: a repository URL the user gave; a "Variation code: <pull request link>" line in the picked test's Noibu draft or in a sibling test's hypothesis; then, on each connected git host, a search for the store's name or domain and for code mentioning `NoibuFeatureFlag`. Earlier A/B pull requests that mention flag keys are the strongest signal. Confirm access with one read. Classify the host from the remote URL (`github.com` → GitHub; `gitlab.com` → GitLab; `bitbucket.org` → Bitbucket; `dev.azure.com` → Azure DevOps). Bitbucket connects through the Atlassian connection, and it counts only when the read shows Bitbucket access for the workspace that holds the repository.
+**Repository.** In order: a repository URL the user gave; a "Variation code: <pull request link>" line in the picked test's Noibu draft or in a sibling test's hypothesis; then, on each connected git host, a search for the store's name or domain and for code mentioning `NoibuFeatureFlag`. Earlier A/B pull requests that mention flag keys are the strongest signal. Confirm access with one read. Classify the host from the remote URL (`github.com` → GitHub; `gitlab.com` → GitLab; `bitbucket.org` → Bitbucket; `dev.azure.com` → Azure DevOps). Only GitHub can take a pull request from Cowork. Azure DevOps can be read but not pushed to, and there is no connection for Bitbucket or GitLab, so on those hosts the repository path can't open a pull request.
 
 **Shopify theme store.** Yes when the `siteType` from `noibu_get_domain` is `Shopify` or `Shopify Plus` and the store is not headless (no Hydrogen/Remix tree in the repository, no business context saying the storefront is headless). Any other `siteType`, or a missing one: no. This one fact decides whether "Preview test on Shopify theme" is offered; never infer it from the domain name or from anything else.
 
@@ -120,7 +120,7 @@ Write nothing after the question. The draft is created in every mode, because th
 
 **When a preview theme is wanted and the Shopify plugin isn't connected:** "The Shopify preview theme", step 1. Nothing is built until it is.
 
-**When a pull request is wanted and none can be opened:** if no repository was found, ask for the repository's URL; if the host isn't known, ask where the code is hosted (GitHub, GitLab, Bitbucket, Azure DevOps). Say in one plain line which connection unlocks it (GitHub; Bitbucket through the Atlassian connection), or that there is no connection for GitLab or Azure DevOps, and that nothing was pushed. Once connected, detect the repository again and continue. Otherwise continue with "Preview test on Shopify theme" on a Shopify theme store, or with "Just show me the code". Ask once; don't raise a declined connection again in this run.
+**When a pull request is wanted and none can be opened:** if no repository was found, ask for the repository's URL; if the host isn't known, ask where the code is hosted (GitHub, GitLab, Bitbucket, Azure DevOps). On GitHub, say in one plain line that the GitHub connection unlocks it. On Azure DevOps, say the connection can read the code but can't push to it; on Bitbucket or GitLab, say there is no connection. Either way, say that nothing was pushed. Once connected, detect the repository again and continue. Otherwise continue with "Preview test on Shopify theme" on a Shopify theme store, or with "Just show me the code". Ask once; don't raise a declined connection again in this run.
 
 **In a scheduled run:** never `full`. Take `pr` when a pull request can be opened, otherwise `preview`, and say which at the top of the result.
 
@@ -181,7 +181,7 @@ Follow "The Shopify preview theme", steps 4–6: copy the live theme, upload the
 
 How a test is built on an unpublished copy of the store's live Shopify theme. It is done through the Shopify plugin for Cowork, which gives access to the store's Shopify Admin API. Used by "Check the store's code" on the theme path (steps 1–3, read only) and by Stage 2f (steps 4–6).
 
-Use the plugin's own GraphQL workflow on every call: look up the schema (`graphql_schema`), validate the query or mutation (`validate_graphql_codeblocks`), then execute it. Never write a query from memory without those two steps.
+Use the plugin's own GraphQL workflow on every call: look up the schema (`graphql_schema`), then execute with the query tool (`graphql_query`) or, for the two mutations below, the mutation tool (`graphql_mutation`). Never write a query from memory without the schema lookup.
 
 **The only store write this skill makes through Shopify is an unpublished preview theme.** Never write a file to the live theme, never publish a theme, never delete a theme, and never change products, orders, settings or anything else in the store.
 
