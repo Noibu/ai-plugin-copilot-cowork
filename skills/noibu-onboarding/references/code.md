@@ -20,7 +20,7 @@ What Cowork can reach:
    - Otherwise ask one clickable question, header "Code": "Where does your store's code live?" Options "GitHub", "Azure DevOps", "Bitbucket", "GitLab or somewhere else", "I'm not sure". Typed replies: "ADO", "azure" → Azure DevOps; "self-hosted", "our agency has it", "no repo", "we edit it in Shopify" → somewhere else; "don't know", "ask my developer" → not sure.
 3. **By host:**
    - **GitHub or Azure DevOps, connected:** go to item 4.
-   - **GitHub or Azure DevOps, not connected:** say which plugin connects it and where ("Connect the GitHub plugin in Cowork (Customize → Plugins → GitHub)."), then ask one clickable question with the host as the header: "Let me know when it shows Connected." Options "It's connected" and "Skip for now". Connected and its tools are here: run the proving read and go to item 4. Connected but its tools still aren't here, or skipped: record "Connect <host> to Cowork" as a to-do for the user. Step 6 still runs, as a hand-off.
+   - **GitHub or Azure DevOps, not connected:** ask one clickable question with the host as the header, naming the plugin and where it is connected: "Connect the GitHub plugin in Cowork (Customize → Plugins → GitHub). Let me know when it shows Connected." Options "It's connected" and "Skip for now". Connected and its tools are here: run the proving read and go to item 4. Connected but its tools still aren't here, or skipped: record "Connect <host> to Cowork" as a to-do for the user. Step 6 still runs, as a hand-off.
    - **Bitbucket:** "Cowork has no Bitbucket connection, so I'll prepare the release step for your developer to add." Step 6 runs as a hand-off.
    - **A Shopify store whose theme is edited in Shopify, with no repository:** "Your theme is edited directly in Shopify, so code changes go through the theme path from step 3." Record "Release reporting: no pipeline to report from yet" as a to-do for their developer, skip step 6, and go to step 7.
    - **GitLab or anything else:** say in one line that Cowork can't connect that host. Record "Set up Noibu release reporting on <what they said>" as a to-do for their developer or agency, skip step 6, and go to step 7.
@@ -57,13 +57,13 @@ Take the host's template from the end of this file and replace exactly three thi
 2. Add the filled template as `.github/workflows/noibu-release.yml`, with the commit message "Add Noibu release event webhook".
 3. Read the file back from the branch and confirm it matches the filled template exactly. If it doesn't, fix it on the same branch before going on.
 4. Open a pull request against the default branch, titled "Add Noibu release event webhook", with one line saying every push to <branch> will be reported to Noibu as a <component> release. Leave it unmerged.
-5. Close the step with the pull request's link and: "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu." Record the link.
+5. Record the link, and end the turn here as plain text: the step's header, the pull request's link, "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu.", and "Say *continue* and I'll carry on." Step 7 starts on the user's next message.
 
 If GitHub refuses the file (workflow files need a permission some connections don't have) or the account can't write to the repository, don't retry and don't try another route into the repository. Say in one line what was refused, delete nothing, and go to the hand-off.
 
 ### 5. Hand-off: every other case
 
-Show the filled file in one code block, with one line above it giving the file's name and where it goes, and the developer's actions after it:
+End the turn here as plain text, so the file is shown: the step's header, one line giving the file's name and where it goes, the filled file in one code block, the developer's actions from the list below, and "Say *continue* and I'll carry on." Step 7 starts on the user's next message.
 
 - **GitHub** (the pull request was refused, or GitHub isn't connected): the file is `.github/workflows/noibu-release.yml`. "Add it through a pull request; the first push to <branch> after it merges reports a release."
 - **Azure DevOps:** the file is `noibu-release.yml` at the repository's root. "Add it through a pull request. Then register it once: Pipelines → New pipeline → Azure Repos Git → <repository> → Existing Azure Pipelines YAML file → `/noibu-release.yml` → Save."

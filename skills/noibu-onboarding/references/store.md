@@ -28,13 +28,13 @@ Everything in this step is a read. Nothing in the store changes.
 1. **Platform.** `Shopify` or `Shopify Plus` as the store's platform means Shopify. If the platform is missing, check the business context in Noibu for it. If neither settles it, ask one clickable question, header "Platform": "Which platform is <store> built on?" Options "Shopify", "BigCommerce", "Salesforce Commerce Cloud", "Something else". Record it.
 2. **Not Shopify:** "<store> runs on <platform>, so there's no store connection to set up." Go to step 4.
 3. **Is the Shopify plugin here?** It is when a Shopify shop-information tool (`get-shop-info`) is available in this session.
-   - Not here: say "To let Cowork read your Shopify store and build theme previews, install and connect the Shopify plugin (Customize → Plugins → Shopify)." and ask one clickable question, header "Shopify": "Let me know when Shopify shows Connected." Options "It's connected" and "Skip for now".
+   - Not here: ask one clickable question, header "Shopify": "To let Cowork read your Shopify store and build theme previews, install and connect the Shopify plugin (Customize → Plugins → Shopify). Let me know when it shows Connected." Options "It's connected" and "Skip for now".
    - "It's connected" and the tool is now here: carry on at item 4.
    - "It's connected" and the tool still isn't here: record "Check the Shopify plugin shows Connected, then say *continue my Noibu setup* in a new chat" as a to-do for the user, and go to item 6.
    - "Skip for now": record "Connect the Shopify plugin" as a to-do for the user, and go to item 6.
 4. **Is it this store?** Read the shop's information. Its primary domain or its `myshopify.com` domain must match the Noibu store, ignoring `www.`.
    - It matches: record the shop.
-   - It is a different shop: say which shop the plugin is connected to, and ask one clickable question, header "Shopify": "Switch the Shopify plugin to <store>'s shop?" Options "Yes, switch" and "Skip for now". On yes, switch with the plugin's own shop-switching tool and check again. If the right shop isn't offered, record "Connect the Shopify plugin with the account that owns <store>" as a to-do for the user and go to item 6.
+   - It is a different shop: ask one clickable question, header "Shopify": "The Shopify plugin is connected to <other shop>. Switch it to <store>'s shop?" Options "Yes, switch" and "Skip for now". On yes, switch with the plugin's own shop-switching tool and check again. If the right shop isn't offered, record "Connect the Shopify plugin with the account that owns <store>" as a to-do for the user and go to item 6.
 5. **Can it change themes?** Through the plugin's query tool, and only as a query, read the app's access scopes:
 
    ```graphql
@@ -58,22 +58,34 @@ Everything in this step is a read. Nothing in the store changes.
 Cowork sets up one schedule from a chat, so the user picks one report here. The others can be scheduled later by running that report and asking to schedule it.
 
 1. **Already scheduled?** Look for a scheduled prompt with one of the names in the table below, for this store. If one exists, say "Your <report> is already scheduled (<when>)." and go to step 5. Never create a second schedule with the same name.
-2. **Ask** one clickable question, header "Report":
+2. **List the reports.** This is the one choice in the setup that is typed, not clicked: end the turn with this message as plain text, with no clickable question, and wait for the reply. Above it go the result lines of the steps finished since the user's last message, then this step's header.
 
-   "Which report should I schedule? Store pulse (daily), checkout analysis, product analysis, segment analysis, errors and slow pages, or A/B test ideas (each weekly on Mondays). Pick one below or type its name."
+   "Which report should I schedule? Type its name, or *skip*.
 
-   Options, in this order: "Store pulse, daily", "Checkout analysis, weekly", "Errors and slow pages, weekly", "A/B test ideas, weekly", "Skip for now".
-3. **Read the reply.** A picked option, or a typed name matched loosely: "pulse", "the daily one" → store pulse; "checkout" → checkout analysis; "products" → product analysis; "segments", "channels", "devices" → segment analysis; "errors", "tech", "slow pages" → errors and slow pages; "ab tests", "experiments" → A/B test ideas. More than one named: schedule the first, and say the rest can be scheduled from each report. "Skip", "later", "none" → record "Schedule a recurring Noibu report" as a to-do for the user and go to step 5.
-4. **Create it** as a Cowork scheduled prompt, at 9 am in the user's timezone, shown only in Cowork. Use the row's name and prompt exactly; they are the ones each report uses for its own schedule, so that report's "change my schedule" finds it later.
+   - **Store pulse**: the store's headline numbers and purchase funnel
+   - **Checkout analysis**: where shoppers drop off in checkout
+   - **Product analysis**: which products and collections are winning or losing
+   - **Segment analysis**: how devices, countries and channels convert
+   - **Errors and slow pages**: the highest-value technical problems
+   - **A/B test ideas**: new test opportunities from your data"
 
-   | Report | Runs | Name | Prompt |
-   |---|---|---|---|
-   | Store pulse | Daily | `store-pulse-<store with dots as dashes>` | *Run Store Pulse for <store> over yesterday, midnight to midnight, in <timezone>, compared to the period of the same length before.* |
-   | Checkout analysis | Mondays | `checkout-analysis-<store>` | *Run the full checkout analysis for <store>.* |
-   | Product analysis | Mondays | `product-analysis-<store>` | *Run the full product analysis for <store>.* |
-   | Segment analysis | Mondays | `segment-analysis-<store>` | *Run the full segment analysis for <store>.* |
-   | Errors and slow pages | Mondays | `tech-scan-<store>` | *Run a tech diagnosis scan for <store>.* |
-   | A/B test ideas | Mondays | `ab-testing-<store>` | *Look for new A/B test opportunities for <store> for the goal All goals. Ask nothing. Do not create any Noibu test, branch or pull request.* |
+3. **Read the reply**, matching loosely: "pulse", "store health" → store pulse; "checkout" → checkout analysis; "products" → product analysis; "segments", "channels", "devices" → segment analysis; "errors", "tech", "slow pages" → errors and slow pages; "ab tests", "experiments" → A/B test ideas. More than one named: take the first, and say the rest can be scheduled from each report. "Skip", "later", "none" → record "Schedule a recurring Noibu report" as a to-do for the user and go to step 5. A reply that matches nothing: send the list once more; a second miss counts as a skip.
+4. **Ask how often**, unless the reply already said (for example "checkout, every Monday"). One clickable question, header "Schedule": "How often should <report> run?" All times are 9 am in the user's timezone.
 
-   Write nothing else into the prompt.
-5. **Confirm** in one sentence once the schedule exists: which report, when it runs, and that it appears in Cowork. Add one line: "To get it by email or in Teams, or to schedule another report, run that report and ask." If the schedule wasn't created (the approval was declined, or no scheduler is available), record "Schedule a recurring Noibu report" as a to-do for the user.
+   - Store pulse: "Weekly on Mondays (Recommended)", "Daily", "Every 2 weeks on Mondays", "Monthly", "Skip for now".
+   - Every other report: "Weekly on Mondays (Recommended)", "Every 2 weeks on Mondays", "Monthly", "Something else", "Skip for now". On "Something else", ask for the day and time in one line.
+
+   Monthly runs on the 1st. If the scheduler has no every-other-week option, say so and offer weekly or monthly. "Skip for now" is the same as a skip in item 3.
+5. **Create it** as a Cowork scheduled prompt at the chosen time, shown only in Cowork. Use the row's name and prompt exactly; they are the ones each report uses for its own schedule, so that report's "change my schedule" finds it later.
+
+   | Report | Name | Prompt |
+   |---|---|---|
+   | Store pulse | `store-pulse-<store with dots as dashes>` | *Run Store Pulse for <store> over <window> in <timezone>, compared to the period of the same length before.* |
+   | Checkout analysis | `checkout-analysis-<store>` | *Run the full checkout analysis for <store>.* |
+   | Product analysis | `product-analysis-<store>` | *Run the full product analysis for <store>.* |
+   | Segment analysis | `segment-analysis-<store>` | *Run the full segment analysis for <store>.* |
+   | Errors and slow pages | `tech-scan-<store>` | *Run a tech diagnosis scan for <store>.* |
+   | A/B test ideas | `ab-testing-<store>` | *Look for new A/B test opportunities for <store> for the goal All goals. Ask nothing. Do not create any Noibu test, branch or pull request.* |
+
+   Store pulse's window follows how often it runs: daily, "yesterday, midnight to midnight"; weekly, "the preceding 7 days, ending at midnight on Monday"; every 2 weeks, "the preceding 14 days, ending at midnight on Monday"; monthly, "the previous calendar month". Write nothing else into any prompt.
+6. **Confirm** in one sentence once the schedule exists: which report, when it runs, and that it appears in Cowork. Add one line: "To get it by email or in Teams, or to schedule another report, run that report and ask." If the schedule wasn't created (the approval was declined, or no scheduler is available), record "Schedule a recurring Noibu report" as a to-do for the user.

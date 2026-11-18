@@ -32,16 +32,8 @@ Then, under the line "Still to do", list every to-do with who needs to do it: th
 
 ## The close
 
-Two or three lines after the list: what is connected, when the scheduled report runs, and where the business context lives (in Noibu) or that it is still to come. If a pull request is open, add that *check my releases* confirms the first release once it is merged.
+Step 8's reply is plain text and ends the setup. No clickable question follows it, because the checklist above it would not be shown.
 
-Then one clickable question with the header "Next step" and the question "What should I do first for <store>?". Options, in this order:
+After the list, two or three lines: what is connected, when the scheduled report runs, and where the business context lives (in Noibu) or that it is still to come. If a pull request is open, add that *check my releases* confirms the first release once it is merged.
 
-1. "Build the business context" when none is saved; otherwise "Analyze products"
-2. "Check the store's last 24 hours"
-3. "Analyze checkout"
-4. "Find errors and slow pages"
-5. "Find A/B test ideas"
-
-If the question is skipped or the reply matches no option, send one line listing the options, and stop.
-
-If the store isn't receiving data, don't ask the question. End on the closing lines.
+Then one last line naming what to ask for next: "Next, ask me to build your business context, check the store's last 24 hours, analyze checkout, find errors and slow pages, or find A/B test ideas." Leave out "build your business context" when one is saved. If the store isn't receiving data, leave this line out altogether.
