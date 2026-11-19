@@ -29,10 +29,10 @@ Everything in this step is a read. Nothing in the store changes.
 1. **Platform.** `Shopify` or `Shopify Plus` as the store's platform means Shopify. If the platform is missing, check the business context in Noibu for it. If neither settles it, ask one clickable question, header "Platform": "Which platform is <store> built on?" Options "Shopify", "BigCommerce", "Salesforce Commerce Cloud", "Something else". Record it.
 2. **Not Shopify:** "<store> runs on <platform>, so there's no store connection to set up." Go to step 4.
 3. **Is the Shopify plugin here?** Find out by trying: look for the Shopify shop-information tool (`get-shop-info`) and call it. It is here when the call returns a shop.
-   - Not here: ask one clickable question, header "Shopify": "Connect the Shopify plugin under Customize → Plugins → Shopify, so Cowork can read your store and build theme previews. Is it connected?" Options "It's connected" and "Skip for now".
-   - "It's connected": look for the tool and call it again; never answer this from the earlier check. It returns a shop: carry on at item 4.
-   - "It's connected" and the lookup and the call both still fail: record "Check the Shopify plugin shows Connected, then say *continue my Noibu setup* in a new chat" as a to-do for the user, and go to item 6.
-   - "Skip for now": record "Connect the Shopify plugin" as a to-do for the user, and go to item 6.
+   - Not here: ask in plain text, as the Guardrails describe, and end the turn: "Connect the Shopify plugin under Customize → Plugins → Shopify, so Cowork can read your store and build theme previews. Then say *connected* and I'll check it, or *skip* to move on."
+   - The user says it is connected: look for the tool and call it again; never answer this from the earlier check. It returns a shop: carry on at item 4.
+   - The lookup and the call both still fail: record "Check the Shopify plugin shows Connected, then say *continue my Noibu setup* in a new chat" as a to-do for the user, and go to item 6.
+   - The user skips: record "Connect the Shopify plugin" as a to-do for the user, and go to item 6.
 4. **Is it this store?** Read the shop's information. Its primary domain or its `myshopify.com` domain must match the Noibu store, ignoring `www.`.
    - It matches: record the shop.
    - It is a different shop: ask one clickable question, header "Shopify": "The Shopify plugin is on <other shop>. Switch it to <store>'s shop?" Options "Yes, switch" and "Skip for now". On yes, switch with the plugin's own shop-switching tool and check again. If the right shop isn't offered, record "Connect the Shopify plugin with the account that owns <store>" as a to-do for the user and go to item 6.
