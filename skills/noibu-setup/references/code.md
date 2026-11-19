@@ -6,7 +6,7 @@ What Cowork can reach:
 
 | Host | Connection in Cowork | Release reporting |
 |---|---|---|
-| GitHub | Reads the repository and opens pull requests | Pull request |
+| GitHub | Reads the repository, opens pull requests and merges them | Pull request, merged from the chat if the user picks it |
 | Azure DevOps | Reads only; it can't push a file | Hand-off |
 | Bitbucket | None | Hand-off |
 | GitLab, self-hosted, anything else | None | To-do only |
@@ -58,8 +58,14 @@ Take the host's template from the end of this file and replace exactly three thi
 1. Create a branch named `noibu/release-events` from the default branch.
 2. Add the filled template as `.github/workflows/noibu-release.yml`, with the commit message "Add Noibu release event webhook".
 3. Read the file back from the branch and confirm it matches the filled template exactly. If it doesn't, fix it on the same branch before going on.
-4. Open a pull request against the default branch, titled "Add Noibu release event webhook", with one line saying every push to <branch> will be reported to Noibu as a <component> release. Leave it unmerged.
-5. Record the link, and end the turn here as plain text: the step's header, the pull request's link, "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu.", and "Say *continue* and I'll carry on." Step 6 starts on the user's next message.
+4. Open a pull request against the default branch, titled "Add Noibu release event webhook", with one line saying every push to <branch> will be reported to Noibu as a <component> release. Record the link.
+5. Ask one clickable question, header "Merge": "Merge the new pull request into <default branch> now, so a test release is sent to Noibu?" Options "Merge it for me", with the description "Merging is a push, so it sends the first release", and "I'll review and merge it myself". If <branch> isn't the default branch, the question ends at "now?" and the description is "The first release is sent on the next push to <branch>". If the question is skipped, the line listing the options also carries the pull request's link.
+6. Whatever the answer, the turn ends as plain text: the step's header, the pull request's link, the lines the answer calls for below, and "Say *continue* and I'll carry on." Step 6 starts on the user's next message.
+   - **"I'll review and merge it myself":** "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu."
+   - **"Merge it for me":** merge that pull request, and only that one, with the GitHub plugin, as a merge commit. Then:
+     - **It merged, and <branch> is the default branch.** The merge is a push to <branch>, so the new step runs once: that run is the test release. Check it as "Checking a release arrived" describes, reading Noibu's releases up to three times in this turn, because the run takes a minute or two. Where the GitHub plugin can read workflow runs, read the "Noibu release event" run between those reads. The release is there: "Merged. Noibu received its first release: <title>, <date>." The run failed: "Merged, but the release step failed on its first run.", and record "Check why the Noibu release step failed in <repository>" as a to-do for their developer; don't push a fix. Neither yet: "Merged. The first release hasn't reached Noibu yet. Say *check my releases* in a few minutes and I'll look again."
+     - **It merged, and <branch> is another branch:** "Merged. The first release is sent on the next push to <branch>."
+     - **GitHub refused the merge** (a required review, a failing check, a conflict, or no permission): say in one line what GitHub asked for. Don't retry, don't approve the pull request, and don't change a branch rule. Record "Approve and merge the Noibu release pull request" as a to-do for whoever can, and add "Once it's merged, say *check my releases* and I'll confirm the first one reached Noibu."
 
 If GitHub refuses the file (workflow files need a permission some connections don't have) or the account can't write to the repository, don't retry and don't try another route into the repository. Say in one line what was refused, delete nothing, and go to the hand-off.
 

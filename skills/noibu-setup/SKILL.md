@@ -24,8 +24,8 @@ Don't use it for:
 
 - If Noibu tools aren't available, ask the user in one line to finish the Connect prompt, then stop.
 - **Interactive only.** On a scheduled or unattended run, say "Noibu setup needs you in the chat, so this run did nothing." and stop.
-- **Three writes, each only after the user picks it in a question:** one scheduled prompt (step 8), one pull request on GitHub (step 5), and saving a business context file the user supplied (step 6). Never report a write as done without the tool's result.
-- **Never merge a pull request, register or run a pipeline, or commit to a default branch.** Those are the user's or their developer's.
+- **Four writes, each only after the user picks it in a question:** one scheduled prompt (step 8), one pull request on GitHub (step 5), merging that pull request (step 5), and saving a business context file the user supplied (step 6). Never report a write as done without the tool's result.
+- **Merge only the pull request this setup opened, and only when the user picks "Merge it for me".** Never merge any other pull request, approve one, change a branch rule, register or run a pipeline, or commit to a default branch. Those are the user's or their developer's.
 - **Shopify is read only here.** Shop information, access scopes and the theme list. No mutation, no theme edit, copy, commit or publish, and no product or setting change, even though the plugin has tools for them.
 - **Never add a connection or change a security setting for the user.** Say which plugin unlocks the step and where it is connected (Customize → Plugins), then end the turn.
 - **Never ask for a token, password, cookie or sign-in code.** Sign-ins happen in the provider's own window.
@@ -71,7 +71,7 @@ Resolve stores and call Noibu's tools the way `querying-noibu-data` describes; i
 2. **The store.** Find and confirm the store this setup is for, and check it is receiving data. `references/store.md`.
 3. **Shopify** (Shopify stores only). Check the Shopify plugin is connected to this store and where theme changes can go. `references/store.md`.
 4. **Code host.** Find where the store's code lives and check the connection to it. Open `references/code.md`.
-5. **Release reporting.** A pull request on GitHub, or a filled pipeline file for the developer on any other host. `references/code.md`.
+5. **Release reporting.** A pull request on GitHub, which the user can have merged from the chat so a test release reaches Noibu, or a filled pipeline file for the developer on any other host. `references/code.md`.
 6. **Business context.** Check Noibu for a saved one, or save the user's file. Open `references/finish.md`.
 7. **Check everything.** Re-check each item live, then list what is left and who does it. `references/finish.md`.
 8. **One scheduled report.** The user types which report, picks how often, and it is scheduled. The user is told to untick "Run once now" when approving, so no report starts in this chat. `references/finish.md`.
