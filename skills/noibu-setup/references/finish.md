@@ -35,7 +35,7 @@ This reply is plain text and goes straight on into step 8's header and report li
 
 ## Step 8 · One scheduled report
 
-This is the last step on purpose: Cowork can start the new schedule's first run straight away, in this chat, and that report then takes the chat over. By now the setup has nothing left to lose.
+The schedule's first run should be its next scheduled time, never now: a report that starts in this chat takes the chat over, and the business context build may be about to start here. Only the user can prevent that, in Cowork's approval prompt, so this step tells them to. The step is still last, so that if a run starts anyway the setup has nothing left to lose.
 
 Cowork sets up one schedule from a chat, so the user picks one report. If the store isn't receiving data, skip this step: say in one line that a report is worth scheduling once data is arriving, and end there.
 
@@ -52,13 +52,15 @@ Cowork sets up one schedule from a chat, so the user picks one report. If the st
    - **A/B test ideas**: new test opportunities from your data"
 
 3. **Read the reply**, matching loosely: "pulse", "store health" → store pulse; "checkout" → checkout analysis; "products" → product analysis; "segments", "channels", "devices" → segment analysis; "tech", "errors", "slow pages" → tech diagnosis; "ab tests", "experiments" → A/B test ideas. More than one named: take the first, and say the rest can be scheduled from each report. "Skip", "later", "none" → reply "No report scheduled. Ask me to schedule one any time." and the last line in item 6. A reply that matches nothing: send the list once more; a second miss counts as a skip.
-4. **Ask how often**, unless the reply already said (for example "checkout, every Monday"). One clickable question, header "Schedule": "How often should <report> run?" All times are 9 am in the user's timezone.
+4. **Ask how often**, unless the reply already said (for example "checkout, every Monday"). One clickable question, header "Schedule": "In the approval box that comes next, untick Run once now. How often should <report> run?" All times are 9 am in the user's timezone.
 
    - Store pulse: "Weekly on Mondays (Recommended)", "Daily", "Every 2 weeks on Mondays", "Monthly", "Skip for now".
    - Every other report: "Weekly on Mondays (Recommended)", "Every 2 weeks on Mondays", "Monthly", "Something else", "Skip for now". On "Something else", ask for the day and time in one line.
 
    Monthly runs on the 1st. If the scheduler has no every-other-week option, say so and offer weekly or monthly. "Skip for now" is the same as a skip in item 3.
 5. **Create it** as a Cowork scheduled prompt at the chosen time, shown only in Cowork, set to run in a new conversation. Use the row's name and prompt exactly; they are the ones each report uses for its own schedule, so that report's "change my schedule" finds it later.
+
+   **Its first run is the next scheduled time.** A schedule has no start date; it first runs at the next occurrence of the chosen day and time. What starts a report in this chat is the "Run once now" box in Cowork's approval prompt, which is ticked unless the user unticks it. So the one line written just before creating the schedule is exactly: "Untick Run once now before you approve, so the report doesn't start in this chat." Write nothing else there, and no reasoning about the scheduler. If the scheduler lets you turn the run on creation off yourself, do that too. Never run the report yourself to "test" the schedule.
 
    | Report | Name | Prompt |
    |---|---|---|
@@ -70,6 +72,6 @@ Cowork sets up one schedule from a chat, so the user picks one report. If the st
    | A/B test ideas | `ab-testing-<store>` | *Look for new A/B test opportunities for <store> for the goal All goals. Ask nothing. Do not create any Noibu test, branch or pull request.* |
 
    Store pulse's window follows how often it runs: daily, "yesterday, midnight to midnight"; weekly, "the preceding 7 days, ending at midnight on Monday"; every 2 weeks, "the preceding 14 days, ending at midnight on Monday"; monthly, "the previous calendar month". Write nothing else into any prompt.
-6. **Close**, as plain text. Once the schedule exists: "<Report> scheduled, <when>. It appears in Cowork. To get it by email or in Teams, or to schedule another report, run that report and ask." If it wasn't created (the approval was declined, or no scheduler is available), say so in one line.
+6. **Close**, as plain text. Once the schedule exists: "<Report> scheduled, <when>. Its first run is <date>. It appears in Cowork. To get it by email or in Teams, or to schedule another report, run that report and ask." If it wasn't created (the approval was declined, or no scheduler is available), say so in one line.
 
-   Then the last line of the setup, naming what to ask for next: "Next, ask me to build your business context, check the store's last 24 hours, analyze checkout, run a tech diagnosis, or find A/B test ideas." Leave out "build your business context" when one is saved. If the schedule's first run has already started in this chat, write nothing more: the report is the reply.
+   Then the last line of the setup, naming what to ask for next: "Next, ask me to build your business context, check the store's last 24 hours, analyze checkout, run a tech diagnosis, or find A/B test ideas." Leave out "build your business context" when one is saved. If a run of the scheduled report has started in this chat all the same, write nothing more and don't start the business context build: the report is the reply.

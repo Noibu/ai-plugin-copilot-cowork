@@ -73,7 +73,7 @@ Resolve stores and call Noibu's tools the way `querying-noibu-data` describes; i
 5. **Release reporting.** A pull request on GitHub, or a filled pipeline file for the developer on any other host. `references/code.md`.
 6. **Business context.** Check Noibu for a saved one, or save the user's file. Open `references/finish.md`.
 7. **Check everything.** Re-check each item live, then list what is left and who does it. `references/finish.md`.
-8. **One scheduled report.** The user types which report, picks how often, and it is scheduled. It is last because the schedule's first run can take over the chat. `references/finish.md`.
+8. **One scheduled report.** The user types which report, picks how often, and it is scheduled. The user is told to untick "Run once now" when approving, so no report starts in this chat. `references/finish.md`.
 
 ## Output
 
