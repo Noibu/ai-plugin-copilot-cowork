@@ -40,7 +40,7 @@ The schedule's first run should be its next scheduled time, never now: a report 
 Cowork sets up one schedule from a chat, so the user picks one report. If the store isn't receiving data, skip this step: say in one line that a report is worth scheduling once data is arriving, and go to item 6.
 
 1. **Already scheduled?** Look for a scheduled prompt with one of the names in the table below, for this store. If one exists, say "Your <report> is already scheduled (<when>)." and go to item 6.
-2. **List the reports.** This is the one choice in the setup that is typed, not clicked: the message below is plain text, with no clickable question. It closes the same reply as step 7's checklist: after the closing lines, this step's header on a line of its own, a blank line, then the message. Then wait for the reply.
+2. **List the reports.** This is the one choice in the setup that is typed, not clicked: the message below is plain text, with no clickable question. It closes the same reply as step 7's checklist: after the closing lines, this step's header on a line of its own, a blank line, then the message. End the turn there: the user's next message is the reply.
 
    "Which report should I schedule? Type its name, or *skip*.
 
@@ -76,7 +76,8 @@ Cowork sets up one schedule from a chat, so the user picks one report. If the st
 
    If a run of the scheduled report has started in this chat all the same, write nothing more, ask nothing and don't start the business context build: the report is the reply.
 
-   - **The user asked in step 6 for a business context to be built:** the setup ends with the offer, as one clickable question, header "Context". Its text follows the Guardrails, so the result is cut to six words ("Store pulse scheduled, Mondays 9 am." or "No report scheduled."): "Step 8 of 8 · One scheduled report. <result> Setup is done. Build <store>'s business context now?" Options "Yes, build it now", with the description "A few questions about the business, then it is saved to Noibu", and "Not now".
+   - **The user asked in step 6 for a business context to be built, and this close is in the same reply as step 7's checklist** (a report was already scheduled, or the store isn't receiving data): a question here would hide the checklist. So the result as plain text, then "Say *build my business context* and I'll start it now.", then the last line below without "build your business context".
+   - **The user asked for one to be built, in any other case:** the setup ends with the offer, as one clickable question, header "Context". Its text follows the Guardrails, so the result is cut to six words ("Store pulse scheduled, Mondays 9 am." or "No report scheduled."): "Step 8 of 8 · One scheduled report. <result> Setup is done. Build <store>'s business context now?" Options "Yes, build it now", with the description "A few questions about the business, then it is saved to Noibu", and "Not now".
      - "Yes, build it now": start `build-business-context` for <store>, handing it the store and company from the ledger.
      - "Not now": "No problem. Say *build my business context* whenever you're ready.", then the last line below without "build your business context".
    - **Otherwise:** the result as plain text, then the last line of the setup, naming what to ask for next: "Next, ask me to build your business context, check the store's last 24 hours, analyze checkout, run a tech diagnosis, or find A/B test ideas." Leave out "build your business context" when one is saved.
