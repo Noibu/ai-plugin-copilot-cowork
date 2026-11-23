@@ -36,6 +36,12 @@ zip -r noibu-cowork.zip manifest.json color.png outline.png noibu-mcp-tools.json
 
 Upload that zip to Cowork. Raise `version` in `manifest.json` before uploading a changed package.
 
+## Releases
+
+A merge to `main` that changes the package publishes a GitHub release with `noibu-cowork.zip` attached (`.github/workflows/release.yml`). The release is numbered with the `version` in `manifest.json`, so the committed file always matches the release.
+
+A pull request that changes the package must raise that `version` above the latest release, or its version check fails (`.github/workflows/version-check.yml`). Pull requests that change only other files, such as this README, need no new version and publish no release.
+
 ## Limits to keep in mind
 
 Cowork enforces these silently:

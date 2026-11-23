@@ -1,0 +1,60 @@
+name: Release Plugin
+
+# Releases the package at the version in manifest.json. The version check on
+# each pull request makes sure that version is new, so a merge that changes the
+# package always has a number of its own.
+on:
+  push:
+    branches: [main]
+    paths:
+      - manifest.json
+      - color.png
+      - outline.png
+      - noibu-mcp-tools.json
+      - skills/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' manifest.json)
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error file=manifest.json::version \"$VERSION\" is not of the form 1.2.3"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "::error file=manifest.json::v$VERSION is already released. Raise version in manifest.json and merge again."
+            exit 1
+          fi
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$VERSION"
+
+      - name: Package plugin
+        run: |
+          mkdir -p dist
+          zip -r dist/noibu-cowork.zip manifest.json color.png outline.png noibu-mcp-tools.json skills \
+            -x '*.DS_Store' -x '*__pycache__*'
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" dist/noibu-cowork.zip \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --generate-notes

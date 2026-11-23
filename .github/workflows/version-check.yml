@@ -1,0 +1,49 @@
+name: Version Check
+
+# Fails a pull request that changes the package without raising version in
+# manifest.json above the latest release. Pull requests that don't touch the
+# package pass, so this can be a required check.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check manifest version
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            manifest.json color.png outline.png noibu-mcp-tools.json skills)
+          if [ -z "$CHANGED" ]; then
+            echo "The package is unchanged, so no new version is needed."
+            exit 0
+          fi
+
+          VERSION=$(jq -r '.version' manifest.json)
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error file=manifest.json::version \"$VERSION\" is not of the form 1.2.3"
+            exit 1
+          fi
+
+          LATEST=$(git tag --list 'v*' --sort=-version:refname | head -n1)
+          if [ -z "$LATEST" ]; then
+            echo "No release yet. This pull request will release v$VERSION."
+            exit 0
+          fi
+
+          HIGHEST=$(printf '%s\n%s\n' "${LATEST#v}" "$VERSION" | sort -V | tail -n1)
+          if [ "$VERSION" = "${LATEST#v}" ] || [ "$HIGHEST" != "$VERSION" ]; then
+            echo "::error file=manifest.json::This pull request changes the package, so version in manifest.json must be higher than the latest release, $LATEST. It is $VERSION."
+            exit 1
+          fi
+          echo "This pull request will release v$VERSION (latest release: $LATEST)."
