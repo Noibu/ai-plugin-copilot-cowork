@@ -5,9 +5,8 @@ name: Release Plugin
 # package always has a number of its own.
 on:
   push:
-    branches: [main, add-releases]
+    branches: [main]
     paths:
-      - .github/workflows/release.yml
       - manifest.json
       - color.png
       - outline.png
