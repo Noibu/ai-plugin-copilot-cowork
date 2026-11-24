@@ -1,6 +1,6 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
-  "manifestVersion": "devPreview",
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.28/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.28",
   "version": "1.1.0",
   "id": "2b1b1694-3a0f-4d10-b590-fd33a92eb90f",
   "developer": {
@@ -10,8 +10,8 @@
     "termsOfUseUrl": "https://noibu.com/terms-of-service"
   },
   "name": {
-    "short": "Noibu Cowork",
-    "full": "Noibu for Microsoft 365 Copilot Cowork"
+    "short": "Noibu",
+    "full": "Noibu"
   },
   "description": {
     "short": "Ecommerce conversion, checkout, error and experiment insights from Noibu",
