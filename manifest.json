@@ -1,21 +1,21 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
-  "manifestVersion": "devPreview",
-  "version": "1.1.0",
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.28/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.28",
+  "version": "1.1.1",
   "id": "2b1b1694-3a0f-4d10-b590-fd33a92eb90f",
   "developer": {
     "name": "Noibu",
-    "websiteUrl": "https://noibu.com",
-    "privacyUrl": "https://noibu.com/privacy-policy",
-    "termsOfUseUrl": "https://noibu.com/terms-of-service"
+    "websiteUrl": "https://www.noibu.com",
+    "privacyUrl": "https://www.noibu.com/privacy-policy",
+    "termsOfUseUrl": "https://www.noibu.com/msa-noibuone"
   },
   "name": {
-    "short": "Noibu Cowork",
-    "full": "Noibu for Microsoft 365 Copilot Cowork"
+    "short": "Noibu",
+    "full": "Noibu"
   },
   "description": {
     "short": "Ecommerce conversion, checkout, error and experiment insights from Noibu",
-    "full": "Connect Noibu to Microsoft 365 Copilot Cowork to work from your store's session, error and conversion data. Check the store's health, analyze checkout, products and traffic segments, diagnose errors and slow pages, and find and build A/B tests. Reports appear as a card in the chat, followed by clickable next steps. Every write, send or schedule needs your confirmation; each user signs in to Noibu individually and sees only the stores their Noibu account can access."
+    "full": "Built for ecommerce, Noibu is a continuous improvement engine for your store. Connect Microsoft 365 Copilot to Noibu’s six AI agents (Bug Resolution, Performance, ROAS, CRO, ADA, and A/B Testing) and to the marketing, support, and commerce platforms that put insight into motion. Go beyond analysis: uncover growth opportunities, find what’s costing you revenue, and get prioritized recommendations, drafted changes, and test ideas. Then take action across your stack and build workflows to automate work end-to-end. Requires a Noibu account.\n\nGetting started with Noibu\n\nNew to Noibu? Start a free trial: https://www.noibu.com/free-trial?utm_source=microsoft-copilot&utm_medium=referral&utm_campaign=copilot-app-listing&utm_content=app-description.\nSet up Noibu in Microsoft 365 Copilot: help.noibu.com/articles/5532087644-noibu-for-ms365-copilot\nHelp center and documentation: help.noibu.com\nContact support: support@noibu.com\nLearn more about Noibu: noibu.com"
   },
   "icons": {
     "color": "color.png",
