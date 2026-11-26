@@ -1,10 +1,10 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.28/MicrosoftTeams.schema.json",
   "manifestVersion": "1.28",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "id": "2b1b1694-3a0f-4d10-b590-fd33a92eb90f",
   "developer": {
-    "name": "Noibu",
+    "name": "Noibu Technologies",
     "websiteUrl": "https://www.noibu.com",
     "privacyUrl": "https://www.noibu.com/privacy-policy",
     "termsOfUseUrl": "https://www.noibu.com/msa-noibuone"
@@ -59,6 +59,10 @@
       "toolSource": {
         "remoteMcpServer": {
           "mcpServerUrl": "https://mcp.noibu.com/mcp",
+          "authorization": {
+            "type": "DynamicClientRegistration",
+            "referenceId": "MTUzYjhmZDktOWZiOC00MTEyLTg2OTktOTQyYmZiYTkzNDViIyM3NjJiYmJhMi1kYzc4LTRiNWYtOGYwZi02YzFiODQ5ZTQ3MGM="
+          },
           "mcpToolDescription": {
             "file": "noibu-mcp-tools.json"
           }
